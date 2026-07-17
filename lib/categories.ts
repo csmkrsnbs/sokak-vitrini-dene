@@ -10,6 +10,7 @@ type CategoryConfig = {
   targetLabel: string;
   targetHint: string;
   notePlaceholder: string;
+  noteSuggestions: readonly string[];
   outputSize: "1024x1536" | "1536x1024";
 };
 
@@ -24,6 +25,11 @@ export const CATEGORY_CONFIG: Record<PreviewCategory, CategoryConfig> = {
     targetLabel: "Senin veya arkadaşının fotoğrafı",
     targetHint: "Boyun, bilek ya da ilgili bölge görünür olsun.",
     notePlaceholder: "Örn. Kolyeyi boynuma doğal ölçüde yerleştir",
+    noteSuggestions: [
+      "Kolyeyi boynuma doğal ölçüsünde, mevcut açı ve ışığı değiştirmeden yerleştir.",
+      "Bileziği görünen bileğime gerçek ürün ölçüsünde tak.",
+      "Küpeleri iki kulağıma simetrik ve doğal biçimde yerleştir.",
+    ],
     outputSize: "1024x1536",
   },
   clothing: {
@@ -36,6 +42,11 @@ export const CATEGORY_CONFIG: Record<PreviewCategory, CategoryConfig> = {
     targetLabel: "Senin veya arkadaşının fotoğrafı",
     targetHint: "Önden çekilmiş, vücudu net gösteren bir fotoğraf seç.",
     notePlaceholder: "Örn. Gömleği üzerime normal kesim olarak giydir",
+    noteSuggestions: [
+      "Gömleği üzerime normal kalıpta, mevcut pozumu koruyarak giydir.",
+      "Ceketi üzerime doğal oturacak şekilde açık kullan.",
+      "Elbiseyi vücut oranlarımı ve duruşumu değiştirmeden giydir.",
+    ],
     outputSize: "1024x1536",
   },
   furniture: {
@@ -48,6 +59,11 @@ export const CATEGORY_CONFIG: Record<PreviewCategory, CategoryConfig> = {
     targetLabel: "Odanın fotoğrafı",
     targetHint: "Yerleştirmek istediğin boş alan kadrajda görünsün.",
     notePlaceholder: "Örn. Koltuğu pencerenin karşısındaki boş duvara yerleştir",
+    noteSuggestions: [
+      "Koltuğu boş duvarın önüne, zemine tam basacak şekilde yerleştir.",
+      "Masayı odanın ortasındaki boş alana perspektife uygun yerleştir.",
+      "Ürünü pencerenin karşısındaki boş alana gerçek ölçüsünde yerleştir.",
+    ],
     outputSize: "1536x1024",
   },
   car: {
@@ -60,6 +76,11 @@ export const CATEGORY_CONFIG: Record<PreviewCategory, CategoryConfig> = {
     targetLabel: "Mekânın fotoğrafı",
     targetHint: "Aracın duracağı alan geniş ve net görünsün.",
     notePlaceholder: "Örn. Aracı garaj kapısının önüne aynı açıyla yerleştir",
+    noteSuggestions: [
+      "Aracı garaj kapısının önüne, zemine ve kamera açısına uygun yerleştir.",
+      "Aracı yol kenarındaki boş alana gerçek ölçüsünde park et.",
+      "Aracı evin önüne, yönünü değiştirmeden doğal gölgeyle yerleştir.",
+    ],
     outputSize: "1536x1024",
   },
 };

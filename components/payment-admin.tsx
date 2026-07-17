@@ -7,6 +7,7 @@ import {
   LoaderCircle,
   LogOut,
   RefreshCw,
+  Trash2,
   TicketCheck,
   XCircle,
 } from "lucide-react";
@@ -154,6 +155,23 @@ export function PaymentAdmin() {
     }
   };
 
+  const deletePayment = async (id: string) => {
+    if (!window.confirm("Reddedilmiş bu ödeme talebi kalıcı olarak silinsin mi?")) return;
+
+    setWorkingId(id);
+    setMessage(null);
+    try {
+      const response = await fetch(`/api/admin/payments/${id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error(await responseError(response));
+      setPayments((current) => current.filter((payment) => payment.id !== id));
+      setMessage("Reddedilmiş ödeme talebi kalıcı olarak silindi.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Ödeme talebi silinemedi.");
+    } finally {
+      setWorkingId(null);
+    }
+  };
+
   return (
     <main className="admin-page">
       <div className="admin-shell">
@@ -292,6 +310,25 @@ export function PaymentAdmin() {
                                   disabled={workingId === payment.id}
                                 >
                                   <XCircle size={15} /> Reddet
+                                </button>
+                              </div>
+                            ) : payment.status === "rejected" ? (
+                              <div className="admin-row-actions">
+                                <span className="admin-reviewed">
+                                  {payment.reviewedAt ? formatDate(payment.reviewedAt) : "—"}
+                                </span>
+                                <button
+                                  type="button"
+                                  className="admin-delete"
+                                  onClick={() => void deletePayment(payment.id)}
+                                  disabled={workingId === payment.id}
+                                >
+                                  {workingId === payment.id ? (
+                                    <LoaderCircle className="spin" size={15} />
+                                  ) : (
+                                    <Trash2 size={15} />
+                                  )}
+                                  Sil
                                 </button>
                               </div>
                             ) : (

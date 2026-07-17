@@ -51,6 +51,8 @@ const categoryIcons = {
 
 const MAX_RAW_FILE_BYTES = 20_000_000;
 const MAX_UPLOAD_BYTES = 1_800_000;
+const DIRECT_UPLOAD_TYPES = new Set(["image/jpeg"]);
+const MAX_DIRECT_UPLOAD_DIMENSION = 4096;
 
 type SelectedImage = {
   file: File;
@@ -120,6 +122,15 @@ async function prepareImage(file: File) {
 
   const source = await loadBrowserImage(file);
   const maxDimension = 1600;
+
+  if (
+    DIRECT_UPLOAD_TYPES.has(file.type) &&
+    file.size <= MAX_UPLOAD_BYTES &&
+    Math.max(source.width, source.height) <= MAX_DIRECT_UPLOAD_DIMENSION
+  ) {
+    return file;
+  }
+
   const ratio = Math.min(1, maxDimension / Math.max(source.width, source.height));
   const width = Math.max(1, Math.round(source.width * ratio));
   const height = Math.max(1, Math.round(source.height * ratio));
@@ -175,7 +186,6 @@ function UploadCard({
   image,
   onSelect,
   onRemove,
-  capture,
   disabled,
 }: {
   id: string;
@@ -185,7 +195,6 @@ function UploadCard({
   image: SelectedImage | null;
   onSelect: (file: File) => Promise<void>;
   onRemove: () => void;
-  capture: "user" | "environment";
   disabled: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -238,7 +247,6 @@ function UploadCard({
           id={id}
           type="file"
           accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-          capture={capture}
           disabled={disabled || preparing}
           onChange={onInputChange}
         />
@@ -341,13 +349,22 @@ export function TryOnStudio() {
   useEffect(() => {
     let active = true;
 
-    fetch("/api/previews", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("History unavailable");
-        return (await response.json()) as { previews: PreviewListItem[] };
-      })
-      .then((payload) => {
+    const bootstrap = async () => {
+      try {
+        const accessResponse = await fetch("/api/access", { cache: "no-store" });
+        if (!accessResponse.ok) throw await readApiError(accessResponse);
+        const accessPayload = (await accessResponse.json()) as { access: AccessState };
+        if (active) setAccess(accessPayload.access);
+      } catch {
+        // Ana deneme akışını bağlantı sorunu yüzünden engelleme.
+      }
+
+      try {
+        const historyResponse = await fetch("/api/previews", { cache: "no-store" });
+        if (!historyResponse.ok) throw new Error("History unavailable");
+        const payload = (await historyResponse.json()) as { previews: PreviewListItem[] };
         if (!active) return;
+
         const previews = payload.previews ?? [];
         setHistory(previews.filter((item) => item.status === "completed"));
         const pending = previews.find((item) => item.status === "processing");
@@ -357,13 +374,14 @@ export function TryOnStudio() {
           setLoading(true);
         }
         setHistoryAvailable(true);
-      })
-      .catch(() => {
+      } catch {
         if (active) setHistoryAvailable(false);
-      })
-      .finally(() => {
+      } finally {
         if (active) setHistoryLoading(false);
-      });
+      }
+    };
+
+    void bootstrap();
 
     return () => {
       active = false;
@@ -405,10 +423,12 @@ export function TryOnStudio() {
 
         if (payload.preview.status === "completed") {
           setResult(payload.preview);
-          setHistory((current) => [
-            payload.preview,
-            ...current.filter((item) => item.id !== payload.preview.id),
-          ]);
+          setHistory((current) =>
+            [
+              payload.preview,
+              ...current.filter((item) => item.id !== payload.preview.id),
+            ].slice(0, 12),
+          );
           setHistoryAvailable(true);
           setNotice({ kind: "success", text: "Önizlemen hazır." });
           window.setTimeout(() => {
@@ -444,26 +464,6 @@ export function TryOnStudio() {
       if (timer) window.clearTimeout(timer);
     };
   }, [activePreviewId]);
-
-  useEffect(() => {
-    let active = true;
-
-    fetch("/api/access", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) throw await readApiError(response);
-        return (await response.json()) as { access: AccessState };
-      })
-      .then((payload) => {
-        if (active) setAccess(payload.access);
-      })
-      .catch(() => {
-        // Ana deneme akışını bağlantı sorunu yüzünden engelleme.
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
 
   useEffect(() => {
     productRef.current = product;
@@ -556,10 +556,12 @@ export function TryOnStudio() {
 
       if (payload.preview.status === "completed") {
         setResult(payload.preview);
-        setHistory((current) => [
-          payload.preview,
-          ...current.filter((item) => item.id !== payload.preview.id),
-        ]);
+        setHistory((current) =>
+          [
+            payload.preview,
+            ...current.filter((item) => item.id !== payload.preview.id),
+          ].slice(0, 12),
+        );
         setLoading(false);
         setNotice({ kind: "success", text: "Önizlemen hazır." });
         window.setTimeout(() => {
@@ -724,7 +726,6 @@ export function TryOnStudio() {
                     image={product}
                     onSelect={(file) => chooseImage(file, product, setProduct)}
                     onRemove={() => removeImage(product, setProduct)}
-                    capture="environment"
                     disabled={loading}
                   />
                   <UploadCard
@@ -735,16 +736,33 @@ export function TryOnStudio() {
                     image={target}
                     onSelect={(file) => chooseImage(file, target, setTarget)}
                     onRemove={() => removeImage(target, setTarget)}
-                    capture={category === "jewelry" || category === "clothing" ? "user" : "environment"}
                     disabled={loading}
                   />
                 </div>
 
-                <label className="note-field">
-                  <span>
-                    Yerleşim notu <em>isteğe bağlı</em>
-                  </span>
+                <div className="note-field">
+                  <label htmlFor="placement-note">
+                    Kendi yerleşim notun <em>isteğe bağlı</em>
+                  </label>
+                  <div className="note-suggestions" aria-label={`${config.label} için hazır yerleşim notları`}>
+                    <strong>Hazır notlardan seç</strong>
+                    <div>
+                      {config.noteSuggestions.map((suggestion) => (
+                        <button
+                          type="button"
+                          className={note === suggestion ? "active" : ""}
+                          aria-pressed={note === suggestion}
+                          onClick={() => setNote(suggestion)}
+                          disabled={loading}
+                          key={suggestion}
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <textarea
+                    id="placement-note"
                     value={note}
                     maxLength={300}
                     rows={2}
@@ -753,7 +771,7 @@ export function TryOnStudio() {
                     disabled={loading}
                   />
                   <small>{note.length}/300</small>
-                </label>
+                </div>
 
                 <label className="consent-row">
                   <input

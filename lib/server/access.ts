@@ -29,7 +29,7 @@ type PreviewReservationInput = {
 
 export class PreviewCreditsRequiredError extends Error {
   constructor() {
-    super("3 ücretsiz deneme hakkınız bitti. Devam etmek için kupon kullanın.");
+    super("2 ücretsiz deneme hakkınız bitti. Devam etmek için kupon kullanın.");
     this.name = "PreviewCreditsRequiredError";
   }
 }

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalShell kicker="Son güncelleme: 17 Temmuz 2026" title="Kullanım Koşulları">
+    <LegalShell kicker="Son güncelleme: 18 Temmuz 2026" title="Kullanım Koşulları">
       <p>
         Sokak Vitrini Dene’yi kullanarak aşağıdaki koşulları kabul etmiş olursunuz.
         Hizmet, fiziksel bir ürünü satın almadan önce fikir vermek amacıyla görsel
@@ -49,8 +49,8 @@ export default function TermsPage() {
 
       <h2>Ücretsiz hak ve Standart Paket</h2>
       <p>
-        Her kullanıcıya toplam 3 ücretsiz görsel üretim hakkı verilir. Ücretsiz haklar
-        tamamlandıktan sonra Standart Paket, tek seferlik 49 TL ödeme karşılığında 10
+        Her kullanıcıya toplam 2 ücretsiz görsel üretim hakkı verilir. Ücretsiz haklar
+        tamamlandıktan sonra Standart Paket, tek seferlik 100 TL ödeme karşılığında 10
         görsel kredisi sağlar. Bu bir üyelik değildir; otomatik yenileme veya düzenli
         tahsilat yapılmaz. Kullanılmayan paket kredilerinin süre sonu yoktur. Kötüye
         kullanımı önlemek için VPN, proxy veya Tor bağlantılarında ücretsiz deneme

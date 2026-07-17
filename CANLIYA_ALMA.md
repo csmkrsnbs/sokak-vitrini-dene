@@ -26,6 +26,7 @@
 - [ ] Build komutu `npm run vercel-build`.
 - [ ] `0002_clear_deadpool` asenkron iş migration'ı deploy sırasında uygulandı.
 - [ ] `0003_neat_wallow` VPN kontrol önbelleği migration'ı deploy sırasında uygulandı.
+- [ ] `0004_clean_runtime_data` tek seferlik temiz veri migration'ı deploy sırasında uygulandı.
 - [ ] Deploy başarılı.
 - [ ] `/api/health` cevabındaki bütün kontroller `true`.
 - [ ] Özel alan adı bağlandı ve `NEXT_PUBLIC_APP_URL` bu adresle güncellendi.
@@ -34,8 +35,8 @@
 
 ## IBAN ve kupon testi
 
-- [ ] İlk 3 başarılı üretimden sonra paket penceresi otomatik açıldı.
-- [ ] Standart Paket ekranında 10 görsel / 49 TL ve doğru IBAN göründü.
+- [ ] İlk 2 başarılı üretimden sonra paket penceresi otomatik açıldı.
+- [ ] Standart Paket ekranında 10 görsel / 100 TL ve doğru IBAN göründü.
 - [ ] Test ödeme talebindeki havale açıklaması banka hareketiyle eşleşti.
 - [ ] `/yonetim/odemeler` adresinde yönetim anahtarıyla giriş yapıldı.
 - [ ] Bekleyen ödeme onaylandı ve kullanıcı ekranında kupon göründü.
@@ -43,6 +44,7 @@
 - [ ] Başarısız üretimde kredi geri geldi.
 - [ ] VPN açıkken ücretsiz deneme engellendi ve RunPod işi oluşmadı.
 - [ ] VPN açıkken geçerli ücretli kuponla üretim tamamlandı.
+- [ ] Reddedilmiş bir ödeme talebi yönetim ekranından kalıcı olarak silindi.
 
 ## Yayın öncesi son kontrol
 

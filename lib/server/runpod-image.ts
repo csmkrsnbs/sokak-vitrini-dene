@@ -35,13 +35,13 @@ export class ImageGenerationError extends Error {
 function categoryPrompt(category: PreviewCategory) {
   const prompts: Record<PreviewCategory, string> = {
     jewelry:
-      "Place the exact jewelry from Reference Image 1 naturally on the appropriate visible body area in Reference Image 2. Preserve the jewelry design, stones, metal color, proportions and distinctive details. Match realistic scale, perspective, skin contact, occlusion, reflections and lighting.",
+      "Place the exact jewelry from Reference Image 1 naturally on the appropriate visible body area in Reference Image 2. Preserve the jewelry design, stones, metal color, proportions and distinctive details. Match realistic scale, perspective, skin contact, occlusion and reflections. Match only the inserted jewelry to the local light; do not relight the person or the rest of the target image.",
     clothing:
-      "Dress the person in Reference Image 2 with the exact clothing item from Reference Image 1. Preserve the garment color, fabric, pattern, cut, buttons and distinctive details. Fit it naturally to the existing pose and body while keeping believable folds, shadows and occlusion.",
+      "Dress the person in Reference Image 2 with the exact clothing item from Reference Image 1. Preserve the garment color, fabric, pattern, cut, buttons and distinctive details. Fit it naturally to the existing pose and body while keeping believable folds, shadows and occlusion. Match only the garment to the local light; do not relight the person or the rest of the target image.",
     furniture:
-      "Place the exact furniture item from Reference Image 1 into the room in Reference Image 2. Preserve the product design, materials, color and proportions. Respect the room perspective, floor plane, available space, contact shadows and existing lighting.",
+      "Place the exact furniture item from Reference Image 1 into the room in Reference Image 2. Preserve the product design, materials, color and proportions. Respect the room perspective, floor plane, available space and contact shadows. Match only the inserted furniture to the local light; do not relight the room or the rest of the target image.",
     car:
-      "Place the exact vehicle from Reference Image 1 into the location in Reference Image 2. Preserve the vehicle body shape, color, wheels and distinctive design details. Match road or ground perspective, realistic scale, tire contact, reflections, shadows and local lighting.",
+      "Place the exact vehicle from Reference Image 1 into the location in Reference Image 2. Preserve the vehicle body shape, color, wheels and distinctive design details. Match road or ground perspective, realistic scale, tire contact, reflections and shadows. Match only the inserted vehicle to the local light; do not relight the location or the rest of the target image.",
   };
 
   return prompts[category];
@@ -60,7 +60,8 @@ function buildPrompt(category: PreviewCategory, note: string | null) {
     "Reference Image 1 is only the product reference. Reference Image 2 is the target person or place and must be the composition of the final image.",
     categoryPrompt(category),
     `Preserve the identity, face, body, pose, architecture, camera angle and all unrelated details of the target ${targetType} from Reference Image 2.`,
-    "Change only what is necessary to add or wear the referenced product. Do not replace the person, room, street or house. Do not beautify faces or alter body shape.",
+    "Keep Reference Image 2's original exposure, brightness, contrast, white balance, saturation, color grading, skin tone and background colors unchanged. Do not brighten, darken, recolor, relight, enhance, apply HDR, denoise, retouch or add a beauty filter to the target image.",
+    "Change only what is necessary to add or wear the referenced product. Do not replace the person, room, street or house. Do not beautify faces, smooth skin or alter body shape.",
     "Return a single natural photograph matching Reference Image 2, not a collage. Add no labels, text, logos, frames, split screen, before/after panel, watermark or interface elements.",
     note ? `Placement preference: ${note}` : "",
   ]

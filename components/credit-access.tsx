@@ -136,12 +136,15 @@ export function CreditAccess({
 
   const freeRemaining = access?.free.remaining ?? 0;
   const couponRemaining = access?.coupon?.remaining ?? 0;
+  const totalRemaining = freeRemaining + couponRemaining;
   const balanceText = access
-    ? freeRemaining > 0
-      ? `${freeRemaining} ücretsiz hakkın kaldı`
-      : couponRemaining > 0
-        ? `${couponRemaining} kupon kredin kaldı`
-        : "Ücretsiz hakların tamamlandı"
+    ? freeRemaining > 0 && couponRemaining > 0
+      ? `${freeRemaining} ücretsiz + ${couponRemaining} kupon kredisi · Toplam ${totalRemaining} hakkın var`
+      : freeRemaining > 0
+        ? `${freeRemaining} ücretsiz hakkın kaldı`
+        : couponRemaining > 0
+          ? `${couponRemaining} kupon kredin kaldı`
+          : "Ücretsiz hakların tamamlandı"
     : "Kullanım hakların yükleniyor";
 
   return (
@@ -153,7 +156,7 @@ export function CreditAccess({
           </span>
           <div>
             <strong>{balanceText}</strong>
-            <span>İlk 3 görsel ücretsiz · Standart Paket 10 görsel / 49 TL</span>
+            <span>İlk 2 görsel ücretsiz · Standart Paket 10 görsel / 100 TL</span>
           </div>
         </div>
         <button
@@ -197,7 +200,7 @@ export function CreditAccess({
                 <h2 id="package-title">Standart Paket</h2>
                 <p>Tek ödeme, süresiz 10 görsel kredisi.</p>
               </div>
-              <strong className="package-price">49 TL</strong>
+              <strong className="package-price">100 TL</strong>
             </div>
 
             <div className="package-tabs" role="tablist" aria-label="Paket işlemleri">
@@ -344,7 +347,7 @@ export function CreditAccess({
                       className="button button-outline"
                       onClick={() => setPayment(null)}
                     >
-                      Yeni 49 TL paket al
+                      Yeni 100 TL paket al
                     </button>
                   </div>
                 ) : payment.status === "pending" ? (

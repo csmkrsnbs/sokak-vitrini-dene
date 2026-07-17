@@ -102,3 +102,61 @@ export async function PATCH(
     return apiError("PAYMENT_UPDATE_FAILED", "Ödeme talebi güncellenemedi.", 500);
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  if (!isSameOrigin(request)) {
+    return apiError("INVALID_ORIGIN", "İstek doğrulanamadı.", 403, noStoreHeaders());
+  }
+
+  try {
+    if (!isAdminAuthenticated(request)) {
+      return apiError("UNAUTHORIZED", "Yönetim girişi gerekli.", 401, noStoreHeaders());
+    }
+
+    const { id } = await context.params;
+    if (!idSchema.safeParse(id).success) {
+      return apiError("INVALID_REQUEST", "Geçersiz ödeme talebi.", 400, noStoreHeaders());
+    }
+
+    const db = getDb();
+    const [deleted] = await db
+      .delete(paymentRequests)
+      .where(
+        and(
+          eq(paymentRequests.id, id),
+          eq(paymentRequests.status, "rejected"),
+        ),
+      )
+      .returning({ id: paymentRequests.id });
+
+    if (deleted) {
+      return NextResponse.json({ deleted: true, id: deleted.id }, { headers: noStoreHeaders() });
+    }
+
+    const [existing] = await db
+      .select({ status: paymentRequests.status })
+      .from(paymentRequests)
+      .where(eq(paymentRequests.id, id))
+      .limit(1);
+
+    if (!existing) {
+      return apiError("PAYMENT_NOT_FOUND", "Ödeme talebi bulunamadı.", 404, noStoreHeaders());
+    }
+
+    return apiError(
+      "PAYMENT_DELETE_NOT_ALLOWED",
+      "Yalnızca reddedilmiş ödeme talepleri silinebilir.",
+      409,
+      noStoreHeaders(),
+    );
+  } catch (error) {
+    if (error instanceof MissingAdminConfigurationError) {
+      return apiError("ADMIN_NOT_CONFIGURED", "Yönetim erişimi henüz yapılandırılmadı.", 503);
+    }
+    console.error("Admin payment delete failed", error);
+    return apiError("PAYMENT_DELETE_FAILED", "Ödeme talebi silinemedi.", 500);
+  }
+}

@@ -1,11 +1,11 @@
-export const FREE_PREVIEW_LIMIT = 3;
+export const FREE_PREVIEW_LIMIT = 2;
 
 export const STANDARD_PACKAGE = {
   code: "standard" as const,
   title: "Standart Paket",
   credits: 10,
-  amountKurus: 4_900,
-  priceLabel: "49 TL",
+  amountKurus: 10_000,
+  priceLabel: "100 TL",
 };
 
 export type BankDetails = {

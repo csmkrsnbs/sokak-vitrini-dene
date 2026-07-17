@@ -14,7 +14,7 @@ hazır Next.js uygulamasıdır.
 - RunPod Serverless üzerinde açık kaynaklı FLUX.2 ile iki referans fotoğraftan önizleme
 - GPU kuyruğunu Vercel isteğinden ayıran asenkron iş ve durum takibi
 - Neon PostgreSQL ile anonim oturum, sonuç geçmişi ve kullanım sınırı
-- Toplam 3 ücretsiz üretim; ardından IBAN ile 10 görsel / 49 TL Standart Paket
+- Toplam 2 ücretsiz üretim; ardından IBAN ile 10 görsel / 100 TL Standart Paket
 - Ücretsiz denemede VPN, proxy ve Tor engeli; ücretli kuponlarda kesintisiz kullanım
 - Manuel ödeme onayı, güvenli kupon ve atomik kredi düşümü
 - Kaynak fotoğrafları veritabanında saklamayan gizlilik odaklı akış
@@ -172,16 +172,21 @@ npm run db:push      # şemayı geliştirme veritabanına doğrudan iter
 
 ## Paket ve ödeme yönetimi
 
-- İlk 3 başarılı görsel üretimi ücretsizdir.
+- İlk 2 başarılı görsel üretimi ücretsizdir.
 - VPN, proxy veya Tor algılanırsa ücretsiz hak ayrılmaz ve RunPod işi başlatılmaz.
   Geçerli ücretli kuponu olan kullanıcı aynı bağlantıda kupon kredisiyle devam edebilir.
-- Standart Paket tek seferlik 49 TL karşılığında 10 görsel kredisi verir.
+- Standart Paket tek seferlik 100 TL karşılığında 10 görsel kredisi verir.
 - Kullanıcı paket penceresinden ödeme talebi oluşturur ve kendisine verilen havale
   açıklamasını IBAN transferine ekler.
 - Yönetici `/yonetim/odemeler` adresinde `ADMIN_ACCESS_KEY` ile giriş yapar, banka
   hareketini kontrol eder ve talebi onaylar.
 - Onaylanan kuponun süre sonu yoktur; her başarılı üretimde 1 kredi atomik olarak düşer.
 - Başarısız AI üretiminde ücretsiz hak veya kupon kredisi otomatik geri verilir.
+- Yönetim ekranında yalnızca reddedilmiş ödeme talepleri kalıcı olarak silinebilir.
+
+> `0004_clean_runtime_data` migration'ı mevcut önizleme, ücretsiz kullanım, kupon,
+> ödeme talebi ve ağ kontrolü kayıtlarını temiz kurulum için bir defaya mahsus siler.
+> Migration uygulandıktan sonra sonraki deploy'larda yeniden çalışmaz.
 
 ## Önemli dosyalar
 
