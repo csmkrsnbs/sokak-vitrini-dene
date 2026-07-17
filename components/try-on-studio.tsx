@@ -37,7 +37,9 @@ import type {
   ApiErrorBody,
   PreviewCategory,
   PreviewListItem,
+  PreviewProviderStatus,
   PreviewResponse,
+  PreviewStatusResponse,
 } from "@/lib/types";
 
 const categoryIcons = {
@@ -60,12 +62,18 @@ type Notice = {
   text: string;
 } | null;
 
+type LoadingStage = "submitting" | "queued" | "running";
+
 const loadingMessages = [
   "Ürün ayrıntıları inceleniyor…",
   "Açı ve perspektif eşleştiriliyor…",
   "Işık ve gölgeler uyarlanıyor…",
   "Gerçekçi önizleme hazırlanıyor…",
 ];
+
+function loadingStageFor(status: PreviewProviderStatus | null): LoadingStage {
+  return status === "IN_PROGRESS" || status === "RUNNING" ? "running" : "queued";
+}
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("tr-TR", {
@@ -284,7 +292,9 @@ export function TryOnStudio() {
   const [note, setNote] = useState("");
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState<LoadingStage>("submitting");
   const [loadingIndex, setLoadingIndex] = useState(0);
+  const [activePreviewId, setActivePreviewId] = useState<string | null>(null);
   const [result, setResult] = useState<PreviewListItem | null>(null);
   const [history, setHistory] = useState<PreviewListItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -295,14 +305,32 @@ export function TryOnStudio() {
   const productRef = useRef<SelectedImage | null>(null);
   const targetRef = useRef<SelectedImage | null>(null);
   const config = CATEGORY_CONFIG[category];
+  const loadingTitle =
+    loadingStage === "submitting"
+      ? "Fotoğraflar güvenli şekilde gönderiliyor…"
+      : loadingStage === "queued"
+        ? "Uygun GPU sırası bekleniyor…"
+        : loadingMessages[loadingIndex];
+  const loadingDescription =
+    loadingStage === "queued"
+      ? "Yoğunluğa göre bekleme uzayabilir. Sayfayı yenilesen de işlem kaldığı yerden izlenir."
+      : loadingStage === "running"
+        ? "GPU çalışıyor; gerçekçi önizlemen oluşturuluyor."
+        : "İşlem kaydı oluşturuluyor; bu adım kısa sürer.";
+  const loadingProgress =
+    loadingStage === "submitting"
+      ? 18
+      : loadingStage === "queued"
+        ? 36
+        : Math.min(94, 58 + loadingIndex * 11);
 
   useEffect(() => {
-    if (!loading) return;
+    if (!loading || loadingStage !== "running") return;
     const timer = window.setInterval(() => {
       setLoadingIndex((current) => Math.min(current + 1, loadingMessages.length - 1));
     }, 8_000);
     return () => window.clearInterval(timer);
-  }, [loading]);
+  }, [loading, loadingStage]);
 
   useEffect(() => {
     if (!notice) return;
@@ -320,7 +348,14 @@ export function TryOnStudio() {
       })
       .then((payload) => {
         if (!active) return;
-        setHistory(payload.previews ?? []);
+        const previews = payload.previews ?? [];
+        setHistory(previews.filter((item) => item.status === "completed"));
+        const pending = previews.find((item) => item.status === "processing");
+        if (pending) {
+          setActivePreviewId(pending.id);
+          setLoadingStage(loadingStageFor(pending.providerStatus));
+          setLoading(true);
+        }
         setHistoryAvailable(true);
       })
       .catch(() => {
@@ -334,6 +369,81 @@ export function TryOnStudio() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!activePreviewId) return;
+
+    let stopped = false;
+    let timer: number | undefined;
+    let connectionWarningShown = false;
+
+    const schedule = (delay: number) => {
+      timer = window.setTimeout(() => void poll(), delay);
+    };
+
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/previews/${activePreviewId}`, {
+          cache: "no-store",
+        });
+        if (!response.ok) throw await readApiError(response);
+        const payload = (await response.json()) as PreviewStatusResponse;
+        if (stopped) return;
+
+        connectionWarningShown = false;
+        setAccess(payload.access);
+
+        if (payload.preview.status === "processing") {
+          setLoading(true);
+          setLoadingStage(loadingStageFor(payload.preview.providerStatus));
+          schedule(3_000);
+          return;
+        }
+
+        setActivePreviewId(null);
+        setLoading(false);
+
+        if (payload.preview.status === "completed") {
+          setResult(payload.preview);
+          setHistory((current) => [
+            payload.preview,
+            ...current.filter((item) => item.id !== payload.preview.id),
+          ]);
+          setHistoryAvailable(true);
+          setNotice({ kind: "success", text: "Önizlemen hazır." });
+          window.setTimeout(() => {
+            document
+              .getElementById("sonuc")
+              ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 100);
+          return;
+        }
+
+        setNotice({
+          kind: "error",
+          text:
+            payload.terminalError?.message ||
+            "Görsel hazırlanamadı. Kullanım hakkınız iade edildi.",
+        });
+      } catch {
+        if (stopped) return;
+        if (!connectionWarningShown) {
+          connectionWarningShown = true;
+          setNotice({
+            kind: "error",
+            text: "Durum bağlantısı geçici olarak kesildi; işlem arka planda devam ediyor.",
+          });
+        }
+        schedule(5_000);
+      }
+    };
+
+    schedule(1_500);
+    return () => {
+      stopped = true;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [activePreviewId]);
 
   useEffect(() => {
     let active = true;
@@ -422,6 +532,7 @@ export function TryOnStudio() {
     }
 
     setLoadingIndex(0);
+    setLoadingStage("submitting");
     setLoading(true);
     setResult(null);
 
@@ -440,19 +551,29 @@ export function TryOnStudio() {
       if (!response.ok) throw await readApiError(response);
 
       const payload = (await response.json()) as PreviewResponse;
-      setResult(payload.preview);
       setAccess(payload.access);
-      setHistory((current) => [
-        payload.preview,
-        ...current.filter((item) => item.id !== payload.preview.id),
-      ]);
       setHistoryAvailable(true);
-      setNotice({ kind: "success", text: "Önizlemen hazır." });
 
-      window.setTimeout(() => {
-        document.getElementById("sonuc")?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 100);
+      if (payload.preview.status === "completed") {
+        setResult(payload.preview);
+        setHistory((current) => [
+          payload.preview,
+          ...current.filter((item) => item.id !== payload.preview.id),
+        ]);
+        setLoading(false);
+        setNotice({ kind: "success", text: "Önizlemen hazır." });
+        window.setTimeout(() => {
+          document
+            .getElementById("sonuc")
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
+        return;
+      }
+
+      setLoadingStage(loadingStageFor(payload.preview.providerStatus));
+      setActivePreviewId(payload.preview.id);
     } catch (error) {
+      setLoading(false);
       if (error instanceof ApiRequestError && error.code === "CREDITS_REQUIRED") {
         setPackageOpen(true);
       }
@@ -460,8 +581,6 @@ export function TryOnStudio() {
         kind: "error",
         text: error instanceof Error ? error.message : "Önizleme hazırlanamadı.",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -655,7 +774,11 @@ export function TryOnStudio() {
                   {loading ? (
                     <>
                       <LoaderCircle className="spin" size={19} />
-                      Önizleme hazırlanıyor
+                      {loadingStage === "queued"
+                        ? "GPU sırası bekleniyor"
+                        : loadingStage === "submitting"
+                          ? "Fotoğraflar gönderiliyor"
+                          : "Önizleme hazırlanıyor"}
                     </>
                   ) : (
                     <>
@@ -676,11 +799,13 @@ export function TryOnStudio() {
                       <span />
                       <Sparkles size={34} />
                     </div>
-                    <span className="section-kicker">Yapay zekâ çalışıyor</span>
-                    <h3>{loadingMessages[loadingIndex]}</h3>
-                    <p>Bu işlem fotoğraflara göre bir miktar sürebilir.</p>
+                    <span className="section-kicker">
+                      {loadingStage === "queued" ? "GPU hazırlanıyor" : "Yapay zekâ çalışıyor"}
+                    </span>
+                    <h3>{loadingTitle}</h3>
+                    <p>{loadingDescription}</p>
                     <div className="loading-progress">
-                      <i style={{ width: `${25 + loadingIndex * 23}%` }} />
+                      <i style={{ width: `${loadingProgress}%` }} />
                     </div>
                   </div>
                 ) : result?.imageUrl ? (

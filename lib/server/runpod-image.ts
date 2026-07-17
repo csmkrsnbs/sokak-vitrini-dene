@@ -1,5 +1,5 @@
 import { CATEGORY_CONFIG } from "@/lib/categories";
-import type { PreviewCategory } from "@/lib/types";
+import type { PreviewCategory, PreviewProviderStatus } from "@/lib/types";
 
 type RunPodJobResponse = {
   id?: unknown;
@@ -96,8 +96,13 @@ function getRunPodConfig() {
   return {
     apiKey,
     endpointId,
-    pollIntervalMs: boundedInteger(process.env.RUNPOD_POLL_INTERVAL_MS, 2_000, 1_000, 10_000),
-    timeoutMs: boundedInteger(process.env.RUNPOD_TIMEOUT_MS, 240_000, 30_000, 270_000),
+    executionTimeoutMs: boundedInteger(
+      process.env.RUNPOD_EXECUTION_TIMEOUT_MS ?? process.env.RUNPOD_TIMEOUT_MS,
+      240_000,
+      30_000,
+      900_000,
+    ),
+    ttlMs: boundedInteger(process.env.RUNPOD_JOB_TTL_MS, 900_000, 120_000, 1_800_000),
   };
 }
 
@@ -194,12 +199,25 @@ async function runPodFetch(
   }
 }
 
-function delay(milliseconds: number) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
 function normalizeStatus(value: unknown) {
   return typeof value === "string" ? value.toUpperCase() : "UNKNOWN";
+}
+
+function normalizeProviderStatus(value: unknown): PreviewProviderStatus {
+  const status = normalizeStatus(value);
+  if (
+    status === "IN_QUEUE" ||
+    status === "IN_PROGRESS" ||
+    status === "RUNNING" ||
+    status === "COMPLETED" ||
+    status === "FAILED" ||
+    status === "ERROR" ||
+    status === "CANCELLED" ||
+    status === "TIMED_OUT"
+  ) {
+    return status;
+  }
+  return "UNKNOWN";
 }
 
 function parseCompletedOutput(payload: RunPodJobResponse) {
@@ -272,54 +290,7 @@ async function cancelJob(endpointId: string, jobId: string, apiKey: string) {
   }
 }
 
-async function waitForJob(input: {
-  endpointId: string;
-  jobId: string;
-  apiKey: string;
-  timeoutMs: number;
-  pollIntervalMs: number;
-}) {
-  const deadline = Date.now() + input.timeoutMs;
-
-  while (Date.now() < deadline) {
-    await delay(input.pollIntervalMs);
-    const response = await runPodFetch(
-      `${RUNPOD_API_BASE}/${input.endpointId}/status/${input.jobId}`,
-      input.apiKey,
-      { method: "GET" },
-    );
-    const payload = await readJson(response);
-    if (!response.ok || !payload) mapHttpError(response, payload);
-
-    const status = normalizeStatus(payload.status);
-    if (status === "COMPLETED") return parseCompletedOutput(payload);
-    if (status === "FAILED" || status === "ERROR" || status === "CANCELLED") {
-      const diagnostic = upstreamMessage(payload);
-      if (diagnostic) console.error("RunPod job failed", diagnostic);
-      throw new ImageGenerationError(
-        "AI_GENERATION_FAILED",
-        "Görsel hazırlanamadı. Daha net fotoğraflarla yeniden deneyin.",
-        502,
-      );
-    }
-    if (status === "TIMED_OUT") {
-      throw new ImageGenerationError(
-        "AI_TIMEOUT",
-        "Görsel hazırlanırken süre sınırı aşıldı. Lütfen yeniden deneyin.",
-        504,
-      );
-    }
-  }
-
-  await cancelJob(input.endpointId, input.jobId, input.apiKey);
-  throw new ImageGenerationError(
-    "AI_TIMEOUT",
-    "Görsel hazırlanırken süre sınırı aşıldı. Lütfen yeniden deneyin.",
-    504,
-  );
-}
-
-export async function generateProductPreview(input: {
+export async function submitProductPreview(input: {
   category: PreviewCategory;
   product: File;
   target: File;
@@ -348,18 +319,14 @@ export async function generateProductPreview(input: {
           seed,
         },
         policy: {
-          executionTimeout: config.timeoutMs,
-          ttl: Math.min(config.timeoutMs + 60_000, 330_000),
+          executionTimeout: config.executionTimeoutMs,
+          ttl: Math.max(config.ttlMs, config.executionTimeoutMs + 60_000),
         },
       }),
     },
   );
   const payload = await readJson(response);
   if (!response.ok || !payload) mapHttpError(response, payload);
-
-  if (normalizeStatus(payload.status) === "COMPLETED") {
-    return parseCompletedOutput(payload);
-  }
 
   if (typeof payload.id !== "string" || !JOB_ID_PATTERN.test(payload.id)) {
     throw new ImageGenerationError(
@@ -369,11 +336,106 @@ export async function generateProductPreview(input: {
     );
   }
 
-  return waitForJob({
-    endpointId: config.endpointId,
-    jobId: payload.id,
-    apiKey: config.apiKey,
-    timeoutMs: config.timeoutMs,
-    pollIntervalMs: config.pollIntervalMs,
-  });
+  const providerStatus = normalizeProviderStatus(payload.status);
+  if (providerStatus === "COMPLETED") {
+    return {
+      jobId: payload.id,
+      providerStatus,
+      result: parseCompletedOutput(payload),
+    };
+  }
+  if (
+    providerStatus === "FAILED" ||
+    providerStatus === "ERROR" ||
+    providerStatus === "CANCELLED" ||
+    providerStatus === "TIMED_OUT"
+  ) {
+    throw new ImageGenerationError(
+      providerStatus === "TIMED_OUT" ? "AI_TIMEOUT" : "AI_GENERATION_FAILED",
+      providerStatus === "TIMED_OUT"
+        ? "Görsel hazırlanırken süre sınırı aşıldı. Lütfen yeniden deneyin."
+        : "Görsel hazırlanamadı. Daha net fotoğraflarla yeniden deneyin.",
+      providerStatus === "TIMED_OUT" ? 504 : 502,
+    );
+  }
+
+  return { jobId: payload.id, providerStatus };
+}
+
+export async function getProductPreviewJob(jobId: string) {
+  if (!JOB_ID_PATTERN.test(jobId)) {
+    throw new ImageGenerationError(
+      "INVALID_AI_RESPONSE",
+      "Görsel servisi iş kaydı geçersiz.",
+      502,
+    );
+  }
+
+  const config = getRunPodConfig();
+  const response = await runPodFetch(
+    `${RUNPOD_API_BASE}/${config.endpointId}/status/${jobId}`,
+    config.apiKey,
+    { method: "GET" },
+  );
+  const payload = await readJson(response);
+  if (!response.ok || !payload) mapHttpError(response, payload);
+
+  const providerStatus = normalizeProviderStatus(payload.status);
+  if (providerStatus === "COMPLETED") {
+    try {
+      return {
+        state: "completed" as const,
+        providerStatus,
+        result: parseCompletedOutput(payload),
+      };
+    } catch (error) {
+      if (error instanceof ImageGenerationError) {
+        return {
+          state: "failed" as const,
+          providerStatus: "ERROR" as const,
+          code: error.code,
+          message: error.message,
+        };
+      }
+      throw error;
+    }
+  }
+
+  if (
+    providerStatus === "FAILED" ||
+    providerStatus === "ERROR" ||
+    providerStatus === "CANCELLED"
+  ) {
+    const diagnostic = upstreamMessage(payload);
+    if (diagnostic) console.error("RunPod job failed", diagnostic);
+    return {
+      state: "failed" as const,
+      providerStatus,
+      code: "AI_GENERATION_FAILED",
+      message: "Görsel hazırlanamadı. Daha net fotoğraflarla yeniden deneyin.",
+    };
+  }
+
+  if (providerStatus === "TIMED_OUT") {
+    return {
+      state: "failed" as const,
+      providerStatus,
+      code: "AI_TIMEOUT",
+      message: "GPU sırası zamanında tamamlanamadı. Hakkınız iade edildi.",
+    };
+  }
+
+  return {
+    state:
+      providerStatus === "IN_PROGRESS" || providerStatus === "RUNNING"
+        ? ("running" as const)
+        : ("queued" as const),
+    providerStatus,
+  };
+}
+
+export async function cancelProductPreviewJob(jobId: string) {
+  if (!JOB_ID_PATTERN.test(jobId)) return;
+  const config = getRunPodConfig();
+  await cancelJob(config.endpointId, jobId, config.apiKey);
 }

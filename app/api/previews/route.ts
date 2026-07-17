@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { isPreviewCategory } from "@/lib/categories";
@@ -28,9 +28,10 @@ import {
   validateImageFile,
 } from "@/lib/server/image-validation";
 import {
-  generateProductPreview,
+  cancelProductPreviewJob,
   getImageModelName,
   ImageGenerationError,
+  submitProductPreview,
 } from "@/lib/server/runpod-image";
 import {
   previewListSelection,
@@ -39,7 +40,7 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 function normalizeNote(value: FormDataEntryValue | null) {
   if (typeof value !== "string") return null;
@@ -59,7 +60,10 @@ export async function GET(request: NextRequest) {
       .where(
         and(
           eq(previewRequests.sessionId, session.id),
-          eq(previewRequests.status, "completed"),
+          or(
+            eq(previewRequests.status, "processing"),
+            eq(previewRequests.status, "completed"),
+          ),
         ),
       )
       .orderBy(desc(previewRequests.createdAt))
@@ -99,6 +103,8 @@ export async function POST(request: NextRequest) {
   const clientKey = getClientKey(request, session.id);
   let requestId: string | null = null;
   let reservation: PreviewAccessReservation | null = null;
+  let providerJobId: string | null = null;
+  let providerJobStored = false;
 
   try {
     const formData = await request.formData();
@@ -132,21 +138,62 @@ export async function POST(request: NextRequest) {
       couponId: getCouponId(request),
     });
 
-    const generated = await generateProductPreview({
+    const submitted = await submitProductPreview({
       category: categoryValue,
       product,
       target,
       note,
     });
+    providerJobId = submitted.jobId;
+
+    if (!submitted.result) {
+      const [processing] = await db
+        .update(previewRequests)
+        .set({
+          providerJobId: submitted.jobId,
+          providerStatus: submitted.providerStatus,
+          providerSubmittedAt: new Date(),
+          providerCheckedAt: new Date(),
+          errorCode: null,
+        })
+        .where(
+          and(
+            eq(previewRequests.id, requestId),
+            eq(previewRequests.sessionId, session.id),
+            eq(previewRequests.status, "processing"),
+          ),
+        )
+        .returning(previewListSelection);
+
+      if (!processing) {
+        throw new Error("Processing preview row was not found");
+      }
+      providerJobStored = true;
+
+      const access = await getAccessState({
+        request,
+        sessionId: session.id,
+        clientKey,
+      });
+      const response = NextResponse.json(
+        { preview: serializePreview(processing), access },
+        { status: 202, headers: noStoreHeaders() },
+      );
+      return attachSessionCookie(response, session);
+    }
 
     const [completed] = await db
       .update(previewRequests)
       .set({
         status: "completed",
-        model: generated.model,
-        resultImageBase64: generated.imageBase64,
-        resultMime: generated.mime,
-        resultBytes: generated.bytes,
+        providerJobId: submitted.jobId,
+        providerStatus: "COMPLETED",
+        providerSubmittedAt: new Date(),
+        providerCheckedAt: new Date(),
+        model: submitted.result.model,
+        resultImageBase64: submitted.result.imageBase64,
+        resultMime: submitted.result.mime,
+        resultBytes: submitted.result.bytes,
         completedAt: new Date(),
         errorCode: null,
       })
@@ -161,6 +208,7 @@ export async function POST(request: NextRequest) {
     if (!completed) {
       throw new Error("Completed preview row was not found");
     }
+    providerJobStored = true;
 
     const access = await getAccessState({
       request,
@@ -173,7 +221,11 @@ export async function POST(request: NextRequest) {
     );
     return attachSessionCookie(response, session);
   } catch (error) {
-    if (requestId && reservation) {
+    if (!providerJobStored && providerJobId) {
+      await cancelProductPreviewJob(providerJobId);
+    }
+
+    if (!providerJobStored && requestId && reservation) {
       try {
         await releasePreviewAccess(
           requestId,

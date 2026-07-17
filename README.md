@@ -12,6 +12,7 @@ hazır Next.js uygulamasıdır.
 - Mobil kameradan çekim veya galeriden fotoğraf yükleme
 - Tarayıcıda otomatik boyutlandırma ve sıkıştırma
 - RunPod Serverless üzerinde açık kaynaklı FLUX.2 ile iki referans fotoğraftan önizleme
+- GPU kuyruğunu Vercel isteğinden ayıran asenkron iş ve durum takibi
 - Neon PostgreSQL ile anonim oturum, sonuç geçmişi ve kullanım sınırı
 - Toplam 3 ücretsiz üretim; ardından IBAN ile 10 görsel / 49 TL Standart Paket
 - Manuel ödeme onayı, güvenli kupon ve atomik kredi düşümü
@@ -55,7 +56,8 @@ DATABASE_URL="postgresql://...-pooler.../neondb?sslmode=require&channel_binding=
 RUNPOD_API_KEY="rpa_..."
 RUNPOD_ENDPOINT_ID="endpoint-id"
 RUNPOD_TIMEOUT_MS="240000"
-RUNPOD_POLL_INTERVAL_MS="2000"
+RUNPOD_JOB_TTL_MS="900000"
+PREVIEW_JOB_MAX_AGE_MS="1200000"
 FLUX_IMAGE_MODEL="black-forest-labs/FLUX.2-klein-4B"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 IMAGE_RETENTION_DAYS="30"
@@ -101,7 +103,8 @@ Tarayıcı adresi: `http://localhost:3000`
    - `RUNPOD_API_KEY`
    - `RUNPOD_ENDPOINT_ID`
    - `RUNPOD_TIMEOUT_MS=240000`
-   - `RUNPOD_POLL_INTERVAL_MS=2000`
+   - `RUNPOD_JOB_TTL_MS=900000` (isteğe bağlı; varsayılan değer aynıdır)
+   - `PREVIEW_JOB_MAX_AGE_MS=1200000` (isteğe bağlı; varsayılan değer aynıdır)
    - `FLUX_IMAGE_MODEL=black-forest-labs/FLUX.2-klein-4B`
    - `NEXT_PUBLIC_APP_URL=https://alan-adiniz.com`
    - `IMAGE_RETENTION_DAYS=30`
@@ -146,8 +149,8 @@ npm run db:push      # şemayı geliştirme veritabanına doğrudan iter
 
 ## Veri ve gizlilik davranışı
 
-- Ürün ve hedef fotoğrafları sunucuda yalnızca AI isteği sırasında bellekte
-  işlenir; Neon'a yazılmaz.
+- Ürün ve hedef fotoğrafları Neon'a yazılmaz. Önizleme tamamlanana veya iş ömrü
+  dolana kadar RunPod'un geçici iş kuyruğunda işlenir.
 - AI tarafından üretilen tek sonuç görseli, tarayıcıya özel geçmiş için Neon'da
   saklanır.
 - Sonuçlar herkese açık değildir; anonim ve `HttpOnly` oturum çerezine bağlıdır.
@@ -182,6 +185,7 @@ app/yonetim/odemeler/        Gizli ödeme yönetim ekranı
 components/try-on-studio.tsx Kamera, yükleme, sonuç ve geçmiş arayüzü
 components/credit-access.tsx Ücretsiz hak, paket, IBAN ve kupon arayüzü
 lib/server/runpod-image.ts   RunPod kuyruk, durum ve FLUX.2 entegrasyonu
+lib/server/preview-job-policy.ts Asenkron iş süre sınırı
 runpod-worker/               Açık kaynak modelin GPU worker ve Docker dosyaları
 lib/db/schema.ts             Neon/Drizzle şeması
 drizzle/                     Uygulanabilir SQL migration dosyaları

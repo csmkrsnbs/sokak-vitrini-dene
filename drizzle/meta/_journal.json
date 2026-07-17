@@ -15,6 +15,13 @@
       "when": 1784295786726,
       "tag": "0001_loving_kid_colt",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784305345886,
+      "tag": "0002_clear_deadpool",
+      "breakpoints": true
     }
   ]
 }

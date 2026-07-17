@@ -9,7 +9,11 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import type { PreviewCategory, PreviewStatus } from "@/lib/types";
+import type {
+  PreviewCategory,
+  PreviewProviderStatus,
+  PreviewStatus,
+} from "@/lib/types";
 
 export const previewRequests = pgTable(
   "preview_requests",
@@ -24,6 +28,10 @@ export const previewRequests = pgTable(
       .notNull()
       .default("processing"),
     model: varchar("model", { length: 80 }).notNull(),
+    providerJobId: varchar("provider_job_id", { length: 160 }),
+    providerStatus: varchar("provider_status", { length: 24 }).$type<PreviewProviderStatus>(),
+    providerSubmittedAt: timestamp("provider_submitted_at", { withTimezone: true }),
+    providerCheckedAt: timestamp("provider_checked_at", { withTimezone: true }),
     resultImageBase64: text("result_image_base64"),
     resultMime: varchar("result_mime", { length: 48 }),
     resultBytes: integer("result_bytes"),
@@ -38,6 +46,7 @@ export const previewRequests = pgTable(
     index("preview_requests_session_created_idx").on(table.sessionId, table.createdAt),
     index("preview_requests_client_created_idx").on(table.clientKey, table.createdAt),
     index("preview_requests_status_created_idx").on(table.status, table.createdAt),
+    uniqueIndex("preview_requests_provider_job_uidx").on(table.providerJobId),
   ],
 );
 

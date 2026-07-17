@@ -25,11 +25,14 @@ docker build -t sokak-vitrini-flux-worker ./runpod-worker
 
 ## 2. RunPod endpoint'i
 
-1. RunPod'da en az 30 GB network volume oluşturun.
+1. RunPod'da en az 30 GB network volume oluşturun. Kapasiteyi artırmak için
+   mümkünse farklı veri merkezlerinde iki volume kullanın.
 2. **Serverless → New Endpoint → Import from Registry** ile worker imajını seçin.
 3. Başlangıç için 24 GB sınıfından L4, A5000, RTX 3090 veya RTX 4090 seçin.
-4. Minimum worker `0`, maksimum worker `1`, idle timeout `5` saniye yapın.
-5. Network volume'u `/runpod-volume` yoluna bağlayın.
+4. Minimum worker `0`, maksimum worker `1`, idle timeout `60` saniye yapın ve
+   FlashBoot'u etkinleştirin.
+5. Network volume'ları `/runpod-volume` yoluna bağlayın. Birden fazla volume
+   seçildiğinde her worker kendi veri merkezindeki volume'u kullanır.
 6. Aşağıdaki worker ortam değişkenlerini tanımlayın:
 
 ```env
@@ -56,11 +59,14 @@ Vercel Production ortamına ekleyin:
 RUNPOD_API_KEY=rpa_...
 RUNPOD_ENDPOINT_ID=...
 RUNPOD_TIMEOUT_MS=240000
-RUNPOD_POLL_INTERVAL_MS=2000
+RUNPOD_JOB_TTL_MS=900000
+PREVIEW_JOB_MAX_AGE_MS=1200000
 FLUX_IMAGE_MODEL=black-forest-labs/FLUX.2-klein-4B
 ```
 
 API anahtarı yalnız sunucu tarafında tutulur; mobil tarayıcıya gönderilmez.
+Uygulama işi kısa bir istekle kuyruğa verir ve sonucu ayrı durum istekleriyle
+izler; GPU kuyruğu Vercel bağlantısının süre aşımına yol açmaz.
 
 ## 4. Doğrulama
 

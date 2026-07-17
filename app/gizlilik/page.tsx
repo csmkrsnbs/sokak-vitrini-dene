@@ -36,8 +36,10 @@ export default function PrivacyPage() {
       <p>
         Yüklediğiniz ürün ve hedef fotoğrafları yalnızca talep ettiğiniz önizlemeyi
         oluşturmak amacıyla yapay zekâ hizmet sağlayıcısına iletilir. Bu iki kaynak
-        fotoğraf Sokak Vitrini Dene veritabanında kalıcı olarak saklanmaz. Oluşturulan
-        sonuç görseli, geçmişinizde gösterilebilmesi için sınırlı süreyle saklanır.
+        fotoğraf Sokak Vitrini Dene veritabanında kalıcı olarak saklanmaz; işlem
+        tamamlanana veya geçici iş süresi dolana kadar sağlayıcının iş kuyruğunda
+        bulunabilir. Oluşturulan sonuç görseli, geçmişinizde gösterilebilmesi için
+        sınırlı süreyle saklanır.
       </p>
 
       <h2>Saklama süresi ve silme</h2>

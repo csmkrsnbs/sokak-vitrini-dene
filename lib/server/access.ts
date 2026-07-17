@@ -2,7 +2,7 @@ import { and, count, eq, or, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
 import { getDb } from "@/lib/db";
-import { couponCodes, freeUsageEvents, previewRequests } from "@/lib/db/schema";
+import { couponCodes, freeUsageEvents } from "@/lib/db/schema";
 import type { AccessState, PreviewCategory } from "@/lib/types";
 import {
   FREE_PREVIEW_LIMIT,
@@ -153,11 +153,21 @@ export async function releasePreviewAccess(
   const db = getDb();
 
   if (reservation.source === "free") {
-    await db.delete(freeUsageEvents).where(eq(freeUsageEvents.previewId, previewId));
-    await db
-      .update(previewRequests)
-      .set({ status: "failed", errorCode, completedAt: new Date() })
-      .where(eq(previewRequests.id, previewId));
+    await db.execute(sql`
+      WITH refundable AS (
+        UPDATE preview_requests
+        SET
+          status = 'failed',
+          error_code = ${errorCode},
+          completed_at = NOW()
+        WHERE id = ${previewId}::uuid
+          AND status = 'processing'
+        RETURNING id
+      )
+      DELETE FROM free_usage_events
+      USING refundable
+      WHERE free_usage_events.preview_id = refundable.id
+    `);
     return;
   }
 
@@ -171,6 +181,7 @@ export async function releasePreviewAccess(
         credit_refunded_at = NOW()
       WHERE id = ${previewId}::uuid
         AND credit_source = 'coupon'
+        AND status = 'processing'
         AND credit_refunded_at IS NULL
       RETURNING coupon_id
     )

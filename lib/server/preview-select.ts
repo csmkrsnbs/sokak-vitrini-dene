@@ -5,7 +5,13 @@ import type { PreviewListItem } from "@/lib/types";
 
 type PreviewRow = Pick<
   InferSelectModel<typeof previewRequests>,
-  "id" | "category" | "note" | "status" | "createdAt" | "completedAt"
+  | "id"
+  | "category"
+  | "note"
+  | "status"
+  | "providerStatus"
+  | "createdAt"
+  | "completedAt"
 >;
 
 export const previewListSelection = {
@@ -13,6 +19,7 @@ export const previewListSelection = {
   category: previewRequests.category,
   note: previewRequests.note,
   status: previewRequests.status,
+  providerStatus: previewRequests.providerStatus,
   createdAt: previewRequests.createdAt,
   completedAt: previewRequests.completedAt,
 };
@@ -23,6 +30,7 @@ export function serializePreview(row: PreviewRow): PreviewListItem {
     category: row.category,
     note: row.note,
     status: row.status,
+    providerStatus: row.providerStatus,
     imageUrl: row.status === "completed" ? `/api/previews/${row.id}/image` : null,
     createdAt: row.createdAt.toISOString(),
     completedAt: row.completedAt?.toISOString() ?? null,

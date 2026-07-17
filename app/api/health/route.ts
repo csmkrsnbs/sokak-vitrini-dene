@@ -35,7 +35,13 @@ export async function GET() {
       await db.execute(sql`SELECT 1`);
       databaseReachable = true;
       await Promise.all([
-        db.select({ id: previewRequests.id }).from(previewRequests).limit(1),
+        db
+          .select({
+            id: previewRequests.id,
+            providerJobId: previewRequests.providerJobId,
+          })
+          .from(previewRequests)
+          .limit(1),
         db.select({ id: freeUsageEvents.previewId }).from(freeUsageEvents).limit(1),
         db.select({ id: paymentRequests.id }).from(paymentRequests).limit(1),
         db.select({ id: couponCodes.id }).from(couponCodes).limit(1),
