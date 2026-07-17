@@ -267,6 +267,14 @@ function parseCompletedOutput(payload: RunPodJobResponse) {
     );
   }
 
+  if (output.error_code === "MODEL_LOAD_FAILED") {
+    throw new ImageGenerationError(
+      "AI_MODEL_LOAD_FAILED",
+      "Görsel üretim modeli worker üzerinde yüklenemedi. Kullanım hakkınız iade edildi; yönetici RunPod loglarını ve volume bağlantısını kontrol etmelidir.",
+      503,
+    );
+  }
+
   if (typeof output.error === "string") {
     console.error("RunPod worker returned an error", output.error.slice(0, 300));
     throw new ImageGenerationError(

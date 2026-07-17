@@ -71,6 +71,9 @@ function terminalMessage(errorCode: string | null) {
   if (errorCode === "AI_GENERATION_FAILED") {
     return "Görsel üretim motoru işlemi tamamlayamadı. Kullanım hakkınız iade edildi; lütfen yeniden deneyin.";
   }
+  if (errorCode === "AI_MODEL_LOAD_FAILED") {
+    return "Görsel üretim modeli worker üzerinde yüklenemedi. Kullanım hakkınız iade edildi; yönetici RunPod loglarını ve volume bağlantısını kontrol etmelidir.";
+  }
   return "Görsel hazırlanamadı. Kullanım hakkınız iade edildi.";
 }
 

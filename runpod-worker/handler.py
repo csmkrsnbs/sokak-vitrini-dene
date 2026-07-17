@@ -232,6 +232,7 @@ def _safety_error(code: str):
 def _generation_error(code: str):
     messages = {
         "GPU_MEMORY_EXHAUSTED": "GPU memory exhausted during generation",
+        "MODEL_LOAD_FAILED": "FLUX model could not be loaded",
         "GENERATION_FAILED": "Image generation failed",
     }
     return {"error_code": code, "error": messages[code]}
@@ -345,7 +346,15 @@ def handler(job):
         return _safety_error("MODERATION_UNAVAILABLE")
 
     runpod.serverless.progress_update(job, "Model ve referanslar hazırlanıyor")
-    pipeline = _get_pipeline()
+    try:
+        pipeline = _get_pipeline()
+    except torch.cuda.OutOfMemoryError:
+        print("Model load failed: CUDA out of memory")
+        torch.cuda.empty_cache()
+        return _generation_error("GPU_MEMORY_EXHAUSTED")
+    except Exception as error:
+        print("Model load failed:", type(error).__name__, str(error)[:500])
+        return _generation_error("MODEL_LOAD_FAILED")
     runpod.serverless.progress_update(job, "Önizleme oluşturuluyor")
 
     try:
