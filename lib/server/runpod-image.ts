@@ -323,6 +323,18 @@ function parseCompletedOutput(payload: RunPodJobResponse) {
   return { model, imageBase64, mime, bytes };
 }
 
+function workerFailure(payload: RunPodJobResponse) {
+  const output = payload.output as RunPodImageOutput | null;
+  if (!output || typeof output !== "object") return null;
+
+  try {
+    parseCompletedOutput(payload);
+    return null;
+  } catch (error) {
+    return error instanceof ImageGenerationError ? error : null;
+  }
+}
+
 async function cancelJob(endpointId: string, jobId: string, apiKey: string) {
   try {
     await runPodFetch(
@@ -396,6 +408,8 @@ export async function submitProductPreview(input: {
     providerStatus === "CANCELLED" ||
     providerStatus === "TIMED_OUT"
   ) {
+    const structuredFailure = workerFailure(payload);
+    if (structuredFailure) throw structuredFailure;
     throw new ImageGenerationError(
       providerStatus === "TIMED_OUT" ? "AI_TIMEOUT" : "AI_GENERATION_FAILED",
       providerStatus === "TIMED_OUT"
@@ -454,6 +468,15 @@ export async function getProductPreviewJob(jobId: string) {
   ) {
     const diagnostic = upstreamMessage(payload);
     if (diagnostic) console.error("RunPod job failed", diagnostic);
+    const structuredFailure = workerFailure(payload);
+    if (structuredFailure) {
+      return {
+        state: "failed" as const,
+        providerStatus,
+        code: structuredFailure.code,
+        message: structuredFailure.message,
+      };
+    }
     return {
       state: "failed" as const,
       providerStatus,

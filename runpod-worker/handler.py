@@ -43,31 +43,31 @@ SEMANTIC_SAFETY_POLICIES = (
         "SAFETY_MINOR_THRESHOLD",
         "a photo whose subject is a child or teenager under 18 years old",
         "a photo of an adult person or an inanimate shopping product, room, furniture, car or street",
-        0.72,
+        0.84,
     ),
     (
         "SAFETY_POLITICAL_THRESHOLD",
         "a politician, political leader, election campaign, political party, protest, rally or political propaganda",
         "an ordinary non-political shopping product, adult portrait, room, furniture, car or street",
-        0.68,
+        0.82,
     ),
     (
         "SAFETY_VIOLENCE_THRESHOLD",
         "graphic violence, blood, severe injury, abuse, self-harm or a dead body",
         "an ordinary peaceful scene without violence, blood or injury",
-        0.70,
+        0.84,
     ),
     (
         "SAFETY_WEAPON_THRESHOLD",
         "a firearm, gun, explosive, combat weapon or threatening knife",
         "an ordinary safe shopping product or everyday scene without weapons",
-        0.72,
+        0.84,
     ),
     (
         "SAFETY_HATE_THRESHOLD",
         "a hate symbol, terrorist propaganda, extremist organization logo or hateful content",
         "an ordinary neutral image without hate or extremist symbols",
-        0.68,
+        0.82,
     ),
 )
 
@@ -188,9 +188,14 @@ def _moderate_images(images: list[Image.Image]) -> bool:
             raise RuntimeError("NSFW model label mapping is invalid")
 
         nsfw_threshold = _bounded_float(
-            "SAFETY_NSFW_THRESHOLD", 0.40, 0.10, 0.95
+            "SAFETY_NSFW_THRESHOLD", 0.72, 0.10, 0.95
         )
-        if bool(torch.any(nsfw_probabilities[:, nsfw_index] >= nsfw_threshold)):
+        nsfw_score = float(torch.max(nsfw_probabilities[:, nsfw_index]).item())
+        if nsfw_score >= nsfw_threshold:
+            print(
+                f"Safety rejected: NSFW score={nsfw_score:.4f} "
+                f"threshold={nsfw_threshold:.4f}"
+            )
             return False
 
         candidate_labels = []
@@ -216,6 +221,10 @@ def _moderate_images(images: list[Image.Image]) -> bool:
                 )[0].item()
                 threshold = _bounded_float(threshold_name, fallback, 0.50, 0.95)
                 if risk_probability >= threshold:
+                    print(
+                        f"Safety rejected: {threshold_name} "
+                        f"score={risk_probability:.4f} threshold={threshold:.4f}"
+                    )
                     return False
 
     return True
