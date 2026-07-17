@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalShell kicker="Son güncelleme: 14 Temmuz 2026" title="Kullanım Koşulları">
+    <LegalShell kicker="Son güncelleme: 17 Temmuz 2026" title="Kullanım Koşulları">
       <p>
         Sokak Vitrini Dene’yi kullanarak aşağıdaki koşulları kabul etmiş olursunuz.
         Hizmet, fiziksel bir ürünü satın almadan önce fikir vermek amacıyla görsel
@@ -43,8 +43,33 @@ export default function TermsPage() {
       <h2>Hizmet sınırları</h2>
       <p>
         Yoğunluk, bakım, kullanım sınırı, yapay zekâ sağlayıcısı veya teknik nedenlerle
-        önizleme geçici olarak kullanılamayabilir. Güvenli ve adil kullanım için günlük
-        işlem sınırı uygulanabilir.
+        önizleme geçici olarak kullanılamayabilir. Güvenli ve adil kullanım için oturum ve
+        cihaz bazlı kontroller uygulanabilir.
+      </p>
+
+      <h2>Ücretsiz hak ve Standart Paket</h2>
+      <p>
+        Her kullanıcıya toplam 3 ücretsiz görsel üretim hakkı verilir. Ücretsiz haklar
+        tamamlandıktan sonra Standart Paket, tek seferlik 49 TL ödeme karşılığında 10
+        görsel kredisi sağlar. Bu bir üyelik değildir; otomatik yenileme veya düzenli
+        tahsilat yapılmaz. Kullanılmayan paket kredilerinin süre sonu yoktur.
+      </p>
+
+      <h2>IBAN ödemesi ve kupon</h2>
+      <p>
+        Ödeme talebinde gösterilen tutar, IBAN ve havale açıklaması eksiksiz kullanılmalıdır.
+        Ödeme banka hareketinde doğrulandıktan sonra yönetici talebi onaylar ve 10 kredilik
+        kupon açılır. Yanlış tutar veya açıklama, onayı geciktirebilir. Kupon kodunu güvenli
+        saklamak kullanıcının sorumluluğundadır; kredi bitene kadar aynı kod yeniden
+        etkinleştirilebilir.
+      </p>
+
+      <h2>İptal ve iade</h2>
+      <p>
+        Hatalı veya mükerrer ödeme durumunda ödeme talebindeki bilgilerle destek kaydı
+        oluşturulmalıdır. Kullanılmaya başlanmış dijital kredilerle ilgili değerlendirme,
+        kullanım durumu ve yürürlükteki zorunlu tüketici hakları dikkate alınarak yapılır.
+        Yasal haklarınız saklıdır.
       </p>
 
       <h2>Silme ve erişim</h2>

@@ -1,9 +1,16 @@
-import { and, count, desc, eq, gte, or } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { isPreviewCategory } from "@/lib/categories";
 import { getDb, MissingDatabaseConfigurationError } from "@/lib/db";
 import { previewRequests } from "@/lib/db/schema";
+import {
+  getAccessState,
+  PreviewCreditsRequiredError,
+  type PreviewAccessReservation,
+  releasePreviewAccess,
+  reservePreviewAccess,
+} from "@/lib/server/access";
 import {
   apiError,
   attachSessionCookie,
@@ -12,6 +19,10 @@ import {
   noStoreHeaders,
 } from "@/lib/server/api";
 import { getClientKey } from "@/lib/server/client-key";
+import {
+  getCouponId,
+  MissingCouponConfigurationError,
+} from "@/lib/server/coupons";
 import {
   ImageValidationError,
   validateImageFile,
@@ -29,11 +40,6 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
-
-function dailyLimit() {
-  const parsed = Number.parseInt(process.env.AI_PREVIEW_DAILY_LIMIT || "10", 10);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 100) : 10;
-}
 
 function normalizeNote(value: FormDataEntryValue | null) {
   if (typeof value !== "string") return null;
@@ -92,6 +98,7 @@ export async function POST(request: NextRequest) {
   const session = getSession(request);
   const clientKey = getClientKey(request, session.id);
   let requestId: string | null = null;
+  let reservation: PreviewAccessReservation | null = null;
 
   try {
     const formData = await request.formData();
@@ -114,40 +121,15 @@ export async function POST(request: NextRequest) {
     const model = getImageModelName();
     const db = getDb();
 
-    const windowStart = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const [usage] = await db
-      .select({ total: count() })
-      .from(previewRequests)
-      .where(
-        and(
-          gte(previewRequests.createdAt, windowStart),
-          or(
-            eq(previewRequests.sessionId, session.id),
-            eq(previewRequests.clientKey, clientKey),
-          ),
-        ),
-      );
-
-    const limit = dailyLimit();
-    if ((usage?.total ?? 0) >= limit) {
-      const response = apiError(
-        "DAILY_LIMIT_REACHED",
-        `Son 24 saatlik ${limit} deneme sınırına ulaştınız.`,
-        429,
-        { ...noStoreHeaders(), "Retry-After": "3600" },
-      );
-      return attachSessionCookie(response, session);
-    }
-
     requestId = crypto.randomUUID();
-    await db.insert(previewRequests).values({
+    reservation = await reservePreviewAccess({
       id: requestId,
       sessionId: session.id,
       clientKey,
       category: categoryValue,
       note,
-      status: "processing",
       model,
+      couponId: getCouponId(request),
     });
 
     const generated = await generateProductPreview({
@@ -180,29 +162,39 @@ export async function POST(request: NextRequest) {
       throw new Error("Completed preview row was not found");
     }
 
+    const access = await getAccessState({
+      request,
+      sessionId: session.id,
+      clientKey,
+    });
     const response = NextResponse.json(
-      { preview: serializePreview(completed) },
+      { preview: serializePreview(completed), access },
       { status: 201, headers: noStoreHeaders() },
     );
     return attachSessionCookie(response, session);
   } catch (error) {
-    if (requestId) {
+    if (requestId && reservation) {
       try {
-        const db = getDb();
-        await db
-          .update(previewRequests)
-          .set({
-            status: "failed",
-            errorCode:
-              error instanceof ImageGenerationError
-                ? error.code.slice(0, 80)
-                : "INTERNAL_ERROR",
-            completedAt: new Date(),
-          })
-          .where(eq(previewRequests.id, requestId));
+        await releasePreviewAccess(
+          requestId,
+          reservation,
+          error instanceof ImageGenerationError
+            ? error.code.slice(0, 80)
+            : "INTERNAL_ERROR",
+        );
       } catch (updateError) {
-        console.error("Failed preview status update failed", updateError);
+        console.error("Preview credit release failed", updateError);
       }
+    }
+
+    if (error instanceof PreviewCreditsRequiredError) {
+      const response = apiError(
+        "CREDITS_REQUIRED",
+        error.message,
+        402,
+        noStoreHeaders(),
+      );
+      return attachSessionCookie(response, session);
     }
 
     if (error instanceof ImageValidationError) {
@@ -213,6 +205,15 @@ export async function POST(request: NextRequest) {
       return apiError(
         "DATABASE_NOT_CONFIGURED",
         "Veritabanı bağlantısı henüz yapılandırılmamış.",
+        503,
+        noStoreHeaders(),
+      );
+    }
+
+    if (error instanceof MissingCouponConfigurationError) {
+      return apiError(
+        "COUPON_NOT_CONFIGURED",
+        "Kupon sistemi henüz yapılandırılmamış.",
         503,
         noStoreHeaders(),
       );

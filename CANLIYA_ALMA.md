@@ -19,12 +19,24 @@
 ## Vercel
 
 - [ ] README'deki ortam değişkenleri Production ortamına eklendi.
+- [ ] `PAYMENT_BANK_NAME`, `PAYMENT_ACCOUNT_HOLDER` ve `PAYMENT_IBAN` eklendi.
+- [ ] Birbirinden farklı uzun değerlerle `ADMIN_ACCESS_KEY` ve `COUPON_SIGNING_SECRET` eklendi.
 - [ ] Build komutu `npm run vercel-build`.
 - [ ] Deploy başarılı.
 - [ ] `/api/health` cevabındaki bütün kontroller `true`.
 - [ ] Özel alan adı bağlandı ve `NEXT_PUBLIC_APP_URL` bu adresle güncellendi.
 - [ ] Mobil cihazdan bir ürün ve hedef fotoğrafla gerçek deneme tamamlandı.
 - [ ] Sonuç indirildi, paylaşıldı ve geçmişten silme kontrol edildi.
+
+## IBAN ve kupon testi
+
+- [ ] İlk 3 başarılı üretimden sonra paket penceresi otomatik açıldı.
+- [ ] Standart Paket ekranında 10 görsel / 49 TL ve doğru IBAN göründü.
+- [ ] Test ödeme talebindeki havale açıklaması banka hareketiyle eşleşti.
+- [ ] `/yonetim/odemeler` adresinde yönetim anahtarıyla giriş yapıldı.
+- [ ] Bekleyen ödeme onaylandı ve kullanıcı ekranında kupon göründü.
+- [ ] Kupon etkinleştirildi; başarılı üretimde bakiye 10'dan 9'a düştü.
+- [ ] Başarısız üretimde kredi geri geldi.
 
 ## Yayın öncesi son kontrol
 

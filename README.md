@@ -13,6 +13,8 @@ hazır Next.js uygulamasıdır.
 - Tarayıcıda otomatik boyutlandırma ve sıkıştırma
 - RunPod Serverless üzerinde açık kaynaklı FLUX.2 ile iki referans fotoğraftan önizleme
 - Neon PostgreSQL ile anonim oturum, sonuç geçmişi ve kullanım sınırı
+- Toplam 3 ücretsiz üretim; ardından IBAN ile 10 görsel / 49 TL Standart Paket
+- Manuel ödeme onayı, güvenli kupon ve atomik kredi düşümü
 - Kaynak fotoğrafları veritabanında saklamayan gizlilik odaklı akış
 - Sonuç indirme, cihaz paylaşım menüsü ve kalıcı silme
 - Sonuçları belirlenen süreden sonra temizleyen günlük görev
@@ -56,10 +58,14 @@ RUNPOD_TIMEOUT_MS="240000"
 RUNPOD_POLL_INTERVAL_MS="2000"
 FLUX_IMAGE_MODEL="black-forest-labs/FLUX.2-klein-4B"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
-AI_PREVIEW_DAILY_LIMIT="10"
 IMAGE_RETENTION_DAYS="30"
 RATE_LIMIT_SALT="en-az-32-karakter-rastgele-deger"
 CRON_SECRET="farkli-en-az-32-karakter-rastgele-deger"
+PAYMENT_BANK_NAME="Banka adı"
+PAYMENT_ACCOUNT_HOLDER="Hesap sahibi"
+PAYMENT_IBAN="TR000000000000000000000000"
+ADMIN_ACCESS_KEY="en-az-32-karakter-gizli-yonetim-anahtari"
+COUPON_SIGNING_SECRET="farkli-en-az-32-karakter-kupon-anahtari"
 ```
 
 Rastgele değer üretmek için:
@@ -98,10 +104,14 @@ Tarayıcı adresi: `http://localhost:3000`
    - `RUNPOD_POLL_INTERVAL_MS=2000`
    - `FLUX_IMAGE_MODEL=black-forest-labs/FLUX.2-klein-4B`
    - `NEXT_PUBLIC_APP_URL=https://alan-adiniz.com`
-   - `AI_PREVIEW_DAILY_LIMIT=10`
    - `IMAGE_RETENTION_DAYS=30`
    - `RATE_LIMIT_SALT`
    - `CRON_SECRET`
+   - `PAYMENT_BANK_NAME`
+   - `PAYMENT_ACCOUNT_HOLDER`
+   - `PAYMENT_IBAN`
+   - `ADMIN_ACCESS_KEY`
+   - `COUPON_SIGNING_SECRET`
 6. Deploy işlemini başlatın. `vercel-build` komutu migration'ı uygular ve
    üretim derlemesini oluşturur.
 7. Yayın bittikten sonra `https://alan-adiniz.com/api/health` adresini açın.
@@ -114,7 +124,9 @@ Tarayıcı adresi: `http://localhost:3000`
     "databaseConfigured": true,
     "databaseReachable": true,
     "schemaReady": true,
-    "aiConfigured": true
+    "aiConfigured": true,
+    "paymentConfigured": true,
+    "securityConfigured": true
   }
 }
 ```
@@ -142,8 +154,20 @@ npm run db:push      # şemayı geliştirme veritabanına doğrudan iter
 - Kullanıcı sonucu istediği anda silebilir.
 - `/api/cron/cleanup` görevi, `IMAGE_RETENTION_DAYS` süresini aşan kayıtları
   günlük olarak siler.
-- IP adresi saklanmaz. Günlük sınır için IP + gizli salt değerinin SHA-256 özeti
-  kullanılır.
+- IP adresi saklanmaz. Ücretsiz hakların kötüye kullanımını azaltmak için IP + gizli
+  salt değerinin SHA-256 özeti kullanılır.
+- Ücretsiz hak, ödeme talebi, kupon ve kredi kayıtları sonuç görselinden bağımsız tutulur.
+
+## Paket ve ödeme yönetimi
+
+- İlk 3 başarılı görsel üretimi ücretsizdir.
+- Standart Paket tek seferlik 49 TL karşılığında 10 görsel kredisi verir.
+- Kullanıcı paket penceresinden ödeme talebi oluşturur ve kendisine verilen havale
+  açıklamasını IBAN transferine ekler.
+- Yönetici `/yonetim/odemeler` adresinde `ADMIN_ACCESS_KEY` ile giriş yapar, banka
+  hareketini kontrol eder ve talebi onaylar.
+- Onaylanan kuponun süre sonu yoktur; her başarılı üretimde 1 kredi atomik olarak düşer.
+- Başarısız AI üretiminde ücretsiz hak veya kupon kredisi otomatik geri verilir.
 
 ## Önemli dosyalar
 
@@ -151,7 +175,12 @@ npm run db:push      # şemayı geliştirme veritabanına doğrudan iter
 app/api/previews/            Önizleme, geçmiş, görsel ve silme API'leri
 app/api/cron/cleanup/        Süreli kayıt temizliği
 app/api/health/              Canlı ortam sağlık kontrolü
+app/api/payments/            IBAN ödeme talebi API'si
+app/api/coupons/             Kupon etkinleştirme API'si
+app/api/admin/               Yönetici girişi ve ödeme onayı API'leri
+app/yonetim/odemeler/        Gizli ödeme yönetim ekranı
 components/try-on-studio.tsx Kamera, yükleme, sonuç ve geçmiş arayüzü
+components/credit-access.tsx Ücretsiz hak, paket, IBAN ve kupon arayüzü
 lib/server/runpod-image.ts   RunPod kuyruk, durum ve FLUX.2 entegrasyonu
 runpod-worker/               Açık kaynak modelin GPU worker ve Docker dosyaları
 lib/db/schema.ts             Neon/Drizzle şeması

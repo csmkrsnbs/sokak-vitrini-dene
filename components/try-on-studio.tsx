@@ -30,8 +30,10 @@ import {
   useState,
 } from "react";
 
+import { CreditAccess } from "@/components/credit-access";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import type {
+  AccessState,
   ApiErrorBody,
   PreviewCategory,
   PreviewListItem,
@@ -139,9 +141,22 @@ async function prepareImage(file: File) {
   });
 }
 
+class ApiRequestError extends Error {
+  constructor(
+    readonly code: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ApiRequestError";
+  }
+}
+
 async function readApiError(response: Response) {
   const payload = (await response.json().catch(() => null)) as ApiErrorBody | null;
-  return payload?.error?.message || "İşlem tamamlanamadı. Lütfen yeniden deneyin.";
+  return new ApiRequestError(
+    payload?.error?.code || "REQUEST_FAILED",
+    payload?.error?.message || "İşlem tamamlanamadı. Lütfen yeniden deneyin.",
+  );
 }
 
 function UploadCard({
@@ -275,6 +290,8 @@ export function TryOnStudio() {
   const [historyLoading, setHistoryLoading] = useState(true);
   const [historyAvailable, setHistoryAvailable] = useState(true);
   const [notice, setNotice] = useState<Notice>(null);
+  const [access, setAccess] = useState<AccessState | null>(null);
+  const [packageOpen, setPackageOpen] = useState(false);
   const productRef = useRef<SelectedImage | null>(null);
   const targetRef = useRef<SelectedImage | null>(null);
   const config = CATEGORY_CONFIG[category];
@@ -311,6 +328,26 @@ export function TryOnStudio() {
       })
       .finally(() => {
         if (active) setHistoryLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    fetch("/api/access", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw await readApiError(response);
+        return (await response.json()) as { access: AccessState };
+      })
+      .then((payload) => {
+        if (active) setAccess(payload.access);
+      })
+      .catch(() => {
+        // Ana deneme akışını bağlantı sorunu yüzünden engelleme.
       });
 
     return () => {
@@ -400,10 +437,11 @@ export function TryOnStudio() {
         method: "POST",
         body: formData,
       });
-      if (!response.ok) throw new Error(await readApiError(response));
+      if (!response.ok) throw await readApiError(response);
 
       const payload = (await response.json()) as PreviewResponse;
       setResult(payload.preview);
+      setAccess(payload.access);
       setHistory((current) => [
         payload.preview,
         ...current.filter((item) => item.id !== payload.preview.id),
@@ -415,6 +453,9 @@ export function TryOnStudio() {
         document.getElementById("sonuc")?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 100);
     } catch (error) {
+      if (error instanceof ApiRequestError && error.code === "CREDITS_REQUIRED") {
+        setPackageOpen(true);
+      }
       setNotice({
         kind: "error",
         text: error instanceof Error ? error.message : "Önizleme hazırlanamadı.",
@@ -477,7 +518,7 @@ export function TryOnStudio() {
     if (!window.confirm("Bu önizlemeyi kalıcı olarak silmek istiyor musun?")) return;
     try {
       const response = await fetch(`/api/previews/${item.id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error(await readApiError(response));
+      if (!response.ok) throw await readApiError(response);
       setHistory((current) => current.filter((entry) => entry.id !== item.id));
       if (result?.id === item.id) setResult(null);
       setNotice({ kind: "success", text: "Önizleme silindi." });
@@ -507,6 +548,13 @@ export function TryOnStudio() {
             <h2>Gördüğünü kendi dünyana taşı</h2>
             <p>Ürün türünü seç, iki fotoğraf yükle ve sonucu gör.</p>
           </div>
+
+          <CreditAccess
+            access={access}
+            open={packageOpen}
+            onOpenChange={setPackageOpen}
+            onAccessChange={setAccess}
+          />
 
           <div className="studio-shell">
             <div className="studio-tabs" role="tablist" aria-label="Ürün türü">

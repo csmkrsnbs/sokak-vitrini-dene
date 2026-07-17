@@ -1,8 +1,15 @@
+import { sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 import { getDb } from "@/lib/db";
-import { previewRequests } from "@/lib/db/schema";
+import {
+  couponCodes,
+  freeUsageEvents,
+  paymentRequests,
+  previewRequests,
+} from "@/lib/db/schema";
 import { noStoreHeaders } from "@/lib/server/api";
+import { isPaymentConfigured } from "@/lib/server/billing";
 import {
   getImageModelName,
   isImageGenerationConfigured,
@@ -14,27 +21,47 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const databaseConfigured = Boolean(process.env.DATABASE_URL?.trim());
   const aiConfigured = isImageGenerationConfigured();
+  const paymentConfigured = isPaymentConfigured();
+  const securityConfigured = Boolean(
+    (process.env.RATE_LIMIT_SALT?.trim().length ?? 0) >= 32 &&
+      (process.env.CRON_SECRET?.trim().length ?? 0) >= 32,
+  );
   let databaseReachable = false;
+  let schemaReady = false;
 
   if (databaseConfigured) {
     try {
       const db = getDb();
-      await db.select({ id: previewRequests.id }).from(previewRequests).limit(1);
+      await db.execute(sql`SELECT 1`);
       databaseReachable = true;
+      await Promise.all([
+        db.select({ id: previewRequests.id }).from(previewRequests).limit(1),
+        db.select({ id: freeUsageEvents.previewId }).from(freeUsageEvents).limit(1),
+        db.select({ id: paymentRequests.id }).from(paymentRequests).limit(1),
+        db.select({ id: couponCodes.id }).from(couponCodes).limit(1),
+      ]);
+      schemaReady = true;
     } catch (error) {
       console.error("Health database check failed", error);
     }
   }
 
-  const ready = databaseReachable && aiConfigured;
+  const ready =
+    databaseReachable &&
+    schemaReady &&
+    aiConfigured &&
+    paymentConfigured &&
+    securityConfigured;
   return NextResponse.json(
     {
       status: ready ? "ready" : "not_ready",
       checks: {
         databaseConfigured,
         databaseReachable,
-        schemaReady: databaseReachable,
+        schemaReady,
         aiConfigured,
+        paymentConfigured,
+        securityConfigured,
         aiProvider: "runpod",
         aiModel: getImageModelName(),
       },
