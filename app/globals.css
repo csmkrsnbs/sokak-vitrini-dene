@@ -1011,6 +1011,20 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
+.consent-row-secondary {
+  margin-top: 10px;
+}
+
+.consent-row a {
+  color: var(--gold-light);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.consent-row a:hover {
+  color: var(--gold);
+}
+
 .studio-submit {
   width: 100%;
   margin-top: 22px;

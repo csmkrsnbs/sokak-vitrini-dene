@@ -12,6 +12,8 @@ hazır Next.js uygulamasıdır.
 - Mobil kameradan çekim veya galeriden fotoğraf yükleme
 - Tarayıcıda otomatik boyutlandırma ve sıkıştırma
 - RunPod Serverless üzerinde açık kaynaklı FLUX.2 ile iki referans fotoğraftan önizleme
+- Aynı GPU worker'ında girdi ve sonuç için fail-closed yetişkin, çocuk, siyasi, şiddet,
+  silah ve nefret/aşırılık içeriği denetimi
 - GPU kuyruğunu Vercel isteğinden ayıran asenkron iş ve durum takibi
 - Neon PostgreSQL ile anonim oturum, sonuç geçmişi ve kullanım sınırı
 - Toplam 2 ücretsiz üretim; ardından IBAN ile 10 görsel / 100 TL Standart Paket
@@ -182,6 +184,10 @@ npm run db:push      # şemayı geliştirme veritabanına doğrudan iter
   hareketini kontrol eder ve talebi onaylar.
 - Onaylanan kuponun süre sonu yoktur; her başarılı üretimde 1 kredi atomik olarak düşer.
 - Başarısız AI üretiminde ücretsiz hak veya kupon kredisi otomatik geri verilir.
+- Güvenlik denetiminden geçmeyen veya denetimi tamamlanamayan üretimde görsel
+  saklanmaz ve ayrılan hak otomatik geri verilir.
+- Son 24 saatte 3 güvenlik reddi alan anonim oturum, bağlantı veya kupon 24 saat
+  süreyle yeni görsel üretimi başlatamaz.
 - Yönetim ekranında yalnızca reddedilmiş ödeme talepleri kalıcı olarak silinebilir.
 
 > `0004_clean_runtime_data` migration'ı mevcut önizleme, ücretsiz kullanım, kupon,
@@ -201,6 +207,7 @@ app/yonetim/odemeler/        Gizli ödeme yönetim ekranı
 components/try-on-studio.tsx Kamera, yükleme, sonuç ve geçmiş arayüzü
 components/credit-access.tsx Ücretsiz hak, paket, IBAN ve kupon arayüzü
 lib/server/runpod-image.ts   RunPod kuyruk, durum ve FLUX.2 entegrasyonu
+lib/server/content-safety.ts Yerleşim notu denetimi ve tekrar eden ihlal sınırı
 lib/server/network-risk.ts  Ücretsiz deneme VPN/proxy/Tor kontrolü
 lib/server/preview-job-policy.ts Asenkron iş süre sınırı
 runpod-worker/               Açık kaynak modelin GPU worker ve Docker dosyaları
@@ -225,7 +232,10 @@ bulunması gerekir.
 
 ## Model lisansı
 
-Worker yalnızca ticari kullanıma izin veren Apache 2.0 lisanslı
-`black-forest-labs/FLUX.2-klein-4B` modelini kullanır. FLUX.2 klein 9B,
-FLUX.2 dev ve araştırma amaçlı sanal deneme modelleri bu ticari akışa dahil
-edilmemiştir.
+Worker üretim için ticari kullanıma izin veren Apache 2.0 lisanslı
+`black-forest-labs/FLUX.2-klein-4B`, yetişkin içerik sınıflandırması için Apache
+2.0 lisanslı `Falconsai/nsfw_image_detection` ve diğer sabit güvenlik sınıfları
+için MIT lisanslı OpenAI CLIP modelini kullanır. Model sürümleri sabit commit
+kimlikleriyle ve `safetensors` dosyalarıyla yüklenir; uzaktan özel model kodu
+çalıştırılmaz. Otomatik sınıflandırma tek başına kusursuz bir hukuki güvenlik
+garantisi değildir; eşikler canlı kontrollü testlerle izlenmelidir.

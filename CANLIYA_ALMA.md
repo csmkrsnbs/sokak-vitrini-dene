@@ -15,6 +15,14 @@
 - [ ] Kalıcı Hugging Face önbelleği için mümkünse farklı veri merkezlerinden iki network volume bağlandı.
 - [ ] `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID` ve FLUX.2 ayarları Vercel'e eklendi.
 - [ ] İlk model indirme/ısınma isteği RunPod panelinden tamamlandı.
+- [ ] Worker loglarında FLUX ile iki sabit güvenlik modelinin volume önbelleğinden
+      yüklendiği ve uygun test isteğinin tamamlandığı görüldü.
+- [ ] Kontrollü yasak içerik testi `UNSAFE_CONTENT` ile reddedildi; FLUX üretimi
+      başlamadı ve ayrılan ücretsiz hak/kupon kredisi geri geldi.
+- [ ] Kaynaklar uygun olsa bile güvenlik denetiminin çalışmadığı senaryoda worker
+      fail-closed davranıp `MODERATION_UNAVAILABLE` döndürdü.
+- [ ] Kullanıcıya sürekli düşük ilk yanıt süresi gerekiyorsa maliyeti kabul edilerek
+      `active workers=1` ayarlandı; aksi durumda ilk soğuk açılış gecikmesi kabul edildi.
 
 ## Vercel
 
@@ -45,6 +53,8 @@
 - [ ] VPN açıkken ücretsiz deneme engellendi ve RunPod işi oluşmadı.
 - [ ] VPN açıkken geçerli ücretli kuponla üretim tamamlandı.
 - [ ] Reddedilmiş bir ödeme talebi yönetim ekranından kalıcı olarak silindi.
+- [ ] Üç tekrar eden güvenlik reddinden sonra aynı oturum/bağlantı/kuponun 24 saat
+      kısıtlandığı doğrulandı.
 
 ## Yayın öncesi son kontrol
 

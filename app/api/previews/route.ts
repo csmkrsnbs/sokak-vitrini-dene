@@ -22,6 +22,12 @@ import {
 } from "@/lib/server/api";
 import { getClientKey } from "@/lib/server/client-key";
 import {
+  assertContentSafetyAllowed,
+  ContentSafetyRestrictedError,
+  UnsafePlacementNoteError,
+  validatePlacementNote,
+} from "@/lib/server/content-safety";
+import {
   getCouponId,
   MissingCouponConfigurationError,
 } from "@/lib/server/coupons";
@@ -124,11 +130,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const product = validateImageFile(formData.get("product"), "Ürün fotoğrafı");
-    const target = validateImageFile(formData.get("target"), "Hedef fotoğraf");
+    if (formData.get("safetyConsent") !== "true") {
+      return apiError(
+        "SAFETY_CONSENT_REQUIRED",
+        "Yasak içerik kurallarını onaylamalısınız.",
+        400,
+      );
+    }
+
+    const [product, target] = await Promise.all([
+      validateImageFile(formData.get("product"), "Ürün fotoğrafı"),
+      validateImageFile(formData.get("target"), "Hedef fotoğraf"),
+    ]);
     const note = normalizeNote(formData.get("note"));
+    validatePlacementNote(note);
     const model = getImageModelName();
     const db = getDb();
+    const couponId = getCouponId(request);
+    await assertContentSafetyAllowed({
+      sessionId: session.id,
+      clientKey,
+      couponId,
+    });
     const networkDecision = await checkFreeTrialNetwork({ request, clientKey });
     const freeTrialRestriction =
       networkDecision.status === "blocked"
@@ -145,7 +168,7 @@ export async function POST(request: NextRequest) {
       category: categoryValue,
       note,
       model,
-      couponId: getCouponId(request),
+      couponId,
       allowFree: networkDecision.status === "allowed",
       freeTrialRestriction,
     });
@@ -283,6 +306,20 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof ImageValidationError) {
       return apiError(error.code, error.message, 400, noStoreHeaders());
+    }
+
+    if (error instanceof UnsafePlacementNoteError) {
+      return apiError("UNSAFE_INSTRUCTION", error.message, 422, noStoreHeaders());
+    }
+
+    if (error instanceof ContentSafetyRestrictedError) {
+      const response = apiError(
+        "CONTENT_SAFETY_RESTRICTED",
+        error.message,
+        403,
+        noStoreHeaders(),
+      );
+      return attachSessionCookie(response, session);
     }
 
     if (error instanceof MissingDatabaseConfigurationError) {

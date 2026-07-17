@@ -59,6 +59,12 @@ function terminalMessage(errorCode: string | null) {
   if (errorCode === "AI_TIMEOUT") {
     return "GPU sırası zamanında tamamlanamadı. Kullanım hakkınız iade edildi.";
   }
+  if (errorCode === "UNSAFE_CONTENT") {
+    return "Fotoğraflar içerik kurallarımıza uygun bulunmadı. İşlem durduruldu, sonuç kaydedilmedi ve kullanım hakkınız iade edildi.";
+  }
+  if (errorCode === "MODERATION_UNAVAILABLE") {
+    return "Güvenlik kontrolü şu anda tamamlanamadı. İşlem durduruldu, sonuç kaydedilmedi ve kullanım hakkınız iade edildi.";
+  }
   return "Görsel hazırlanamadı. Kullanım hakkınız iade edildi.";
 }
 

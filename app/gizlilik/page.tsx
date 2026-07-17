@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalShell kicker="Son güncelleme: 17 Temmuz 2026" title="Gizlilik">
+    <LegalShell kicker="Son güncelleme: 18 Temmuz 2026" title="Gizlilik">
       <p>
         Sokak Vitrini Dene, ürünleri üzerinizde veya yaşam alanınızda görmenizi sağlayan
         yapay zekâ destekli bir önizleme hizmetidir. Bu açıklama, uygulama içinde işlenen
@@ -43,6 +43,19 @@ export default function PrivacyPage() {
         tamamlanana veya geçici iş süresi dolana kadar sağlayıcının iş kuyruğunda
         bulunabilir. Oluşturulan sonuç görseli, geçmişinizde gösterilebilmesi için
         sınırlı süreyle saklanır.
+      </p>
+
+      <h2>İçerik güvenliği denetimi</h2>
+      <p>
+        Kaynak fotoğraflar ve oluşturulan sonuç; çıplaklık veya cinsel içerik, 18 yaş
+        altındaki kişiler, şiddet, silah, nefret veya aşırılık sembolleri ve siyasi içerik
+        riskini belirlemek amacıyla aynı RunPod GPU worker’ında otomatik sınıflandırmadan
+        geçirilir. Bu denetim için ayrı bir üçüncü taraf moderasyon servisine ikinci kez
+        gönderim yapılmaz. Sınıflandırma puanları uygulama veritabanında saklanmaz.
+        Reddedilen denemede yalnızca genel güvenlik hata kodu, anonim oturum veya
+        tuzlanmış bağlantı özeti ve işlem zamanı; tekrar eden kötüye kullanımı sınırlamak
+        için normal önizleme saklama süresi boyunca tutulabilir. Otomatik denetim hata
+        yapabilir ve tek başına içeriğin hukuka uygun olduğuna dair garanti oluşturmaz.
       </p>
 
       <h2>Saklama süresi ve silme</h2>
@@ -79,7 +92,8 @@ export default function PrivacyPage() {
       <h2>Fotoğraftaki kişiler</h2>
       <p>
         Başka bir kişiye ait fotoğrafı yalnızca o kişinin açık izniyle yüklemelisiniz.
-        Çocuklara ait fotoğraflar ebeveyn veya yasal temsilci izni olmadan yüklenmemelidir.
+        Bu hizmette 18 yaş altındaki kişilere ait fotoğraflar, ebeveyn veya yasal temsilci
+        izni bulunsa dahi kabul edilmez.
       </p>
     </LegalShell>
   );

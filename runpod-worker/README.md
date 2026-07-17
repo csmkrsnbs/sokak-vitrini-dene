@@ -3,6 +3,9 @@
 Bu worker, ürün ve hedef fotoğrafını Apache 2.0 lisanslı
 `black-forest-labs/FLUX.2-klein-4B` modeliyle birleştirir. Model takı, giyim,
 mobilya ve otomobil kategorilerinin tamamında aynı iki referanslı akışı kullanır.
+Kaynak görseller FLUX çalışmadan önce, üretilen sonuç da kullanıcıya dönmeden önce
+aynı worker içinde iki açık kaynaklı güvenlik modeliyle denetlenir. Ayrı moderasyon
+API çağrısı yapılmadığı için ikinci bir ağ gecikmesi oluşmaz.
 
 ## 1. Docker imajını oluşturma
 
@@ -41,14 +44,29 @@ FLUX_MODEL_ID=black-forest-labs/FLUX.2-klein-4B
 FLUX_MODEL_REVISION=0eeac0d3d5a1179e84510324ffcac805059a296f
 FLUX_INFERENCE_STEPS=4
 FLUX_CPU_OFFLOAD=false
+SAFETY_DEVICE=cuda
+SAFETY_NSFW_MODEL_ID=Falconsai/nsfw_image_detection
+SAFETY_NSFW_MODEL_REVISION=04367978d3474804ab1a00a9bd6548b741764069
+SAFETY_CLIP_MODEL_ID=openai/clip-vit-base-patch32
+SAFETY_CLIP_MODEL_REVISION=c7244be81152024ce0e99ac8d2e373a8953d9f9a
+SAFETY_NSFW_THRESHOLD=0.40
 ```
 
 16 GB GPU seçilirse `FLUX_CPU_OFFLOAD=true` kullanın. Bu seçenek maliyeti
 azaltabilir ancak işlemi yavaşlatır.
 
-İlk worker açılışında model network volume'a indirilir. Bu ilk istek normalden
-uzun sürebileceği için canlıya almadan önce RunPod panelinin **Requests**
-sekmesinden iki test görseliyle bir ısınma isteği tamamlayın.
+İlk worker açılışında FLUX ve güvenlik modelleri network volume'a indirilir. Bu
+ilk istek normalden uzun sürebileceği için canlıya almadan önce RunPod panelinin
+**Requests** sekmesinden iki uygun test görseliyle bir ısınma isteği tamamlayın.
+Modeller worker belleğinde önbelleğe alınır; sıcak worker'da iki kaynak görselin
+toplu güvenlik kontrolü ayrı bir sunucu turu oluşturmaz. Güvenlik modelleri
+yüklenemezse worker güvenli varsayım yapmaz ve üretimi durdurur.
+
+Varsayılan eşikler yetişkin içerik, 18 yaş altı kişi, siyasi içerik, grafik
+şiddet, silah ve nefret/aşırılık sembolleri için sıkı tutulur. Canlı eşikleri
+düşürmeden önce yalnızca kontrollü bir doğrulama setiyle yanlış kabul ve yanlış
+ret oranlarını ölçün. Worker güvenlik nedenini veya sınıflandırma puanlarını
+istemciye göndermez.
 
 ## 3. Uygulama bağlantısı
 
@@ -78,4 +96,6 @@ https://dene.sokakvitrini.com/api/health
 
 cevabında `databaseReachable` ve `aiConfigured` değerleri `true` olmalıdır.
 Ardından dört kategorinin her birini mobil cihazdan iki gerçek fotoğrafla test
-edin.
+edin. Uygun bir isteğin tamamlandığını, kurala aykırı kontrollü bir test
+örneğinin `UNSAFE_CONTENT` ile reddedildiğini ve reddedilen işlemde kullanım
+hakkının iade edildiğini ayrıca doğrulayın.

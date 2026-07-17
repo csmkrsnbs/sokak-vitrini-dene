@@ -33,6 +33,39 @@ export default function TermsPage() {
         <li>Hizmet sınırlarını aşmaya veya güvenlik önlemlerini devre dışı bırakmaya çalışmayın.</li>
       </ul>
 
+      <h2>Yasak içerik</h2>
+      <p>
+        Hizmet yalnızca takı, giyim, mobilya ve otomobil önizlemesi içindir. Aşağıdaki
+        içerikler kaynak fotoğraf, arka plan, yerleşim notu veya oluşturulacak sonuç
+        içinde kullanılamaz:
+      </p>
+      <ul>
+        <li>Çıplaklık, pornografi, cinsel veya fetiş içerik ve mahrem görüntüler.</li>
+        <li>18 yaş altındaki veya yaşı açıkça yetişkin görünmeyen kişilerin fotoğrafları.</li>
+        <li>Şiddet, kan, yaralanma, istismar, kendine zarar verme, silah veya patlayıcı.</li>
+        <li>Nefret sembolleri, terör veya aşırılık propagandası ve hedef gösterme.</li>
+        <li>
+          Siyasi kişiler, seçim veya parti çalışmaları, miting, protesto, propaganda ve
+          siyasi semboller.
+        </li>
+        <li>
+          İzin dışı yüz değiştirme, kimliğe bürünme, itibar zedeleme veya yasa dışı bir
+          amaç taşıyan içerikler.
+        </li>
+      </ul>
+
+      <h2>Otomatik güvenlik denetimi</h2>
+      <p>
+        Kaynak fotoğraflar görsel üretimden önce, oluşturulan sonuç ise kullanıcıya
+        sunulmadan önce aynı güvenli GPU ortamında otomatik olarak denetlenir. Denetim
+        tamamlanamazsa işlem güvenlik amacıyla durdurulur. Reddedilen işlemde görsel
+        sonucu saklanmaz ve kullanılan ücretsiz hak veya kupon kredisi iade edilir.
+        Otomatik sınıflandırma hata yapabilir; güvenli olduğu düşünülen bir içerik de
+        reddedilebilir. Güvenlik önlemlerini aşmaya çalışmak veya tekrar eden yasak içerik
+        denemeleri, tarayıcı, bağlantı ya da kupon için geçici erişim kısıtlamasına neden
+        olur.
+      </p>
+
       <h2>Ürün ve marka hakları</h2>
       <p>
         Fotoğrafladığınız ürünler marka, tasarım veya telif hakkıyla korunabilir. Üretilen

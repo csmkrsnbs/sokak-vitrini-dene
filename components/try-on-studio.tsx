@@ -21,6 +21,7 @@ import {
   WandSparkles,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import {
   ChangeEvent,
   DragEvent,
@@ -67,6 +68,7 @@ type Notice = {
 type LoadingStage = "submitting" | "queued" | "running";
 
 const loadingMessages = [
+  "Görseller güvenlik kontrolünden geçiriliyor…",
   "Ürün ayrıntıları inceleniyor…",
   "Açı ve perspektif eşleştiriliyor…",
   "Işık ve gölgeler uyarlanıyor…",
@@ -299,6 +301,7 @@ export function TryOnStudio() {
   const [target, setTarget] = useState<SelectedImage | null>(null);
   const [note, setNote] = useState("");
   const [consent, setConsent] = useState(false);
+  const [safetyConsent, setSafetyConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingStage, setLoadingStage] = useState<LoadingStage>("submitting");
   const [loadingIndex, setLoadingIndex] = useState(0);
@@ -530,6 +533,13 @@ export function TryOnStudio() {
       });
       return;
     }
+    if (!safetyConsent) {
+      setNotice({
+        kind: "error",
+        text: "Yasak içerik kurallarını onaylamalısınız.",
+      });
+      return;
+    }
 
     setLoadingIndex(0);
     setLoadingStage("submitting");
@@ -542,6 +552,7 @@ export function TryOnStudio() {
     formData.append("target", target.file);
     formData.append("note", note.trim());
     formData.append("consent", "true");
+    formData.append("safetyConsent", "true");
 
     try {
       const response = await fetch("/api/previews", {
@@ -660,6 +671,7 @@ export function TryOnStudio() {
     removeImage(target, setTarget);
     setNote("");
     setConsent(false);
+    setSafetyConsent(false);
     setResult(null);
     document.getElementById("dene")?.scrollIntoView({ behavior: "smooth" });
   };
@@ -788,10 +800,41 @@ export function TryOnStudio() {
                   </span>
                 </label>
 
+                <label className="consent-row consent-row-secondary">
+                  <input
+                    type="checkbox"
+                    checked={safetyConsent}
+                    onChange={(event) => setSafetyConsent(event.target.checked)}
+                    disabled={loading}
+                  />
+                  <span className="custom-check" aria-hidden="true">
+                    <Check size={14} />
+                  </span>
+                  <span>
+                    Fotoğraflarda 18 yaş altı kişi, çıplaklık veya cinsel içerik;
+                    şiddet, silah, nefret sembolü ya da siyasi kişi ve propaganda
+                    bulunmadığını onaylıyorum. {" "}
+                    <Link
+                      href="/kullanim-kosullari"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      Yasak içerik kuralları
+                    </Link>
+                  </span>
+                </label>
+
                 <button
                   className="button button-gold studio-submit"
                   type="submit"
-                  disabled={loading || !product || !target}
+                  disabled={
+                    loading ||
+                    !product ||
+                    !target ||
+                    !consent ||
+                    !safetyConsent
+                  }
                 >
                   {loading ? (
                     <>
