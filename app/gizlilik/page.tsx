@@ -27,12 +27,12 @@ export default function PrivacyPage() {
         ve kısa süreli önbellek tarihi tutulur.
       </p>
 
-      <h2>Paket ve ödeme verileri</h2>
+      <h2>Kupon verileri</h2>
       <p>
-        Standart Paket talebi oluşturduğunuzda ad soyad, e-posta adresi, size özel
-        havale açıklaması, talep durumu ve kupon kredi hareketleri saklanır. IBAN
-        ödemesi banka hareketiyle yönetici tarafından elle eşleştirilir; uygulama banka
-        parolanızı, kart bilginizi veya kripto cüzdan anahtarınızı istemez ve işlemez.
+        Bir kupon etkinleştirildiğinde kuponun açık metni yerine tek yönlü güvenli özeti,
+        toplam ve kalan önizleme hakkı, etkinleştirme zamanı, kampanya etiketi ve varsa
+        son kullanım tarihi saklanır. Bunun dışında kullanıcıdan finansal bilgi
+        istenmez ve işlenmez.
       </p>
 
       <h2>Fotoğrafların kullanımı</h2>
@@ -63,9 +63,8 @@ export default function PrivacyPage() {
         Sonuç görselleri varsayılan olarak 30 gün sonra otomatik olarak silinir. Uygulama
         yöneticisi bu süreyi daha kısa belirleyebilir. Geçmiş bölümündeki silme düğmesiyle
         kendi sonuç görselinizi daha önce de kalıcı olarak silebilirsiniz. Ücretsiz kullanım
-        hakkı kayıtları ile ödeme, kupon ve kredi kayıtları; kötüye kullanımı önlemek,
-        paketi işletmek ve mali yükümlülükleri yerine getirmek için sonuç görselinden daha
-        uzun süre saklanabilir.
+        hakkı kayıtları ile kupon ve hak hareketleri; kötüye kullanımı önlemek ve erişim
+        avantajını işletmek için sonuç görselinden daha uzun süre saklanabilir.
       </p>
 
       <h2>Erişim</h2>
@@ -78,15 +77,17 @@ export default function PrivacyPage() {
       <h2>Çerezler</h2>
       <p>
         Anonim oturum, etkin kupon ve yönetici oturumu için güvenli, HttpOnly çerezler
-        kullanılır. Kupon çerezi, kalan kredilerin bu tarayıcıda kullanılabilmesini sağlar.
+        kullanılır. Kupon çerezi, kalan önizleme haklarının bu tarayıcıda kullanılabilmesini sağlar.
       </p>
 
       <h2>Üçüncü taraf hizmet</h2>
       <p>
         Yapay zekâ işlemi, sunucuda yapılandırılmış görsel üretim sağlayıcısı üzerinden
-        gerçekleştirilir. Ücretsiz denemenin kötüye kullanımını önlemek için bağlantı riski
-        IPQualityScore üzerinden kontrol edilir. Bu sağlayıcıların kendi güvenlik ve veri
-        işleme koşulları geçerlidir. API anahtarları kullanıcıya veya tarayıcıya gönderilmez.
+        gerçekleştirilir. Ücretsiz denemenin kötüye kullanımını azaltmak için bağlantı riski
+        IPQualityScore üzerinden en iyi çabayla kontrol edilir. Sağlayıcı yanıt vermezse
+        oturum, bağlantı özeti ve günlük kapasite sınırları uygulanmaya devam eder. Bu
+        sağlayıcıların kendi güvenlik ve veri işleme koşulları geçerlidir. API anahtarları
+        kullanıcıya veya tarayıcıya gönderilmez.
       </p>
 
       <h2>Fotoğraftaki kişiler</h2>

@@ -23,8 +23,8 @@ export type FreeTrialNetworkDecision =
 const IPQS_TIMEOUT_MS = 7_000;
 
 function cacheHours() {
-  const parsed = Number.parseInt(process.env.IP_RISK_CACHE_HOURS || "24", 10);
-  return Number.isFinite(parsed) && parsed >= 1 ? Math.min(parsed, 168) : 24;
+  const parsed = Number.parseInt(process.env.IP_RISK_CACHE_HOURS || "168", 10);
+  return Number.isFinite(parsed) && parsed >= 1 ? Math.min(parsed, 168) : 168;
 }
 
 function riskType(payload: IpqsResponse) {

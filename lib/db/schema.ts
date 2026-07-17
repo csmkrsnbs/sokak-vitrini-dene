@@ -81,26 +81,17 @@ export const networkRiskChecks = pgTable(
   (table) => [index("network_risk_checks_expires_idx").on(table.expiresAt)],
 );
 
-export const paymentRequests = pgTable(
-  "payment_requests",
+export const dailyGenerationEvents = pgTable(
+  "daily_generation_events",
   {
-    id: uuid("id").primaryKey(),
-    sessionId: varchar("session_id", { length: 64 }).notNull(),
-    clientKey: varchar("client_key", { length: 64 }).notNull(),
-    customerName: varchar("customer_name", { length: 120 }).notNull(),
-    customerEmail: varchar("customer_email", { length: 254 }).notNull(),
-    referenceCode: varchar("reference_code", { length: 24 }).notNull(),
-    packageCode: varchar("package_code", { length: 32 }).notNull(),
-    amountKurus: integer("amount_kurus").notNull(),
-    credits: integer("credits").notNull(),
-    status: varchar("status", { length: 24 }).notNull().default("pending"),
+    previewId: uuid("preview_id").primaryKey(),
+    dayKey: varchar("day_key", { length: 10 }).notNull(),
+    slot: integer("slot").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   },
   (table) => [
-    uniqueIndex("payment_requests_reference_uidx").on(table.referenceCode),
-    index("payment_requests_session_created_idx").on(table.sessionId, table.createdAt),
-    index("payment_requests_status_created_idx").on(table.status, table.createdAt),
+    uniqueIndex("daily_generation_day_slot_uidx").on(table.dayKey, table.slot),
+    index("daily_generation_created_idx").on(table.createdAt),
   ],
 );
 
@@ -108,17 +99,18 @@ export const couponCodes = pgTable(
   "coupon_codes",
   {
     id: uuid("id").primaryKey(),
-    paymentRequestId: uuid("payment_request_id").notNull(),
+    label: varchar("label", { length: 120 }).notNull().default("Kupon"),
     codeHash: varchar("code_hash", { length: 64 }).notNull(),
     totalCredits: integer("total_credits").notNull(),
     remainingCredits: integer("remaining_credits").notNull(),
     status: varchar("status", { length: 24 }).notNull().default("active"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     activatedAt: timestamp("activated_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
   },
   (table) => [
-    uniqueIndex("coupon_codes_payment_request_uidx").on(table.paymentRequestId),
     uniqueIndex("coupon_codes_hash_uidx").on(table.codeHash),
     index("coupon_codes_status_idx").on(table.status),
+    index("coupon_codes_expires_idx").on(table.expiresAt),
   ],
 );

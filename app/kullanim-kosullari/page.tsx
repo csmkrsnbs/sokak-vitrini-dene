@@ -80,31 +80,24 @@ export default function TermsPage() {
         cihaz bazlı kontroller uygulanabilir.
       </p>
 
-      <h2>Ücretsiz hak ve Standart Paket</h2>
+      <h2>Ücretsiz hak ve kupon</h2>
       <p>
-        Her kullanıcıya toplam 2 ücretsiz görsel üretim hakkı verilir. Ücretsiz haklar
-        tamamlandıktan sonra Standart Paket, tek seferlik 100 TL ödeme karşılığında 10
-        görsel kredisi sağlar. Bu bir üyelik değildir; otomatik yenileme veya düzenli
-        tahsilat yapılmaz. Kullanılmayan paket kredilerinin süre sonu yoktur. Kötüye
-        kullanımı önlemek için VPN, proxy veya Tor bağlantılarında ücretsiz deneme
-        kullanılamaz; geçerli ücretli kupon kredileri kullanılmaya devam edebilir.
+        Her kullanıcıya aylık yenilenmeyen toplam 2 ücretsiz görsel üretim hakkı verilir.
+        Dönemsel kampanya, tanıtım veya iş birliklerinde ek önizleme hakkı sağlayan
+        kuponlar sunulabilir. Kuponların nakit karşılığı yoktur ve uygulama içinde satışa
+        sunulmaz. Bir kuponun hak adedi ve varsa son kullanım tarihi kupon oluşturulurken
+        belirlenir. Başarılı her önizleme bir hak kullanır; tamamlanamayan işlemde ayrılan
+        hak otomatik olarak geri verilir.
       </p>
 
-      <h2>IBAN ödemesi ve kupon</h2>
+      <h2>Adil kullanım ve günlük kapasite</h2>
       <p>
-        Ödeme talebinde gösterilen tutar, IBAN ve havale açıklaması eksiksiz kullanılmalıdır.
-        Ödeme banka hareketinde doğrulandıktan sonra yönetici talebi onaylar ve 10 kredilik
-        kupon açılır. Yanlış tutar veya açıklama, onayı geciktirebilir. Kupon kodunu güvenli
-        saklamak kullanıcının sorumluluğundadır; kredi bitene kadar aynı kod yeniden
-        etkinleştirilebilir.
-      </p>
-
-      <h2>İptal ve iade</h2>
-      <p>
-        Hatalı veya mükerrer ödeme durumunda ödeme talebindeki bilgilerle destek kaydı
-        oluşturulmalıdır. Kullanılmaya başlanmış dijital kredilerle ilgili değerlendirme,
-        kullanım durumu ve yürürlükteki zorunlu tüketici hakları dikkate alınarak yapılır.
-        Yasal haklarınız saklıdır.
+        Kötüye kullanımı azaltmak için anonim oturum, bağlantı özeti, VPN/proxy/Tor risk
+        kontrolü ve günlük genel üretim kapasitesi uygulanabilir. Risk sağlayıcısı geçici
+        olarak yanıt vermezse diğer sınırlar yürürlükte kalır; açıkça VPN, proxy veya Tor
+        olarak belirlenen bağlantılarda ücretsiz deneme engellenebilir. Günlük kapasite
+        dolduğunda yeni işlem başlatılmaz ve kullanıcının hakkı düşürülmez. Kupon kodunu
+        güvenli saklamak kullanıcının sorumluluğundadır.
       </p>
 
       <h2>Silme ve erişim</h2>

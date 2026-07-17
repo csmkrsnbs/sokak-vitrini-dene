@@ -55,38 +55,20 @@ export type AccessState = {
     total: number;
     remaining: number;
   } | null;
-  package: {
-    code: "standard";
-    title: string;
-    credits: number;
-    amountKurus: number;
-    priceLabel: string;
-  };
-  paymentConfigured: boolean;
 };
 
-export type PaymentRequestStatus = "pending" | "approved" | "rejected";
+export type AdminCouponStatus = "active" | "exhausted" | "expired" | "revoked";
 
-export type PaymentRequestView = {
+export type AdminCouponView = {
   id: string;
-  customerName: string;
-  customerEmail: string;
-  referenceCode: string;
-  status: PaymentRequestStatus;
-  amountKurus: number;
-  priceLabel: string;
-  credits: number;
+  label: string;
+  status: AdminCouponStatus;
+  totalCredits: number;
+  remainingCredits: number;
   createdAt: string;
-  reviewedAt: string | null;
-  couponCode: string | null;
-  bank: {
-    name: string;
-    accountHolder: string;
-    iban: string;
-  };
+  activatedAt: string | null;
+  expiresAt: string | null;
 };
-
-export type AdminPaymentRequestView = Omit<PaymentRequestView, "couponCode" | "bank">;
 
 export type ApiErrorBody = {
   error: {

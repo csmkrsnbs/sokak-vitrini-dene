@@ -312,7 +312,7 @@ export function TryOnStudio() {
   const [historyAvailable, setHistoryAvailable] = useState(true);
   const [notice, setNotice] = useState<Notice>(null);
   const [access, setAccess] = useState<AccessState | null>(null);
-  const [packageOpen, setPackageOpen] = useState(false);
+  const [couponOpen, setCouponOpen] = useState(false);
   const productRef = useRef<SelectedImage | null>(null);
   const targetRef = useRef<SelectedImage | null>(null);
   const config = CATEGORY_CONFIG[category];
@@ -592,7 +592,7 @@ export function TryOnStudio() {
         (error.code === "CREDITS_REQUIRED" ||
           error.code === "VPN_FREE_TRIAL_BLOCKED")
       ) {
-        setPackageOpen(true);
+        setCouponOpen(true);
       }
       setNotice({
         kind: "error",
@@ -688,8 +688,8 @@ export function TryOnStudio() {
 
           <CreditAccess
             access={access}
-            open={packageOpen}
-            onOpenChange={setPackageOpen}
+            open={couponOpen}
+            onOpenChange={setCouponOpen}
             onAccessChange={setAccess}
           />
 

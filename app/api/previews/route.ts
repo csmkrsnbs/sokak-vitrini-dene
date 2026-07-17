@@ -6,8 +6,8 @@ import { getDb, MissingDatabaseConfigurationError } from "@/lib/db";
 import { previewRequests } from "@/lib/db/schema";
 import {
   getAccessState,
+  DailyGenerationCapacityError,
   PreviewCreditsRequiredError,
-  PreviewVpnCheckUnavailableError,
   PreviewVpnRestrictedError,
   type PreviewAccessReservation,
   releasePreviewAccess,
@@ -156,9 +156,7 @@ export async function POST(request: NextRequest) {
     const freeTrialRestriction =
       networkDecision.status === "blocked"
         ? "anonymizer"
-        : networkDecision.status === "unavailable"
-          ? "verification_unavailable"
-          : null;
+        : null;
 
     requestId = crypto.randomUUID();
     reservation = await reservePreviewAccess({
@@ -169,7 +167,7 @@ export async function POST(request: NextRequest) {
       note,
       model,
       couponId,
-      allowFree: networkDecision.status === "allowed",
+      allowFree: networkDecision.status !== "blocked",
       freeTrialRestriction,
     });
 
@@ -294,9 +292,9 @@ export async function POST(request: NextRequest) {
       return attachSessionCookie(response, session);
     }
 
-    if (error instanceof PreviewVpnCheckUnavailableError) {
+    if (error instanceof DailyGenerationCapacityError) {
       const response = apiError(
-        "VPN_CHECK_UNAVAILABLE",
+        "DAILY_CAPACITY_REACHED",
         error.message,
         503,
         noStoreHeaders(),

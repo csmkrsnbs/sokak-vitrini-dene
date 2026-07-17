@@ -1,14 +1,10 @@
-import { and, count, eq, or, sql } from "drizzle-orm";
+import { and, count, eq, gt, isNull, or, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
 import { getDb } from "@/lib/db";
 import { couponCodes, freeUsageEvents } from "@/lib/db/schema";
 import type { AccessState, PreviewCategory } from "@/lib/types";
-import {
-  FREE_PREVIEW_LIMIT,
-  isPaymentConfigured,
-  STANDARD_PACKAGE,
-} from "@/lib/server/billing";
+import { dailyGenerationLimit, FREE_PREVIEW_LIMIT } from "@/lib/server/usage-limits";
 import { getCouponId } from "@/lib/server/coupons";
 
 export type PreviewAccessReservation =
@@ -24,7 +20,7 @@ type PreviewReservationInput = {
   model: string;
   couponId: string | null;
   allowFree: boolean;
-  freeTrialRestriction: "anonymizer" | "verification_unavailable" | null;
+  freeTrialRestriction: "anonymizer" | null;
 };
 
 export class PreviewCreditsRequiredError extends Error {
@@ -37,18 +33,16 @@ export class PreviewCreditsRequiredError extends Error {
 export class PreviewVpnRestrictedError extends Error {
   constructor() {
     super(
-      "VPN, proxy veya Tor bağlantısıyla ücretsiz deneme kullanılamaz. Bağlantıyı kapatın veya ücretli kuponunuzu etkinleştirin.",
+      "VPN, proxy veya Tor bağlantısıyla ücretsiz deneme kullanılamaz. Bağlantıyı kapatın veya kuponunuzu etkinleştirin.",
     );
     this.name = "PreviewVpnRestrictedError";
   }
 }
 
-export class PreviewVpnCheckUnavailableError extends Error {
+export class DailyGenerationCapacityError extends Error {
   constructor() {
-    super(
-      "Ücretsiz deneme için güvenli bağlantı kontrolü şu anda yapılamıyor. Biraz sonra yeniden deneyin veya ücretli kuponunuzu etkinleştirin.",
-    );
-    this.name = "PreviewVpnCheckUnavailableError";
+    super("Bugünkü görsel üretim kapasitesi doldu. Kullanım hakkınız düşürülmedi; lütfen daha sonra yeniden deneyin.");
+    this.name = "DailyGenerationCapacityError";
   }
 }
 
@@ -129,6 +123,7 @@ async function reserveCouponPreview(input: PreviewReservationInput, couponId: st
       WHERE id = ${couponId}::uuid
         AND status = 'active'
         AND remaining_credits > 0
+        AND (expires_at IS NULL OR expires_at > NOW())
       RETURNING id
     )
     INSERT INTO preview_requests (
@@ -151,26 +146,77 @@ async function reserveCouponPreview(input: PreviewReservationInput, couponId: st
   return resultRows(result).length > 0;
 }
 
+function istanbulDayKey() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Istanbul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+async function reserveDailyGeneration(previewId: string) {
+  const db = getDb();
+  const limit = dailyGenerationLimit();
+  const dayKey = istanbulDayKey();
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const result = await db.execute(sql`
+      INSERT INTO daily_generation_events (preview_id, day_key, slot)
+      SELECT ${previewId}::uuid, ${dayKey}, slots.slot
+      FROM generate_series(1, ${limit}) AS slots(slot)
+      WHERE NOT EXISTS (
+        SELECT 1 FROM daily_generation_events
+        WHERE day_key = ${dayKey} AND daily_generation_events.slot = slots.slot
+      )
+      ORDER BY slots.slot
+      LIMIT 1
+      ON CONFLICT DO NOTHING
+      RETURNING preview_id
+    `);
+
+    if (resultRows(result).length > 0) return true;
+
+    const existing = await db.execute(sql`
+      SELECT 1 FROM daily_generation_events
+      WHERE preview_id = ${previewId}::uuid
+      LIMIT 1
+    `);
+    if (resultRows(existing).length > 0) return true;
+  }
+
+  return false;
+}
+
 export async function reservePreviewAccess(
   input: PreviewReservationInput,
 ): Promise<PreviewAccessReservation> {
+  let reservation: PreviewAccessReservation | null = null;
+
   if (input.allowFree && (await reserveFreePreview(input))) {
-    return { source: "free", couponId: null };
+    reservation = { source: "free", couponId: null };
   }
 
-  if (input.couponId && (await reserveCouponPreview(input, input.couponId))) {
-    return { source: "coupon", couponId: input.couponId };
+  if (!reservation && input.couponId && (await reserveCouponPreview(input, input.couponId))) {
+    reservation = { source: "coupon", couponId: input.couponId };
   }
 
-  if (input.freeTrialRestriction === "anonymizer") {
+  if (!reservation && input.freeTrialRestriction === "anonymizer") {
     throw new PreviewVpnRestrictedError();
   }
 
-  if (input.freeTrialRestriction === "verification_unavailable") {
-    throw new PreviewVpnCheckUnavailableError();
+  if (!reservation) {
+    throw new PreviewCreditsRequiredError();
   }
 
-  throw new PreviewCreditsRequiredError();
+  if (!(await reserveDailyGeneration(input.id))) {
+    await releasePreviewAccess(input.id, reservation, "DAILY_CAPACITY_REACHED");
+    throw new DailyGenerationCapacityError();
+  }
+
+  return reservation;
 }
 
 export async function releasePreviewAccess(
@@ -214,7 +260,9 @@ export async function releasePreviewAccess(
       RETURNING coupon_id
     )
     UPDATE coupon_codes
-    SET remaining_credits = remaining_credits + 1, status = 'active'
+    SET
+      remaining_credits = remaining_credits + 1,
+      status = CASE WHEN coupon_codes.status = 'exhausted' THEN 'active' ELSE coupon_codes.status END
     FROM refundable
     WHERE coupon_codes.id = refundable.coupon_id
   `);
@@ -254,7 +302,13 @@ export async function getAccessState({
         remaining: couponCodes.remainingCredits,
       })
       .from(couponCodes)
-      .where(and(eq(couponCodes.id, couponId), or(eq(couponCodes.status, "active"), eq(couponCodes.status, "exhausted"))))
+      .where(
+        and(
+          eq(couponCodes.id, couponId),
+          or(eq(couponCodes.status, "active"), eq(couponCodes.status, "exhausted")),
+          or(isNull(couponCodes.expiresAt), gt(couponCodes.expiresAt, new Date())),
+        ),
+      )
       .limit(1);
 
     if (row) {
@@ -273,7 +327,5 @@ export async function getAccessState({
       remaining: Math.max(0, FREE_PREVIEW_LIMIT - used),
     },
     coupon,
-    package: STANDARD_PACKAGE,
-    paymentConfigured: isPaymentConfigured(),
   };
 }

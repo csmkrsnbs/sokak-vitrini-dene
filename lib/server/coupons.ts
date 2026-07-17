@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -33,13 +33,9 @@ export function normalizeCouponCode(value: string) {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
-export function generateCouponCode(paymentRequestId: string) {
-  const value = createHmac("sha256", couponSecret())
-    .update(`coupon:${paymentRequestId}`)
-    .digest("hex")
-    .slice(0, 16)
-    .toUpperCase();
-  return `SV-${value.slice(0, 4)}-${value.slice(4, 8)}-${value.slice(8, 12)}-${value.slice(12)}`;
+export function generateCouponCode() {
+  const value = randomBytes(10).toString("hex").toUpperCase();
+  return `SV-${value.match(/.{1,4}/g)?.join("-") ?? value}`;
 }
 
 export function hashCouponCode(code: string) {

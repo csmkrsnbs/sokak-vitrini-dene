@@ -2,7 +2,7 @@ import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
 import { NextRequest, NextResponse } from "next/server";
 
-export const ADMIN_COOKIE = "sv_payment_admin";
+export const ADMIN_COOKIE = "sv_coupon_admin";
 const ADMIN_SESSION_SECONDS = 60 * 60 * 12;
 
 export class MissingAdminConfigurationError extends Error {

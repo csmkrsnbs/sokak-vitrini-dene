@@ -2,7 +2,11 @@ import { and, eq, lt } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "@/lib/db";
-import { networkRiskChecks, previewRequests } from "@/lib/db/schema";
+import {
+  dailyGenerationEvents,
+  networkRiskChecks,
+  previewRequests,
+} from "@/lib/db/schema";
 import {
   releasePreviewAccess,
   type PreviewAccessReservation,
@@ -92,12 +96,23 @@ export async function GET(request: NextRequest) {
       .where(lt(networkRiskChecks.expiresAt, new Date()))
       .returning({ clientKey: networkRiskChecks.clientKey });
 
+    const dailyCapacityDeleted = await db
+      .delete(dailyGenerationEvents)
+      .where(
+        lt(
+          dailyGenerationEvents.createdAt,
+          new Date(now - 3 * 24 * 60 * 60 * 1000),
+        ),
+      )
+      .returning({ previewId: dailyGenerationEvents.previewId });
+
     return NextResponse.json(
       {
         ok: true,
         released,
         deleted: deleted.length,
         riskChecksDeleted: riskChecksDeleted.length,
+        dailyCapacityDeleted: dailyCapacityDeleted.length,
         retentionDays: days,
       },
       { headers: noStoreHeaders() },

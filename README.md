@@ -3,57 +3,56 @@
 **Sokakta gör. Kendinde dene.**
 
 Vitrinde görülen takı, kıyafet, mobilya veya otomobili iki referans fotoğrafla
-yapay zekâ destekli olarak kişinin üzerinde ya da hedef mekânda gösteren canlıya
-hazır Next.js uygulamasıdır.
+kişinin üzerinde ya da hedef mekânda gösteren Next.js uygulamasıdır.
 
 ## Özellikler
 
-- Takı, giyim, mobilya ve otomobil için kategoriye özel AI komutları
-- Mobil kameradan çekim veya galeriden fotoğraf yükleme
-- Tarayıcıda otomatik boyutlandırma ve sıkıştırma
-- RunPod Serverless üzerinde açık kaynaklı FLUX.2 ile iki referans fotoğraftan önizleme
-- Aynı GPU worker'ında girdi ve sonuç için fail-closed yetişkin, çocuk, siyasi, şiddet,
+- Takı, giyim, mobilya ve otomobil için kategoriye özel yerleştirme
+- Mobil kameradan veya galeriden fotoğraf seçme, boyutlandırma ve sıkıştırma
+- RunPod Serverless üzerinde açık kaynaklı FLUX.2 ile asenkron görsel üretimi
+- Aynı GPU worker'ında kaynak ve sonuç için yetişkin, çocuk, siyasi, şiddet,
   silah ve nefret/aşırılık içeriği denetimi
-- GPU kuyruğunu Vercel isteğinden ayıran asenkron iş ve durum takibi
-- Neon PostgreSQL ile anonim oturum, sonuç geçmişi ve kullanım sınırı
-- Toplam 2 ücretsiz üretim; ardından IBAN ile 10 görsel / 100 TL Standart Paket
-- Ücretsiz denemede VPN, proxy ve Tor engeli; ücretli kuponlarda kesintisiz kullanım
-- Manuel ödeme onayı, güvenli kupon ve atomik kredi düşümü
+- Neon PostgreSQL ile anonim oturum, sonuç geçmişi ve atomik kullanım hakkı
+- Aylık yenilenmeyen toplam 2 ücretsiz önizleme hakkı
+- Kampanya, tanıtım ve iş birlikleri için yönetici tarafından oluşturulan kuponlar
+- IPQualityScore çalıştığında VPN/proxy/Tor engeli; servis kesintisinde güvenli
+  yerel sınırlarla devam eden ücretsiz deneme
+- İstanbul saatine göre yapılandırılabilir günlük genel üretim kapasitesi
+- Başarısız üretimde ücretsiz veya kupon hakkının otomatik iadesi
 - Kaynak fotoğrafları veritabanında saklamayan gizlilik odaklı akış
-- Sonuç indirme, cihaz paylaşım menüsü ve kalıcı silme
-- Sonuçları belirlenen süreden sonra temizleyen günlük görev
-- Mobil, tablet ve masaüstü için responsive siyah–altın–beyaz tasarım
-- Sağlık kontrolü, güvenlik başlıkları, kullanım koşulları ve gizlilik sayfası
+- Sonuç indirme, cihaz paylaşım menüsü, geçmiş ve kalıcı silme
+
+Uygulama içinde fiyat, paket, IBAN veya ödeme akışı bulunmaz. Kuponlar yalnızca
+önceden tanımlanan ek önizleme hakkını temsil eder.
 
 ## Teknoloji
 
-- Next.js 16 App Router
-- React 19 + TypeScript
-- Neon Serverless PostgreSQL
-- Drizzle ORM ve SQL migration
+- Next.js 16 App Router, React 19 ve TypeScript
+- Neon Serverless PostgreSQL ve Drizzle ORM
 - Apache 2.0 lisanslı FLUX.2 klein 4B
 - RunPod Serverless GPU worker
-- Vercel dağıtım ve günlük cron yapılandırması
+- Vercel dağıtım ve günlük cron görevi
 
 ## Yerelde çalıştırma
 
-### 1. Gereksinimler
-
-- Node.js 20.9 veya üzeri
-- Neon PostgreSQL projesi
-- RunPod hesabı, API anahtarı ve yayınlanmış FLUX.2 worker endpoint'i
-- IPQualityScore hesabı ve ücretsiz Proxy & VPN Detection API anahtarı
-
-### 2. Bağımlılıkları yükleyin
+Gereksinimler: Node.js 20.9+, Neon PostgreSQL ve yayınlanmış RunPod endpoint'i.
 
 ```bash
 npm install
+cp .env.example .env.local
+npm run db:migrate
+npm run dev
 ```
 
-### 3. Ortam dosyasını hazırlayın
+Tarayıcı adresi: `http://localhost:3000`
 
-`.env.example` dosyasını `.env.local` adıyla kopyalayın ve gerçek değerleri
-girin:
+En az 32 karakterlik gizli değerleri şu komutla üretebilirsiniz:
+
+```bash
+openssl rand -hex 32
+```
+
+## Ortam değişkenleri
 
 ```env
 DATABASE_URL="postgresql://...-pooler.../neondb?sslmode=require&channel_binding=require"
@@ -66,67 +65,31 @@ FLUX_IMAGE_MODEL="black-forest-labs/FLUX.2-klein-4B"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 IMAGE_RETENTION_DAYS="30"
 IPQS_API_KEY="ipqs-private-key"
-IP_RISK_CACHE_HOURS="24"
+IP_RISK_CACHE_HOURS="168"
+DAILY_GENERATION_LIMIT="20"
 RATE_LIMIT_SALT="en-az-32-karakter-rastgele-deger"
 CRON_SECRET="farkli-en-az-32-karakter-rastgele-deger"
-PAYMENT_BANK_NAME="Banka adı"
-PAYMENT_ACCOUNT_HOLDER="Hesap sahibi"
-PAYMENT_IBAN="TR000000000000000000000000"
-ADMIN_ACCESS_KEY="en-az-32-karakter-gizli-yonetim-anahtari"
+ADMIN_ACCESS_KEY="farkli-en-az-32-karakter-yonetim-anahtari"
 COUPON_SIGNING_SECRET="farkli-en-az-32-karakter-kupon-anahtari"
 ```
 
-Rastgele değer üretmek için:
+`IPQS_API_KEY` isteğe bağlıdır. Tanımlı ve erişilebilir olduğunda tespit edilen
+VPN, proxy ve Tor bağlantıları ücretsiz denemeden yararlanamaz. Sağlayıcı kota,
+zaman aşımı veya bağlantı hatası verirse site kapanmaz; toplam ücretsiz hak,
+anonim oturum/bağlantı özeti ve günlük genel kapasite uygulanmaya devam eder.
 
-```bash
-openssl rand -hex 32
-```
-
-### 4. Neon tablolarını oluşturun
-
-```bash
-npm run db:migrate
-```
-
-### 5. Uygulamayı açın
-
-```bash
-npm run dev
-```
-
-Tarayıcı adresi: `http://localhost:3000`
+`DAILY_GENERATION_LIMIT` tüm ücretsiz ve kuponlu isteklerin günlük toplam
+kapasitesidir. Sınır dolduğunda RunPod işi oluşturulmaz ve kullanıcı hakkı düşmez.
 
 ## Vercel üzerinden canlıya alma
 
-1. Projeyi GitHub deposuna gönderin.
-2. `runpod-worker/README.md` adımlarını uygulayarak GPU worker imajını ve RunPod
-   Serverless endpoint'ini hazırlayın.
-3. Vercel'de **New Project** ile GitHub deposunu içe aktarın.
-4. Neon panelinde **Connect** düğmesinden **pooled** bağlantı adresini alın.
-5. Vercel projesinde **Settings → Environment Variables** bölümüne aşağıdaki
-   değerleri ekleyin:
-   - `DATABASE_URL`
-   - `RUNPOD_API_KEY`
-   - `RUNPOD_ENDPOINT_ID`
-   - `RUNPOD_TIMEOUT_MS=240000`
-   - `RUNPOD_JOB_TTL_MS=900000` (isteğe bağlı; varsayılan değer aynıdır)
-   - `PREVIEW_JOB_MAX_AGE_MS=1200000` (isteğe bağlı; varsayılan değer aynıdır)
-   - `FLUX_IMAGE_MODEL=black-forest-labs/FLUX.2-klein-4B`
-   - `NEXT_PUBLIC_APP_URL=https://alan-adiniz.com`
-   - `IMAGE_RETENTION_DAYS=30`
-   - `IPQS_API_KEY` (IPQualityScore hesabındaki Private Key)
-   - `IP_RISK_CACHE_HOURS=24` (isteğe bağlı; API kotasını koruyan önbellek)
-   - `RATE_LIMIT_SALT`
-   - `CRON_SECRET`
-   - `PAYMENT_BANK_NAME`
-   - `PAYMENT_ACCOUNT_HOLDER`
-   - `PAYMENT_IBAN`
-   - `ADMIN_ACCESS_KEY`
-   - `COUPON_SIGNING_SECRET`
-6. Deploy işlemini başlatın. `vercel-build` komutu migration'ı uygular ve
-   üretim derlemesini oluşturur.
-7. Yayın bittikten sonra `https://alan-adiniz.com/api/health` adresini açın.
-   Aşağıdaki cevap canlı ortamın hazır olduğunu gösterir:
+1. Depoyu GitHub'a gönderin ve Vercel'e aktarın.
+2. Neon'un pooled bağlantısını `DATABASE_URL` olarak ekleyin.
+3. `.env.example` içindeki Production değişkenlerini Vercel'e ekleyin.
+4. Build komutunu `npm run vercel-build` olarak bırakın; migration otomatik uygulanır.
+5. Deploy sonrasında `/api/health` adresinin `ready` döndürdüğünü kontrol edin.
+
+Hazır sağlık yanıtındaki temel alanlar:
 
 ```json
 {
@@ -136,106 +99,62 @@ Tarayıcı adresi: `http://localhost:3000`
     "databaseReachable": true,
     "schemaReady": true,
     "aiConfigured": true,
-    "paymentConfigured": true,
-    "vpnDetectionConfigured": true,
-    "securityConfigured": true
+    "couponConfigured": true,
+    "securityConfigured": true,
+    "aiProvider": "runpod"
   }
 }
 ```
 
+## Kupon yönetimi
+
+- Yönetici `/yonetim/kuponlar` adresinde `ADMIN_ACCESS_KEY` ile giriş yapar.
+- Kampanya adı, 1–100 arası önizleme hakkı ve isteğe bağlı son kullanım tarihi seçilir.
+- Açık kupon kodu yalnızca oluşturulduğu anda gösterilir; veritabanında HMAC özeti tutulur.
+- Her başarılı üretim bir hak düşürür; başarısız veya güvenlik nedeniyle durdurulan
+  üretimde hak otomatik iade edilir.
+- Etkin kupon yönetim ekranından kullanıma kapatılabilir.
+- Önceki sürümden kalan etkin kuponların kod özetleri ve kalan hakları korunur.
+
+## Veri davranışı
+
+- Ürün ve hedef fotoğrafları Neon'a yazılmaz; yalnızca RunPod iş kuyruğunda geçici işlenir.
+- Sonuç görseli tarayıcıya özel geçmiş için sınırlı süre saklanır.
+- Ham IP veritabanında tutulmaz; kötüye kullanım kontrolü için tuzlanmış SHA-256 özeti kullanılır.
+- IPQualityScore sonucu varsayılan 168 saat önbelleklenir.
+- `/api/cron/cleanup`, süre aşımına uğrayan işleri iade eder ve eski sonuçları temizler.
+
 ## Komutlar
 
 ```bash
-npm run dev          # geliştirme sunucusu
-npm run lint         # kod kalite kontrolü
-npm run typecheck    # TypeScript kontrolü
-npm run build        # üretim derlemesi
-npm run check        # lint + typecheck + build
-npm run db:generate  # şemadan yeni migration oluşturur
-npm run db:migrate   # bekleyen migration'ları uygular
-npm run db:push      # şemayı geliştirme veritabanına doğrudan iter
+npm run dev
+npm run lint
+npm run typecheck
+npm run build
+npm run check
+npm run db:generate
+npm run db:migrate
 ```
-
-## Veri ve gizlilik davranışı
-
-- Ürün ve hedef fotoğrafları Neon'a yazılmaz. Önizleme tamamlanana veya iş ömrü
-  dolana kadar RunPod'un geçici iş kuyruğunda işlenir.
-- AI tarafından üretilen tek sonuç görseli, tarayıcıya özel geçmiş için Neon'da
-  saklanır.
-- Sonuçlar herkese açık değildir; anonim ve `HttpOnly` oturum çerezine bağlıdır.
-- Kullanıcı sonucu istediği anda silebilir.
-- `/api/cron/cleanup` görevi, `IMAGE_RETENTION_DAYS` süresini aşan kayıtları ve
-  süresi dolan ağ kontrolü önbelleğini siler.
-- IP adresi uygulama veritabanında saklanmaz. Ücretsiz hakların kötüye kullanımını
-  azaltmak için IP + gizli salt değerinin SHA-256 özeti kullanılır. Ham IP yalnızca
-  VPN/proxy/Tor kontrolü sırasında IPQualityScore'a anlık iletilir; sonuç 24 saat
-  tuzlanmış ağ özetiyle önbelleklenir.
-- Ücretsiz hak, ödeme talebi, kupon ve kredi kayıtları sonuç görselinden bağımsız tutulur.
-
-## Paket ve ödeme yönetimi
-
-- İlk 2 başarılı görsel üretimi ücretsizdir.
-- VPN, proxy veya Tor algılanırsa ücretsiz hak ayrılmaz ve RunPod işi başlatılmaz.
-  Geçerli ücretli kuponu olan kullanıcı aynı bağlantıda kupon kredisiyle devam edebilir.
-- Standart Paket tek seferlik 100 TL karşılığında 10 görsel kredisi verir.
-- Kullanıcı paket penceresinden ödeme talebi oluşturur ve kendisine verilen havale
-  açıklamasını IBAN transferine ekler.
-- Yönetici `/yonetim/odemeler` adresinde `ADMIN_ACCESS_KEY` ile giriş yapar, banka
-  hareketini kontrol eder ve talebi onaylar.
-- Onaylanan kuponun süre sonu yoktur; her başarılı üretimde 1 kredi atomik olarak düşer.
-- Başarısız AI üretiminde ücretsiz hak veya kupon kredisi otomatik geri verilir.
-- Güvenlik denetiminden geçmeyen veya denetimi tamamlanamayan üretimde görsel
-  saklanmaz ve ayrılan hak otomatik geri verilir.
-- Son 24 saatte 3 güvenlik reddi alan anonim oturum, bağlantı veya kupon 24 saat
-  süreyle yeni görsel üretimi başlatamaz.
-- Yönetim ekranında yalnızca reddedilmiş ödeme talepleri kalıcı olarak silinebilir.
-
-> `0004_clean_runtime_data` migration'ı mevcut önizleme, ücretsiz kullanım, kupon,
-> ödeme talebi ve ağ kontrolü kayıtlarını temiz kurulum için bir defaya mahsus siler.
-> Migration uygulandıktan sonra sonraki deploy'larda yeniden çalışmaz.
 
 ## Önemli dosyalar
 
 ```text
-app/api/previews/            Önizleme, geçmiş, görsel ve silme API'leri
-app/api/cron/cleanup/        Süreli kayıt temizliği
-app/api/health/              Canlı ortam sağlık kontrolü
-app/api/payments/            IBAN ödeme talebi API'si
-app/api/coupons/             Kupon etkinleştirme API'si
-app/api/admin/               Yönetici girişi ve ödeme onayı API'leri
-app/yonetim/odemeler/        Gizli ödeme yönetim ekranı
-components/try-on-studio.tsx Kamera, yükleme, sonuç ve geçmiş arayüzü
-components/credit-access.tsx Ücretsiz hak, paket, IBAN ve kupon arayüzü
-lib/server/runpod-image.ts   RunPod kuyruk, durum ve FLUX.2 entegrasyonu
-lib/server/content-safety.ts Yerleşim notu denetimi ve tekrar eden ihlal sınırı
-lib/server/network-risk.ts  Ücretsiz deneme VPN/proxy/Tor kontrolü
-lib/server/preview-job-policy.ts Asenkron iş süre sınırı
-runpod-worker/               Açık kaynak modelin GPU worker ve Docker dosyaları
-lib/db/schema.ts             Neon/Drizzle şeması
-drizzle/                     Uygulanabilir SQL migration dosyaları
-vercel.json                  Build ve cron ayarları
+app/api/previews/                 Önizleme, geçmiş ve silme API'leri
+app/api/coupons/redeem/           Kupon etkinleştirme API'si
+app/api/admin/coupons/            Güvenli kupon yönetimi API'si
+app/yonetim/kuponlar/             Gizli kupon yönetim ekranı
+components/credit-access.tsx      Ücretsiz hak ve kupon arayüzü
+lib/server/access.ts              Atomik hak ve günlük kapasite yönetimi
+lib/server/network-risk.ts        En iyi çabayla VPN/proxy/Tor kontrolü
+lib/server/runpod-image.ts        RunPod ve FLUX.2 entegrasyonu
+runpod-worker/                    GPU worker ve Docker dosyaları
+lib/db/schema.ts                  Neon/Drizzle şeması
 ```
-
-## Doğrulama
-
-Final paket aşağıdaki kontrollerden geçirilmiştir:
-
-```bash
-npm run lint
-npm run typecheck
-npm run build
-```
-
-Gerçek AI işlemi ve Neon yazma testi için dağıtım ortamında geçerli
-`DATABASE_URL`, `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID` ve `IPQS_API_KEY`
-bulunması gerekir.
 
 ## Model lisansı
 
-Worker üretim için ticari kullanıma izin veren Apache 2.0 lisanslı
-`black-forest-labs/FLUX.2-klein-4B`, yetişkin içerik sınıflandırması için Apache
-2.0 lisanslı `Falconsai/nsfw_image_detection` ve diğer sabit güvenlik sınıfları
-için MIT lisanslı OpenAI CLIP modelini kullanır. Model sürümleri sabit commit
-kimlikleriyle ve `safetensors` dosyalarıyla yüklenir; uzaktan özel model kodu
-çalıştırılmaz. Otomatik sınıflandırma tek başına kusursuz bir hukuki güvenlik
-garantisi değildir; eşikler canlı kontrollü testlerle izlenmelidir.
+Worker üretimde Apache 2.0 lisanslı `black-forest-labs/FLUX.2-klein-4B`, yetişkin
+içerik sınıflandırmasında Apache 2.0 lisanslı `Falconsai/nsfw_image_detection`
+ve diğer sabit güvenlik sınıflarında MIT lisanslı OpenAI CLIP modelini kullanır.
+Buradaki OpenAI CLIP yerel açık kaynak modelidir; OpenAI API veya OpenAI üretim
+kotası kullanılmaz.

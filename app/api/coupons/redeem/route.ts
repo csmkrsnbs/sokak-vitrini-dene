@@ -1,4 +1,4 @@
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, isNull, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
           eq(couponCodes.codeHash, hashCouponCode(parsed.data.code)),
           eq(couponCodes.status, "active"),
           gt(couponCodes.remainingCredits, 0),
+          or(isNull(couponCodes.expiresAt), gt(couponCodes.expiresAt, new Date())),
         ),
       )
       .limit(1);
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
     if (!coupon) {
       return apiError(
         "COUPON_NOT_AVAILABLE",
-        "Kupon bulunamadı, kullanım dışı veya kredisi bitmiş.",
+        "Kupon bulunamadı, süresi dolmuş, kullanım dışı veya hakkı bitmiş.",
         404,
         noStoreHeaders(),
       );

@@ -1852,7 +1852,7 @@ body.modal-open {
 }
 
 .credit-access-icon,
-.package-modal-icon {
+.coupon-modal-icon {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
@@ -1874,7 +1874,7 @@ body.modal-open {
   font-size: 11px;
 }
 
-.package-modal-backdrop {
+.coupon-modal-backdrop {
   position: fixed;
   z-index: 120;
   inset: 0;
@@ -1886,7 +1886,7 @@ body.modal-open {
   backdrop-filter: blur(10px);
 }
 
-.package-modal {
+.coupon-modal {
   position: relative;
   width: min(100%, 650px);
   max-height: calc(100svh - 52px);
@@ -1898,7 +1898,7 @@ body.modal-open {
   box-shadow: 0 30px 100px rgba(0, 0, 0, 0.65);
 }
 
-.package-modal-close {
+.coupon-modal-close {
   position: absolute;
   z-index: 2;
   top: 18px;
@@ -1914,7 +1914,7 @@ body.modal-open {
   cursor: pointer;
 }
 
-.package-modal-heading {
+.coupon-modal-heading {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
@@ -1922,78 +1922,40 @@ body.modal-open {
   padding-right: 32px;
 }
 
-.package-modal-icon {
+.coupon-modal-icon {
   width: 50px;
   height: 50px;
 }
 
-.package-modal-heading h2 {
+.coupon-modal-heading h2 {
   margin: 3px 0 2px;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 30px;
   font-weight: 400;
 }
 
-.package-modal-heading p {
+.coupon-modal-heading p {
   margin: 0;
   color: #8c877f;
   font-size: 11px;
 }
 
-.package-price {
-  color: var(--gold-light);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 25px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.package-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px;
-  margin: 26px 0 22px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 4px;
-  background: #0b0b0b;
-}
-
-.package-tabs button {
-  display: inline-flex;
-  min-height: 42px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: #827d76;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 750;
-}
-
-.package-tabs button.active {
-  background: #202020;
-  color: var(--gold-light);
-}
-
-.coupon-form,
-.payment-form {
+.coupon-form {
   display: grid;
   gap: 15px;
 }
 
+.coupon-only-form {
+  margin-top: 26px;
+}
+
 .coupon-form label,
-.payment-form label,
 .admin-login-card label {
   display: grid;
   gap: 7px;
 }
 
 .coupon-form label > span,
-.payment-form label > span,
 .admin-login-card label > span {
   color: #aaa49b;
   font-size: 10px;
@@ -2001,7 +1963,6 @@ body.modal-open {
 }
 
 .coupon-form input,
-.payment-form input,
 .admin-login-card input {
   width: 100%;
   min-height: 48px;
@@ -2016,189 +1977,17 @@ body.modal-open {
 }
 
 .coupon-form input:focus,
-.payment-form input:focus,
 .admin-login-card input:focus {
   border-color: rgba(214, 169, 79, 0.65);
   box-shadow: 0 0 0 3px rgba(214, 169, 79, 0.1);
 }
 
-.coupon-form .button,
-.payment-form .button {
+.coupon-form .button {
   width: 100%;
   margin-top: 2px;
 }
 
-.package-loading,
-.package-config-warning,
-.payment-info-note {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.025);
-  color: #a9a39a;
-  font-size: 11px;
-}
-
-.package-config-warning svg,
-.payment-info-note svg {
-  flex: 0 0 auto;
-  color: var(--gold);
-}
-
-.package-config-warning strong {
-  display: block;
-  color: #e9e2d8;
-}
-
-.package-config-warning p,
-.payment-info-note p {
-  margin: 2px 0 0;
-}
-
-.payment-instructions {
-  display: grid;
-  gap: 16px;
-}
-
-.payment-status {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 13px 15px;
-  background: rgba(255, 255, 255, 0.025);
-}
-
-.payment-status > svg {
-  flex: 0 0 auto;
-}
-
-.payment-status > div {
-  display: grid;
-  gap: 1px;
-}
-
-.payment-status strong {
-  color: #eee7dd;
-  font-size: 12px;
-}
-
-.payment-status span {
-  color: #8f8981;
-  font-size: 10px;
-}
-
-.payment-status-approved {
-  border-color: rgba(79, 191, 131, 0.25);
-  background: rgba(79, 191, 131, 0.06);
-}
-
-.payment-status-approved > svg {
-  color: var(--success);
-}
-
-.payment-status-pending > svg {
-  color: var(--gold);
-}
-
-.payment-status-rejected > svg {
-  color: var(--danger);
-}
-
-.bank-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  background: #0b0b0b;
-}
-
-.bank-details > div {
-  position: relative;
-  display: grid;
-  min-width: 0;
-  gap: 3px;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  padding: 13px 15px;
-}
-
-.bank-details > div:nth-child(even) {
-  border-right: 0;
-}
-
-.bank-details > div:last-child {
-  border-bottom: 0;
-}
-
-.bank-details span,
-.approved-coupon > span {
-  color: #77726b;
-  font-size: 9px;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.bank-details strong {
-  overflow-wrap: anywhere;
-  color: #e8e1d7;
-  font-size: 11px;
-}
-
-.bank-copy-row {
-  padding-right: 48px !important;
-}
-
-.bank-copy-row button {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  display: grid;
-  width: 28px;
-  height: 28px;
-  transform: translateY(-50%);
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #191919;
-  color: #aaa49a;
-  cursor: pointer;
-}
-
-.bank-reference-row strong {
-  color: var(--gold-light);
-  letter-spacing: 0.08em;
-}
-
-.approved-coupon {
-  display: grid;
-  gap: 10px;
-  border: 1px solid rgba(214, 169, 79, 0.28);
-  border-radius: 16px;
-  padding: 18px;
-  background: rgba(214, 169, 79, 0.06);
-  text-align: center;
-}
-
-.approved-coupon > strong {
-  color: var(--gold-light);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: clamp(15px, 4vw, 20px);
-  letter-spacing: 0.06em;
-}
-
-.approved-coupon .button,
-.payment-refresh {
-  width: 100%;
-}
-
-.package-message,
+.coupon-message,
 .admin-message {
   margin-top: 15px;
   border: 1px solid rgba(214, 169, 79, 0.22);
@@ -2210,7 +1999,7 @@ body.modal-open {
   text-align: center;
 }
 
-.package-footnote {
+.coupon-footnote {
   margin: 17px 0 0;
   color: #625e58;
   font-size: 9px;
@@ -2363,11 +2152,82 @@ body.modal-open {
   font-weight: 400;
 }
 
-.admin-payments-card {
+.admin-coupons-card,
+.admin-coupon-create {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 22px;
   background: #111;
+}
+
+.admin-coupon-create {
+  margin-bottom: 18px;
+}
+
+.admin-coupon-create > form {
+  display: grid;
+  grid-template-columns: 1.4fr 0.65fr 1fr auto;
+  align-items: end;
+  gap: 12px;
+  padding: 22px 25px;
+}
+
+.admin-coupon-create label {
+  display: grid;
+  gap: 7px;
+}
+
+.admin-coupon-create label > span,
+.admin-created-coupon span {
+  color: #827c74;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.admin-coupon-create input {
+  width: 100%;
+  min-height: 45px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 11px;
+  outline: 0;
+  padding: 0 13px;
+  background: #090909;
+  color: #eee8df;
+  color-scheme: dark;
+}
+
+.admin-coupon-create input:focus {
+  border-color: rgba(214, 169, 79, 0.65);
+  box-shadow: 0 0 0 3px rgba(214, 169, 79, 0.1);
+}
+
+.admin-coupon-create form .button {
+  min-height: 45px;
+}
+
+.admin-created-coupon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 0 25px 24px;
+  border: 1px solid rgba(214, 169, 79, 0.3);
+  border-radius: 15px;
+  padding: 16px 18px;
+  background: rgba(214, 169, 79, 0.07);
+}
+
+.admin-created-coupon > div {
+  display: grid;
+  gap: 5px;
+}
+
+.admin-created-coupon strong {
+  color: var(--gold-light);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: clamp(13px, 2vw, 18px);
+  letter-spacing: 0.05em;
+  overflow-wrap: anywhere;
 }
 
 .admin-card-heading {
@@ -2457,19 +2317,20 @@ body.modal-open {
   white-space: nowrap;
 }
 
-.admin-status-pending {
+.admin-status-active {
   border-color: rgba(214, 169, 79, 0.28);
   background: rgba(214, 169, 79, 0.08);
   color: var(--gold-light);
 }
 
-.admin-status-approved {
+.admin-status-exhausted {
   border-color: rgba(79, 191, 131, 0.25);
   background: rgba(79, 191, 131, 0.07);
   color: #86d9aa;
 }
 
-.admin-status-rejected {
+.admin-status-expired,
+.admin-status-revoked {
   border-color: rgba(239, 109, 109, 0.22);
   background: rgba(239, 109, 109, 0.07);
   color: #ee9999;
@@ -2595,6 +2456,10 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 
+  .admin-coupon-create > form {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .desktop-nav {
     display: none;
   }
@@ -2678,12 +2543,12 @@ body.modal-open {
     width: 100%;
   }
 
-  .package-modal-backdrop {
+  .coupon-modal-backdrop {
     align-items: end;
     padding: 0;
   }
 
-  .package-modal {
+  .coupon-modal {
     width: 100%;
     max-height: 92svh;
     border-right: 0;
@@ -2693,28 +2558,9 @@ body.modal-open {
     padding: 25px 17px 22px;
   }
 
-  .package-modal-heading {
+  .coupon-modal-heading {
     grid-template-columns: auto 1fr;
     padding-right: 30px;
-  }
-
-  .package-price {
-    grid-column: 2;
-    font-size: 21px;
-  }
-
-  .package-tabs {
-    margin-top: 20px;
-  }
-
-  .bank-details {
-    grid-template-columns: 1fr;
-  }
-
-  .bank-details > div,
-  .bank-details > div:nth-child(even) {
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
   }
 
   .admin-page {
@@ -2744,6 +2590,17 @@ body.modal-open {
     align-items: flex-start;
     flex-direction: column;
     padding: 20px 17px;
+  }
+
+  .admin-coupon-create > form {
+    grid-template-columns: 1fr;
+    padding: 18px 17px;
+  }
+
+  .admin-created-coupon {
+    align-items: stretch;
+    flex-direction: column;
+    margin: 0 17px 18px;
   }
 
   .container {

@@ -2,61 +2,48 @@
 
 ## Neon
 
-- [ ] Neon'da yeni proje oluşturuldu.
-- [ ] **Pooled connection** adresi `DATABASE_URL` olarak kopyalandı.
-- [ ] `npm run db:migrate` migration'ı başarıyla tamamladı.
+- [ ] Pooled bağlantı `DATABASE_URL` olarak tanımlandı.
+- [ ] `npm run db:migrate` başarıyla tamamlandı.
+- [ ] Mevcut etkin kuponların kalan hakları migration sonrasında korundu.
 
-## RunPod ve açık kaynak model
+## RunPod
 
-- [ ] GitHub Actions, `runpod-worker` Docker imajını GHCR'a gönderdi.
-- [ ] GHCR paketi public yapıldı veya RunPod'a registry bilgileri eklendi.
-- [ ] RunPod Serverless endpoint'i 16–24 GB NVIDIA GPU ile oluşturuldu.
-- [ ] `workersMin=0`, `workersMax=1`, idle timeout `60` saniye ve FlashBoot seçildi.
-- [ ] Kalıcı Hugging Face önbelleği için mümkünse farklı veri merkezlerinden iki network volume bağlandı.
-- [ ] `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID` ve FLUX.2 ayarları Vercel'e eklendi.
-- [ ] İlk model indirme/ısınma isteği RunPod panelinden tamamlandı.
-- [ ] Worker loglarında FLUX ile iki sabit güvenlik modelinin volume önbelleğinden
-      yüklendiği ve uygun test isteğinin tamamlandığı görüldü.
-- [ ] Kontrollü yasak içerik testi `UNSAFE_CONTENT` ile reddedildi; FLUX üretimi
-      başlamadı ve ayrılan ücretsiz hak/kupon kredisi geri geldi.
-- [ ] Kaynaklar uygun olsa bile güvenlik denetiminin çalışmadığı senaryoda worker
-      fail-closed davranıp `MODERATION_UNAVAILABLE` döndürdü.
-- [ ] Kullanıcıya sürekli düşük ilk yanıt süresi gerekiyorsa maliyeti kabul edilerek
-      `active workers=1` ayarlandı; aksi durumda ilk soğuk açılış gecikmesi kabul edildi.
+- [ ] Worker imajı GHCR'a gönderildi ve endpoint'e bağlandı.
+- [ ] Farklı veri merkezlerindeki network volume seçenekleri endpoint'e eklendi.
+- [ ] `workersMin=0`, `workersMax=1` ve uygun idle timeout seçildi.
+- [ ] Worker loglarında FLUX ve güvenlik modellerinin önbellekten yüklendiği görüldü.
+- [ ] Uygun test tamamlandı; yasak içerik `UNSAFE_CONTENT` ile reddedildi.
+- [ ] RunPod düşük bakiye bildirimi etkinleştirildi.
 
 ## Vercel
 
-- [ ] README'deki ortam değişkenleri Production ortamına eklendi.
-- [ ] IPQualityScore Private Key, `IPQS_API_KEY` adıyla Production ortamına eklendi.
-- [ ] `IP_RISK_CACHE_HOURS=24` eklendi.
-- [ ] `PAYMENT_BANK_NAME`, `PAYMENT_ACCOUNT_HOLDER` ve `PAYMENT_IBAN` eklendi.
-- [ ] Birbirinden farklı uzun değerlerle `ADMIN_ACCESS_KEY` ve `COUPON_SIGNING_SECRET` eklendi.
+- [ ] `.env.example` içindeki Production değişkenleri eklendi.
+- [ ] `IP_RISK_CACHE_HOURS=168` ayarlandı.
+- [ ] `DAILY_GENERATION_LIMIT=20` veya seçilen günlük tavan eklendi.
+- [ ] `ADMIN_ACCESS_KEY` ve `COUPON_SIGNING_SECRET` birbirinden farklı uzun değerler.
 - [ ] Build komutu `npm run vercel-build`.
-- [ ] `0002_clear_deadpool` asenkron iş migration'ı deploy sırasında uygulandı.
-- [ ] `0003_neat_wallow` VPN kontrol önbelleği migration'ı deploy sırasında uygulandı.
-- [ ] `0004_clean_runtime_data` tek seferlik temiz veri migration'ı deploy sırasında uygulandı.
-- [ ] Deploy başarılı.
-- [ ] `/api/health` cevabındaki bütün kontroller `true`.
-- [ ] Özel alan adı bağlandı ve `NEXT_PUBLIC_APP_URL` bu adresle güncellendi.
-- [ ] Mobil cihazdan bir ürün ve hedef fotoğrafla gerçek deneme tamamlandı.
-- [ ] Sonuç indirildi, paylaşıldı ve geçmişten silme kontrol edildi.
+- [ ] Deploy başarılı ve `/api/health` durumu `ready`.
+- [ ] Özel alan adı ile `NEXT_PUBLIC_APP_URL` eşleşiyor.
 
-## IBAN ve kupon testi
+## Hak ve kupon testi
 
-- [ ] İlk 2 başarılı üretimden sonra paket penceresi otomatik açıldı.
-- [ ] Standart Paket ekranında 10 görsel / 100 TL ve doğru IBAN göründü.
-- [ ] Test ödeme talebindeki havale açıklaması banka hareketiyle eşleşti.
-- [ ] `/yonetim/odemeler` adresinde yönetim anahtarıyla giriş yapıldı.
-- [ ] Bekleyen ödeme onaylandı ve kullanıcı ekranında kupon göründü.
-- [ ] Kupon etkinleştirildi; başarılı üretimde bakiye 10'dan 9'a düştü.
-- [ ] Başarısız üretimde kredi geri geldi.
-- [ ] VPN açıkken ücretsiz deneme engellendi ve RunPod işi oluşmadı.
-- [ ] VPN açıkken geçerli ücretli kuponla üretim tamamlandı.
-- [ ] Reddedilmiş bir ödeme talebi yönetim ekranından kalıcı olarak silindi.
-- [ ] Üç tekrar eden güvenlik reddinden sonra aynı oturum/bağlantı/kuponun 24 saat
-      kısıtlandığı doğrulandı.
+- [ ] Kullanıcı ekranında fiyat, paket, IBAN veya ödeme ifadesi görünmüyor.
+- [ ] İlk 2 başarılı üretimden sonra yalnızca “Kupon ekle” ekranı açılıyor.
+- [ ] `/yonetim/kuponlar` adresinde 1 haklı test kuponu oluşturuldu.
+- [ ] Açık kod yalnızca oluşturma sonucunda gösterildi ve kopyalandı.
+- [ ] Kupon etkinleştirildi; başarılı üretimde hak 1 azaldı.
+- [ ] Başarısız üretimde ücretsiz veya kupon hakkı geri geldi.
+- [ ] Etkin kupon yönetim ekranından kapatıldı.
+- [ ] Son kullanım tarihi geçmiş kupon kabul edilmedi.
 
-## Yayın öncesi son kontrol
+## Ağ ve kapasite testi
+
+- [ ] IPQualityScore çalışırken tespit edilen VPN/proxy/Tor ücretsiz denemede engellendi.
+- [ ] IPQualityScore kota veya zaman aşımı verirken site diğer sınırlarla üretime devam etti.
+- [ ] Günlük genel kapasite dolduğunda RunPod işi oluşmadı ve kullanıcı hakkı düşmedi.
+- [ ] Günlük sınır İstanbul tarihinde yenilendi.
+
+## Yayın öncesi
 
 ```bash
 npm run check

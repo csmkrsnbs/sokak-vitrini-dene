@@ -4,13 +4,12 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import {
   couponCodes,
+  dailyGenerationEvents,
   freeUsageEvents,
   networkRiskChecks,
-  paymentRequests,
   previewRequests,
 } from "@/lib/db/schema";
 import { noStoreHeaders } from "@/lib/server/api";
-import { isPaymentConfigured } from "@/lib/server/billing";
 import {
   getImageModelName,
   isImageGenerationConfigured,
@@ -23,7 +22,10 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const databaseConfigured = Boolean(process.env.DATABASE_URL?.trim());
   const aiConfigured = isImageGenerationConfigured();
-  const paymentConfigured = isPaymentConfigured();
+  const couponConfigured = Boolean(
+    (process.env.COUPON_SIGNING_SECRET?.trim().length ?? 0) >= 32 &&
+      (process.env.ADMIN_ACCESS_KEY?.trim().length ?? 0) >= 32,
+  );
   const vpnDetectionConfigured = isVpnDetectionConfigured();
   const securityConfigured = Boolean(
     (process.env.RATE_LIMIT_SALT?.trim().length ?? 0) >= 32 &&
@@ -46,8 +48,11 @@ export async function GET() {
           .from(previewRequests)
           .limit(1),
         db.select({ id: freeUsageEvents.previewId }).from(freeUsageEvents).limit(1),
-        db.select({ id: paymentRequests.id }).from(paymentRequests).limit(1),
         db.select({ id: couponCodes.id }).from(couponCodes).limit(1),
+        db
+          .select({ id: dailyGenerationEvents.previewId })
+          .from(dailyGenerationEvents)
+          .limit(1),
         db
           .select({ clientKey: networkRiskChecks.clientKey })
           .from(networkRiskChecks)
@@ -63,8 +68,7 @@ export async function GET() {
     databaseReachable &&
     schemaReady &&
     aiConfigured &&
-    paymentConfigured &&
-    vpnDetectionConfigured &&
+    couponConfigured &&
     securityConfigured;
   return NextResponse.json(
     {
@@ -74,7 +78,7 @@ export async function GET() {
         databaseReachable,
         schemaReady,
         aiConfigured,
-        paymentConfigured,
+        couponConfigured,
         vpnDetectionConfigured,
         securityConfigured,
         aiProvider: "runpod",
