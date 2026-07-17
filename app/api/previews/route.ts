@@ -7,6 +7,8 @@ import { previewRequests } from "@/lib/db/schema";
 import {
   getAccessState,
   PreviewCreditsRequiredError,
+  PreviewVpnCheckUnavailableError,
+  PreviewVpnRestrictedError,
   type PreviewAccessReservation,
   releasePreviewAccess,
   reservePreviewAccess,
@@ -27,6 +29,7 @@ import {
   ImageValidationError,
   validateImageFile,
 } from "@/lib/server/image-validation";
+import { checkFreeTrialNetwork } from "@/lib/server/network-risk";
 import {
   cancelProductPreviewJob,
   getImageModelName,
@@ -126,6 +129,13 @@ export async function POST(request: NextRequest) {
     const note = normalizeNote(formData.get("note"));
     const model = getImageModelName();
     const db = getDb();
+    const networkDecision = await checkFreeTrialNetwork({ request, clientKey });
+    const freeTrialRestriction =
+      networkDecision.status === "blocked"
+        ? "anonymizer"
+        : networkDecision.status === "unavailable"
+          ? "verification_unavailable"
+          : null;
 
     requestId = crypto.randomUUID();
     reservation = await reservePreviewAccess({
@@ -136,6 +146,8 @@ export async function POST(request: NextRequest) {
       note,
       model,
       couponId: getCouponId(request),
+      allowFree: networkDecision.status === "allowed",
+      freeTrialRestriction,
     });
 
     const submitted = await submitProductPreview({
@@ -244,6 +256,26 @@ export async function POST(request: NextRequest) {
         "CREDITS_REQUIRED",
         error.message,
         402,
+        noStoreHeaders(),
+      );
+      return attachSessionCookie(response, session);
+    }
+
+    if (error instanceof PreviewVpnRestrictedError) {
+      const response = apiError(
+        "VPN_FREE_TRIAL_BLOCKED",
+        error.message,
+        403,
+        noStoreHeaders(),
+      );
+      return attachSessionCookie(response, session);
+    }
+
+    if (error instanceof PreviewVpnCheckUnavailableError) {
+      const response = apiError(
+        "VPN_CHECK_UNAVAILABLE",
+        error.message,
+        503,
         noStoreHeaders(),
       );
       return attachSessionCookie(response, session);

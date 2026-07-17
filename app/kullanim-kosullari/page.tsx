@@ -52,7 +52,9 @@ export default function TermsPage() {
         Her kullanıcıya toplam 3 ücretsiz görsel üretim hakkı verilir. Ücretsiz haklar
         tamamlandıktan sonra Standart Paket, tek seferlik 49 TL ödeme karşılığında 10
         görsel kredisi sağlar. Bu bir üyelik değildir; otomatik yenileme veya düzenli
-        tahsilat yapılmaz. Kullanılmayan paket kredilerinin süre sonu yoktur.
+        tahsilat yapılmaz. Kullanılmayan paket kredilerinin süre sonu yoktur. Kötüye
+        kullanımı önlemek için VPN, proxy veya Tor bağlantılarında ücretsiz deneme
+        kullanılamaz; geçerli ücretli kupon kredileri kullanılmaya devam edebilir.
       </p>
 
       <h2>IBAN ödemesi ve kupon</h2>

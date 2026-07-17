@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import {
   couponCodes,
   freeUsageEvents,
+  networkRiskChecks,
   paymentRequests,
   previewRequests,
 } from "@/lib/db/schema";
@@ -14,6 +15,7 @@ import {
   getImageModelName,
   isImageGenerationConfigured,
 } from "@/lib/server/runpod-image";
+import { isVpnDetectionConfigured } from "@/lib/server/network-risk";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,6 +24,7 @@ export async function GET() {
   const databaseConfigured = Boolean(process.env.DATABASE_URL?.trim());
   const aiConfigured = isImageGenerationConfigured();
   const paymentConfigured = isPaymentConfigured();
+  const vpnDetectionConfigured = isVpnDetectionConfigured();
   const securityConfigured = Boolean(
     (process.env.RATE_LIMIT_SALT?.trim().length ?? 0) >= 32 &&
       (process.env.CRON_SECRET?.trim().length ?? 0) >= 32,
@@ -45,6 +48,10 @@ export async function GET() {
         db.select({ id: freeUsageEvents.previewId }).from(freeUsageEvents).limit(1),
         db.select({ id: paymentRequests.id }).from(paymentRequests).limit(1),
         db.select({ id: couponCodes.id }).from(couponCodes).limit(1),
+        db
+          .select({ clientKey: networkRiskChecks.clientKey })
+          .from(networkRiskChecks)
+          .limit(1),
       ]);
       schemaReady = true;
     } catch (error) {
@@ -57,6 +64,7 @@ export async function GET() {
     schemaReady &&
     aiConfigured &&
     paymentConfigured &&
+    vpnDetectionConfigured &&
     securityConfigured;
   return NextResponse.json(
     {
@@ -67,6 +75,7 @@ export async function GET() {
         schemaReady,
         aiConfigured,
         paymentConfigured,
+        vpnDetectionConfigured,
         securityConfigured,
         aiProvider: "runpod",
         aiModel: getImageModelName(),

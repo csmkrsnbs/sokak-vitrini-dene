@@ -574,7 +574,11 @@ export function TryOnStudio() {
       setActivePreviewId(payload.preview.id);
     } catch (error) {
       setLoading(false);
-      if (error instanceof ApiRequestError && error.code === "CREDITS_REQUIRED") {
+      if (
+        error instanceof ApiRequestError &&
+        (error.code === "CREDITS_REQUIRED" ||
+          error.code === "VPN_FREE_TRIAL_BLOCKED")
+      ) {
         setPackageOpen(true);
       }
       setNotice({

@@ -21,7 +21,10 @@ export default function PrivacyPage() {
         Önizleme oluşturduğunuzda ürün fotoğrafı, hedef kişi veya mekân fotoğrafı, seçilen
         ürün türü ve isteğe bağlı yerleşim notu işlenir. Kötüye kullanımı sınırlamak için
         IP adresinizin tek yönlü ve geri döndürülemez bir özeti ile tarayıcınıza ait anonim
-        oturum kimliği kullanılabilir.
+        oturum kimliği kullanılabilir. Ücretsiz deneme sırasında IP adresi, VPN, proxy veya
+        Tor bağlantısı kontrolü için güvenlik sağlayıcısına anlık olarak iletilir. Ham IP
+        adresi uygulama veritabanında saklanmaz; yalnızca tuzlanmış ağ özeti, kontrol sonucu
+        ve kısa süreli önbellek tarihi tutulur.
       </p>
 
       <h2>Paket ve ödeme verileri</h2>
@@ -68,8 +71,9 @@ export default function PrivacyPage() {
       <h2>Üçüncü taraf hizmet</h2>
       <p>
         Yapay zekâ işlemi, sunucuda yapılandırılmış görsel üretim sağlayıcısı üzerinden
-        gerçekleştirilir. Hizmet sağlayıcısının kendi güvenlik ve veri işleme koşulları
-        geçerlidir. API anahtarları kullanıcıya veya tarayıcıya gönderilmez.
+        gerçekleştirilir. Ücretsiz denemenin kötüye kullanımını önlemek için bağlantı riski
+        IPQualityScore üzerinden kontrol edilir. Bu sağlayıcıların kendi güvenlik ve veri
+        işleme koşulları geçerlidir. API anahtarları kullanıcıya veya tarayıcıya gönderilmez.
       </p>
 
       <h2>Fotoğraftaki kişiler</h2>

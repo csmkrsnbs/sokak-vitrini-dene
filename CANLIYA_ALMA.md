@@ -19,10 +19,13 @@
 ## Vercel
 
 - [ ] README'deki ortam değişkenleri Production ortamına eklendi.
+- [ ] IPQualityScore Private Key, `IPQS_API_KEY` adıyla Production ortamına eklendi.
+- [ ] `IP_RISK_CACHE_HOURS=24` eklendi.
 - [ ] `PAYMENT_BANK_NAME`, `PAYMENT_ACCOUNT_HOLDER` ve `PAYMENT_IBAN` eklendi.
 - [ ] Birbirinden farklı uzun değerlerle `ADMIN_ACCESS_KEY` ve `COUPON_SIGNING_SECRET` eklendi.
 - [ ] Build komutu `npm run vercel-build`.
 - [ ] `0002_clear_deadpool` asenkron iş migration'ı deploy sırasında uygulandı.
+- [ ] `0003_neat_wallow` VPN kontrol önbelleği migration'ı deploy sırasında uygulandı.
 - [ ] Deploy başarılı.
 - [ ] `/api/health` cevabındaki bütün kontroller `true`.
 - [ ] Özel alan adı bağlandı ve `NEXT_PUBLIC_APP_URL` bu adresle güncellendi.
@@ -38,6 +41,8 @@
 - [ ] Bekleyen ödeme onaylandı ve kullanıcı ekranında kupon göründü.
 - [ ] Kupon etkinleştirildi; başarılı üretimde bakiye 10'dan 9'a düştü.
 - [ ] Başarısız üretimde kredi geri geldi.
+- [ ] VPN açıkken ücretsiz deneme engellendi ve RunPod işi oluşmadı.
+- [ ] VPN açıkken geçerli ücretli kuponla üretim tamamlandı.
 
 ## Yayın öncesi son kontrol
 

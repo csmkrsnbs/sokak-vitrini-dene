@@ -15,6 +15,7 @@ hazır Next.js uygulamasıdır.
 - GPU kuyruğunu Vercel isteğinden ayıran asenkron iş ve durum takibi
 - Neon PostgreSQL ile anonim oturum, sonuç geçmişi ve kullanım sınırı
 - Toplam 3 ücretsiz üretim; ardından IBAN ile 10 görsel / 49 TL Standart Paket
+- Ücretsiz denemede VPN, proxy ve Tor engeli; ücretli kuponlarda kesintisiz kullanım
 - Manuel ödeme onayı, güvenli kupon ve atomik kredi düşümü
 - Kaynak fotoğrafları veritabanında saklamayan gizlilik odaklı akış
 - Sonuç indirme, cihaz paylaşım menüsü ve kalıcı silme
@@ -39,6 +40,7 @@ hazır Next.js uygulamasıdır.
 - Node.js 20.9 veya üzeri
 - Neon PostgreSQL projesi
 - RunPod hesabı, API anahtarı ve yayınlanmış FLUX.2 worker endpoint'i
+- IPQualityScore hesabı ve ücretsiz Proxy & VPN Detection API anahtarı
 
 ### 2. Bağımlılıkları yükleyin
 
@@ -61,6 +63,8 @@ PREVIEW_JOB_MAX_AGE_MS="1200000"
 FLUX_IMAGE_MODEL="black-forest-labs/FLUX.2-klein-4B"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 IMAGE_RETENTION_DAYS="30"
+IPQS_API_KEY="ipqs-private-key"
+IP_RISK_CACHE_HOURS="24"
 RATE_LIMIT_SALT="en-az-32-karakter-rastgele-deger"
 CRON_SECRET="farkli-en-az-32-karakter-rastgele-deger"
 PAYMENT_BANK_NAME="Banka adı"
@@ -108,6 +112,8 @@ Tarayıcı adresi: `http://localhost:3000`
    - `FLUX_IMAGE_MODEL=black-forest-labs/FLUX.2-klein-4B`
    - `NEXT_PUBLIC_APP_URL=https://alan-adiniz.com`
    - `IMAGE_RETENTION_DAYS=30`
+   - `IPQS_API_KEY` (IPQualityScore hesabındaki Private Key)
+   - `IP_RISK_CACHE_HOURS=24` (isteğe bağlı; API kotasını koruyan önbellek)
    - `RATE_LIMIT_SALT`
    - `CRON_SECRET`
    - `PAYMENT_BANK_NAME`
@@ -129,6 +135,7 @@ Tarayıcı adresi: `http://localhost:3000`
     "schemaReady": true,
     "aiConfigured": true,
     "paymentConfigured": true,
+    "vpnDetectionConfigured": true,
     "securityConfigured": true
   }
 }
@@ -155,15 +162,19 @@ npm run db:push      # şemayı geliştirme veritabanına doğrudan iter
   saklanır.
 - Sonuçlar herkese açık değildir; anonim ve `HttpOnly` oturum çerezine bağlıdır.
 - Kullanıcı sonucu istediği anda silebilir.
-- `/api/cron/cleanup` görevi, `IMAGE_RETENTION_DAYS` süresini aşan kayıtları
-  günlük olarak siler.
-- IP adresi saklanmaz. Ücretsiz hakların kötüye kullanımını azaltmak için IP + gizli
-  salt değerinin SHA-256 özeti kullanılır.
+- `/api/cron/cleanup` görevi, `IMAGE_RETENTION_DAYS` süresini aşan kayıtları ve
+  süresi dolan ağ kontrolü önbelleğini siler.
+- IP adresi uygulama veritabanında saklanmaz. Ücretsiz hakların kötüye kullanımını
+  azaltmak için IP + gizli salt değerinin SHA-256 özeti kullanılır. Ham IP yalnızca
+  VPN/proxy/Tor kontrolü sırasında IPQualityScore'a anlık iletilir; sonuç 24 saat
+  tuzlanmış ağ özetiyle önbelleklenir.
 - Ücretsiz hak, ödeme talebi, kupon ve kredi kayıtları sonuç görselinden bağımsız tutulur.
 
 ## Paket ve ödeme yönetimi
 
 - İlk 3 başarılı görsel üretimi ücretsizdir.
+- VPN, proxy veya Tor algılanırsa ücretsiz hak ayrılmaz ve RunPod işi başlatılmaz.
+  Geçerli ücretli kuponu olan kullanıcı aynı bağlantıda kupon kredisiyle devam edebilir.
 - Standart Paket tek seferlik 49 TL karşılığında 10 görsel kredisi verir.
 - Kullanıcı paket penceresinden ödeme talebi oluşturur ve kendisine verilen havale
   açıklamasını IBAN transferine ekler.
@@ -185,6 +196,7 @@ app/yonetim/odemeler/        Gizli ödeme yönetim ekranı
 components/try-on-studio.tsx Kamera, yükleme, sonuç ve geçmiş arayüzü
 components/credit-access.tsx Ücretsiz hak, paket, IBAN ve kupon arayüzü
 lib/server/runpod-image.ts   RunPod kuyruk, durum ve FLUX.2 entegrasyonu
+lib/server/network-risk.ts  Ücretsiz deneme VPN/proxy/Tor kontrolü
 lib/server/preview-job-policy.ts Asenkron iş süre sınırı
 runpod-worker/               Açık kaynak modelin GPU worker ve Docker dosyaları
 lib/db/schema.ts             Neon/Drizzle şeması
@@ -203,7 +215,8 @@ npm run build
 ```
 
 Gerçek AI işlemi ve Neon yazma testi için dağıtım ortamında geçerli
-`DATABASE_URL`, `RUNPOD_API_KEY` ve `RUNPOD_ENDPOINT_ID` bulunması gerekir.
+`DATABASE_URL`, `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID` ve `IPQS_API_KEY`
+bulunması gerekir.
 
 ## Model lisansı
 

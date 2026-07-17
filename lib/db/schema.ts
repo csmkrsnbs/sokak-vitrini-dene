@@ -1,4 +1,5 @@
 import {
+  boolean,
   index,
   integer,
   pgTable,
@@ -65,6 +66,19 @@ export const freeUsageEvents = pgTable(
     index("free_usage_session_idx").on(table.sessionId),
     index("free_usage_client_idx").on(table.clientKey),
   ],
+);
+
+export const networkRiskChecks = pgTable(
+  "network_risk_checks",
+  {
+    clientKey: varchar("client_key", { length: 64 }).primaryKey(),
+    anonymousNetwork: boolean("anonymous_network").notNull(),
+    riskType: varchar("risk_type", { length: 24 }).notNull(),
+    fraudScore: integer("fraud_score"),
+    checkedAt: timestamp("checked_at", { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [index("network_risk_checks_expires_idx").on(table.expiresAt)],
 );
 
 export const paymentRequests = pgTable(

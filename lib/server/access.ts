@@ -23,12 +23,32 @@ type PreviewReservationInput = {
   note: string | null;
   model: string;
   couponId: string | null;
+  allowFree: boolean;
+  freeTrialRestriction: "anonymizer" | "verification_unavailable" | null;
 };
 
 export class PreviewCreditsRequiredError extends Error {
   constructor() {
     super("3 ücretsiz deneme hakkınız bitti. Devam etmek için kupon kullanın.");
     this.name = "PreviewCreditsRequiredError";
+  }
+}
+
+export class PreviewVpnRestrictedError extends Error {
+  constructor() {
+    super(
+      "VPN, proxy veya Tor bağlantısıyla ücretsiz deneme kullanılamaz. Bağlantıyı kapatın veya ücretli kuponunuzu etkinleştirin.",
+    );
+    this.name = "PreviewVpnRestrictedError";
+  }
+}
+
+export class PreviewVpnCheckUnavailableError extends Error {
+  constructor() {
+    super(
+      "Ücretsiz deneme için güvenli bağlantı kontrolü şu anda yapılamıyor. Biraz sonra yeniden deneyin veya ücretli kuponunuzu etkinleştirin.",
+    );
+    this.name = "PreviewVpnCheckUnavailableError";
   }
 }
 
@@ -134,12 +154,20 @@ async function reserveCouponPreview(input: PreviewReservationInput, couponId: st
 export async function reservePreviewAccess(
   input: PreviewReservationInput,
 ): Promise<PreviewAccessReservation> {
-  if (await reserveFreePreview(input)) {
+  if (input.allowFree && (await reserveFreePreview(input))) {
     return { source: "free", couponId: null };
   }
 
   if (input.couponId && (await reserveCouponPreview(input, input.couponId))) {
     return { source: "coupon", couponId: input.couponId };
+  }
+
+  if (input.freeTrialRestriction === "anonymizer") {
+    throw new PreviewVpnRestrictedError();
+  }
+
+  if (input.freeTrialRestriction === "verification_unavailable") {
+    throw new PreviewVpnCheckUnavailableError();
   }
 
   throw new PreviewCreditsRequiredError();
