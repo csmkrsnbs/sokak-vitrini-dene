@@ -116,7 +116,9 @@ def _get_safety_bundle():
         if _safety_bundle is not None:
             return _safety_bundle
 
-        configured_device = os.getenv("SAFETY_DEVICE", "cuda").strip().lower()
+        # Keep the lightweight safety models on CPU so the 24 GB worker GPU is
+        # reserved for FLUX. Running all three models on CUDA can exhaust VRAM.
+        configured_device = os.getenv("SAFETY_DEVICE", "cpu").strip().lower()
         if configured_device.startswith("cuda") and not torch.cuda.is_available():
             raise RuntimeError("CUDA is required for configured safety inference")
 
@@ -223,6 +225,14 @@ def _safety_error(code: str):
     messages = {
         "UNSAFE_CONTENT": "Content rejected by safety policy",
         "MODERATION_UNAVAILABLE": "Safety moderation is unavailable",
+    }
+    return {"error_code": code, "error": messages[code]}
+
+
+def _generation_error(code: str):
+    messages = {
+        "GPU_MEMORY_EXHAUSTED": "GPU memory exhausted during generation",
+        "GENERATION_FAILED": "Image generation failed",
     }
     return {"error_code": code, "error": messages[code]}
 
@@ -338,16 +348,24 @@ def handler(job):
     pipeline = _get_pipeline()
     runpod.serverless.progress_update(job, "Önizleme oluşturuluyor")
 
-    result = pipeline(
-        image=[product, target],
-        prompt=prompt.strip(),
-        width=width,
-        height=height,
-        num_inference_steps=steps,
-        guidance_scale=1.0,
-        generator=generator,
-        num_images_per_prompt=1,
-    ).images[0]
+    try:
+        result = pipeline(
+            image=[product, target],
+            prompt=prompt.strip(),
+            width=width,
+            height=height,
+            num_inference_steps=steps,
+            guidance_scale=1.0,
+            generator=generator,
+            num_images_per_prompt=1,
+        ).images[0]
+    except torch.cuda.OutOfMemoryError:
+        print("Generation failed: CUDA out of memory")
+        torch.cuda.empty_cache()
+        return _generation_error("GPU_MEMORY_EXHAUSTED")
+    except Exception as error:
+        print("Generation failed:", type(error).__name__, str(error)[:500])
+        return _generation_error("GENERATION_FAILED")
 
     runpod.serverless.progress_update(job, "Sonuç güvenlik kontrolünden geçiriliyor")
     try:

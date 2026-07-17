@@ -44,7 +44,7 @@ FLUX_MODEL_ID=black-forest-labs/FLUX.2-klein-4B
 FLUX_MODEL_REVISION=0eeac0d3d5a1179e84510324ffcac805059a296f
 FLUX_INFERENCE_STEPS=4
 FLUX_CPU_OFFLOAD=false
-SAFETY_DEVICE=cuda
+SAFETY_DEVICE=cpu
 SAFETY_NSFW_MODEL_ID=Falconsai/nsfw_image_detection
 SAFETY_NSFW_MODEL_REVISION=04367978d3474804ab1a00a9bd6548b741764069
 SAFETY_CLIP_MODEL_ID=openai/clip-vit-base-patch32
@@ -52,8 +52,10 @@ SAFETY_CLIP_MODEL_REVISION=c7244be81152024ce0e99ac8d2e373a8953d9f9a
 SAFETY_NSFW_THRESHOLD=0.40
 ```
 
-16 GB GPU seçilirse `FLUX_CPU_OFFLOAD=true` kullanın. Bu seçenek maliyeti
-azaltabilir ancak işlemi yavaşlatır.
+Güvenlik modellerini `SAFETY_DEVICE=cpu` ile çalıştırın. Böylece 24 GB GPU
+belleği FLUX'a ayrılır ve güvenlik modelleriyle birlikte oluşabilecek CUDA
+bellek taşması önlenir. 16 GB GPU seçilirse ayrıca `FLUX_CPU_OFFLOAD=true`
+kullanın. Bu seçenek maliyeti azaltabilir ancak işlemi yavaşlatır.
 
 İlk worker açılışında FLUX ve güvenlik modelleri network volume'a indirilir. Bu
 ilk istek normalden uzun sürebileceği için canlıya almadan önce RunPod panelinin

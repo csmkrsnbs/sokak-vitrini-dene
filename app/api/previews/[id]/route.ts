@@ -65,6 +65,12 @@ function terminalMessage(errorCode: string | null) {
   if (errorCode === "MODERATION_UNAVAILABLE") {
     return "Güvenlik kontrolü şu anda tamamlanamadı. İşlem durduruldu, sonuç kaydedilmedi ve kullanım hakkınız iade edildi.";
   }
+  if (errorCode === "AI_GPU_MEMORY") {
+    return "Görsel üretim sunucusunun GPU belleği yetersiz kaldı. Kullanım hakkınız iade edildi; yönetici GPU ayarını kontrol etmelidir.";
+  }
+  if (errorCode === "AI_GENERATION_FAILED") {
+    return "Görsel üretim motoru işlemi tamamlayamadı. Kullanım hakkınız iade edildi; lütfen yeniden deneyin.";
+  }
   return "Görsel hazırlanamadı. Kullanım hakkınız iade edildi.";
 }
 

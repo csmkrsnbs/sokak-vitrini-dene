@@ -251,6 +251,22 @@ function parseCompletedOutput(payload: RunPodJobResponse) {
     );
   }
 
+  if (output.error_code === "GPU_MEMORY_EXHAUSTED") {
+    throw new ImageGenerationError(
+      "AI_GPU_MEMORY",
+      "Görsel üretim sunucusunun GPU belleği yetersiz kaldı. Kullanım hakkınız iade edildi; yönetici GPU ayarını kontrol etmelidir.",
+      503,
+    );
+  }
+
+  if (output.error_code === "GENERATION_FAILED") {
+    throw new ImageGenerationError(
+      "AI_GENERATION_FAILED",
+      "Görsel üretim motoru işlemi tamamlayamadı. Kullanım hakkınız iade edildi; lütfen yeniden deneyin.",
+      502,
+    );
+  }
+
   if (typeof output.error === "string") {
     console.error("RunPod worker returned an error", output.error.slice(0, 300));
     throw new ImageGenerationError(

@@ -12,6 +12,7 @@
 - [ ] Farklı veri merkezlerindeki network volume seçenekleri endpoint'e eklendi.
 - [ ] `workersMin=0`, `workersMax=1` ve uygun idle timeout seçildi.
 - [ ] Worker loglarında FLUX ve güvenlik modellerinin önbellekten yüklendiği görüldü.
+- [ ] 24 GB GPU için `SAFETY_DEVICE=cpu` ayarlandı; FLUX GPU belleği güvenlik modelleriyle paylaşmıyor.
 - [ ] Uygun test tamamlandı; yasak içerik `UNSAFE_CONTENT` ile reddedildi.
 - [ ] RunPod düşük bakiye bildirimi etkinleştirildi.
 
