@@ -19,6 +19,20 @@ jobs:
       - name: Kodu al
         uses: actions/checkout@v4
 
+      - name: Runner disk alanını temizle
+        shell: bash
+        run: |
+          echo "Temizlik öncesi disk kullanımı:"
+          df -h /
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          docker system prune --all --force || true
+          echo "Temizlik sonrası disk kullanımı:"
+          df -h /
+
       - name: Docker Buildx hazırla
         uses: docker/setup-buildx-action@v3
 
@@ -40,5 +54,3 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}-flux-worker:latest
             ghcr.io/${{ github.repository }}-flux-worker:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
