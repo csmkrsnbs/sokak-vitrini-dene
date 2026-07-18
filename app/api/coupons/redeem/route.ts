@@ -1,4 +1,4 @@
-import { and, eq, gt, isNull, or } from "drizzle-orm";
+import { and, eq, gt, isNull, or, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -40,20 +40,50 @@ export async function POST(request: NextRequest) {
     }
 
     const db = getDb();
+    const codeHash = hashCouponCode(parsed.data.code);
     const [coupon] = await db
-      .select({ id: couponCodes.id })
-      .from(couponCodes)
+      .update(couponCodes)
+      .set({
+        claimedSessionId: session.id,
+        activatedAt: sql`COALESCE(${couponCodes.activatedAt}, NOW())`,
+      })
       .where(
         and(
-          eq(couponCodes.codeHash, hashCouponCode(parsed.data.code)),
+          eq(couponCodes.codeHash, codeHash),
           eq(couponCodes.status, "active"),
           gt(couponCodes.remainingCredits, 0),
+          or(
+            isNull(couponCodes.claimedSessionId),
+            eq(couponCodes.claimedSessionId, session.id),
+          ),
           or(isNull(couponCodes.expiresAt), gt(couponCodes.expiresAt, new Date())),
         ),
       )
-      .limit(1);
+      .returning({ id: couponCodes.id });
 
     if (!coupon) {
+      const [existing] = await db
+        .select({ claimedSessionId: couponCodes.claimedSessionId })
+        .from(couponCodes)
+        .where(
+          and(
+            eq(couponCodes.codeHash, codeHash),
+            eq(couponCodes.status, "active"),
+            gt(couponCodes.remainingCredits, 0),
+            or(isNull(couponCodes.expiresAt), gt(couponCodes.expiresAt, new Date())),
+          ),
+        )
+        .limit(1);
+
+      if (existing?.claimedSessionId && existing.claimedSessionId !== session.id) {
+        return apiError(
+          "COUPON_ALREADY_CLAIMED",
+          "Bu kupon başka bir tarayıcıda etkinleştirilmiş. Yöneticiyle iletişime geçin.",
+          409,
+          noStoreHeaders(),
+        );
+      }
+
       return apiError(
         "COUPON_NOT_AVAILABLE",
         "Kupon bulunamadı, süresi dolmuş, kullanım dışı veya hakkı bitmiş.",
@@ -61,11 +91,6 @@ export async function POST(request: NextRequest) {
         noStoreHeaders(),
       );
     }
-
-    await db
-      .update(couponCodes)
-      .set({ activatedAt: new Date() })
-      .where(eq(couponCodes.id, coupon.id));
 
     const access = await getAccessState({
       request,

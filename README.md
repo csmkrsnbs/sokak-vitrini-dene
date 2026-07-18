@@ -13,17 +13,16 @@ kişinin üzerinde ya da hedef mekânda gösteren Next.js uygulamasıdır.
 - Aynı GPU worker'ında kaynak ve sonuç için yetişkin, çocuk, siyasi, şiddet,
   silah ve nefret/aşırılık içeriği denetimi
 - Neon PostgreSQL ile anonim oturum, sonuç geçmişi ve atomik kullanım hakkı
-- Aylık yenilenmeyen toplam 2 ücretsiz önizleme hakkı
-- Kampanya, tanıtım ve iş birlikleri için yönetici tarafından oluşturulan kuponlar
-- IPQualityScore çalıştığında VPN/proxy/Tor engeli; servis kesintisinde güvenli
-  yerel sınırlarla devam eden ücretsiz deneme
+- Yalnızca yönetici tarafından oluşturulan geçerli kuponla önizleme erişimi
+- Kampanya, tanıtım ve iş birlikleri için 1–3 haklı, 7–30 gün süreli kuponlar
+- Kuponu ilk etkinleştiren anonim tarayıcı oturumuna atomik bağlama
 - İstanbul saatine göre yapılandırılabilir günlük genel üretim kapasitesi
-- Başarısız üretimde ücretsiz veya kupon hakkının otomatik iadesi
+- Başarısız üretimde kupon hakkının otomatik iadesi
 - Kaynak fotoğrafları veritabanında saklamayan gizlilik odaklı akış
 - Sonuç indirme, cihaz paylaşım menüsü, geçmiş ve kalıcı silme
 
 Uygulama içinde fiyat, paket, IBAN veya ödeme akışı bulunmaz. Kuponlar yalnızca
-önceden tanımlanan ek önizleme hakkını temsil eder.
+önceden tanımlanan önizleme hakkını temsil eder; ücretsiz deneme bulunmaz.
 
 ## Teknoloji
 
@@ -64,8 +63,6 @@ PREVIEW_JOB_MAX_AGE_MS="1200000"
 FLUX_IMAGE_MODEL="black-forest-labs/FLUX.2-klein-4B"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 IMAGE_RETENTION_DAYS="30"
-IPQS_API_KEY="ipqs-private-key"
-IP_RISK_CACHE_HOURS="168"
 DAILY_GENERATION_LIMIT="20"
 RATE_LIMIT_SALT="en-az-32-karakter-rastgele-deger"
 CRON_SECRET="farkli-en-az-32-karakter-rastgele-deger"
@@ -73,13 +70,8 @@ ADMIN_ACCESS_KEY="farkli-en-az-32-karakter-yonetim-anahtari"
 COUPON_SIGNING_SECRET="farkli-en-az-32-karakter-kupon-anahtari"
 ```
 
-`IPQS_API_KEY` isteğe bağlıdır. Tanımlı ve erişilebilir olduğunda tespit edilen
-VPN, proxy ve Tor bağlantıları ücretsiz denemeden yararlanamaz. Sağlayıcı kota,
-zaman aşımı veya bağlantı hatası verirse site kapanmaz; toplam ücretsiz hak,
-anonim oturum/bağlantı özeti ve günlük genel kapasite uygulanmaya devam eder.
-
-`DAILY_GENERATION_LIMIT` tüm ücretsiz ve kuponlu isteklerin günlük toplam
-kapasitesidir. Sınır dolduğunda RunPod işi oluşturulmaz ve kullanıcı hakkı düşmez.
+`DAILY_GENERATION_LIMIT` tüm kuponlu isteklerin günlük toplam kapasitesidir.
+Sınır dolduğunda RunPod işi oluşturulmaz ve kullanıcının kupon hakkı düşmez.
 
 ## Vercel üzerinden canlıya alma
 
@@ -109,8 +101,10 @@ Hazır sağlık yanıtındaki temel alanlar:
 ## Kupon yönetimi
 
 - Yönetici `/yonetim/kuponlar` adresinde `ADMIN_ACCESS_KEY` ile giriş yapar.
-- Kampanya adı, 1–100 arası önizleme hakkı ve isteğe bağlı son kullanım tarihi seçilir.
+- Kampanya adı, 1–3 arası önizleme hakkı ve 7–30 gün son kullanım tarihi seçilir.
 - Açık kupon kodu yalnızca oluşturulduğu anda gösterilir; veritabanında HMAC özeti tutulur.
+- İlk başarılı etkinleştirme kuponu anonim tarayıcı oturumuna bağlar; başka bir
+  tarayıcı aynı kodu etkinleştiremez veya kupon hakkını harcayamaz.
 - Her başarılı üretim bir hak düşürür; başarısız veya güvenlik nedeniyle durdurulan
   üretimde hak otomatik iade edilir.
 - Etkin kupon yönetim ekranından kullanıma kapatılabilir.
@@ -121,7 +115,8 @@ Hazır sağlık yanıtındaki temel alanlar:
 - Ürün ve hedef fotoğrafları Neon'a yazılmaz; yalnızca RunPod iş kuyruğunda geçici işlenir.
 - Sonuç görseli tarayıcıya özel geçmiş için sınırlı süre saklanır.
 - Ham IP veritabanında tutulmaz; kötüye kullanım kontrolü için tuzlanmış SHA-256 özeti kullanılır.
-- IPQualityScore sonucu varsayılan 168 saat önbelleklenir.
+- Kuponun bağlandığı anonim oturum kimliği saklanır; tarayıcı verilerinin silinmesi
+  kupona erişimi kaybettirebilir.
 - `/api/cron/cleanup`, süre aşımına uğrayan işleri iade eder ve eski sonuçları temizler.
 
 ## Komutlar
@@ -143,9 +138,8 @@ app/api/previews/                 Önizleme, geçmiş ve silme API'leri
 app/api/coupons/redeem/           Kupon etkinleştirme API'si
 app/api/admin/coupons/            Güvenli kupon yönetimi API'si
 app/yonetim/kuponlar/             Gizli kupon yönetim ekranı
-components/credit-access.tsx      Ücretsiz hak ve kupon arayüzü
+components/credit-access.tsx      Kupon bakiyesi ve etkinleştirme arayüzü
 lib/server/access.ts              Atomik hak ve günlük kapasite yönetimi
-lib/server/network-risk.ts        En iyi çabayla VPN/proxy/Tor kontrolü
 lib/server/runpod-image.ts        RunPod ve FLUX.2 entegrasyonu
 runpod-worker/                    GPU worker ve Docker dosyaları
 lib/db/schema.ts                  Neon/Drizzle şeması

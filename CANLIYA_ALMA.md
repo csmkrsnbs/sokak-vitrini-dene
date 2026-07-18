@@ -4,6 +4,7 @@
 
 - [ ] Pooled bağlantı `DATABASE_URL` olarak tanımlandı.
 - [ ] `npm run db:migrate` başarıyla tamamlandı.
+- [ ] `coupon_codes.claimed_session_id` kolonu migration ile oluştu.
 - [ ] Mevcut etkin kuponların kalan hakları migration sonrasında korundu.
 
 ## RunPod
@@ -20,7 +21,6 @@
 ## Vercel
 
 - [ ] `.env.example` içindeki Production değişkenleri eklendi.
-- [ ] `IP_RISK_CACHE_HOURS=168` ayarlandı.
 - [ ] `DAILY_GENERATION_LIMIT=20` veya seçilen günlük tavan eklendi.
 - [ ] `ADMIN_ACCESS_KEY` ve `COUPON_SIGNING_SECRET` birbirinden farklı uzun değerler.
 - [ ] Build komutu `npm run vercel-build`.
@@ -30,18 +30,18 @@
 ## Hak ve kupon testi
 
 - [ ] Kullanıcı ekranında fiyat, paket, IBAN veya ödeme ifadesi görünmüyor.
-- [ ] İlk 2 başarılı üretimden sonra yalnızca “Kupon ekle” ekranı açılıyor.
+- [ ] Kupon etkinleştirilmeden önizleme isteği `CREDITS_REQUIRED` ile reddediliyor.
 - [ ] `/yonetim/kuponlar` adresinde 1 haklı test kuponu oluşturuldu.
 - [ ] Açık kod yalnızca oluşturma sonucunda gösterildi ve kopyalandı.
 - [ ] Kupon etkinleştirildi; başarılı üretimde hak 1 azaldı.
-- [ ] Başarısız üretimde ücretsiz veya kupon hakkı geri geldi.
+- [ ] Aynı kupon aynı tarayıcıda kullanılabildi, farklı tarayıcıda `COUPON_ALREADY_CLAIMED` ile reddedildi.
+- [ ] Yönetim API'si 3'ten fazla hak ve 7–30 gün dışındaki süreyi reddetti.
+- [ ] Başarısız üretimde kupon hakkı geri geldi.
 - [ ] Etkin kupon yönetim ekranından kapatıldı.
 - [ ] Son kullanım tarihi geçmiş kupon kabul edilmedi.
 
-## Ağ ve kapasite testi
+## Kapasite testi
 
-- [ ] IPQualityScore çalışırken tespit edilen VPN/proxy/Tor ücretsiz denemede engellendi.
-- [ ] IPQualityScore kota veya zaman aşımı verirken site diğer sınırlarla üretime devam etti.
 - [ ] Günlük genel kapasite dolduğunda RunPod işi oluşmadı ve kullanıcı hakkı düşmedi.
 - [ ] Günlük sınır İstanbul tarihinde yenilendi.
 

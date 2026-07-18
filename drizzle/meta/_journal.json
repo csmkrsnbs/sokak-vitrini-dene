@@ -43,6 +43,13 @@
       "when": 1784328870793,
       "tag": "0005_wooden_shen",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784361814626,
+      "tag": "0006_dusty_leper_queen",
+      "breakpoints": true
     }
   ]
 }

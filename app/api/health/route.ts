@@ -5,8 +5,6 @@ import { getDb } from "@/lib/db";
 import {
   couponCodes,
   dailyGenerationEvents,
-  freeUsageEvents,
-  networkRiskChecks,
   previewRequests,
 } from "@/lib/db/schema";
 import { noStoreHeaders } from "@/lib/server/api";
@@ -14,7 +12,6 @@ import {
   getImageModelName,
   isImageGenerationConfigured,
 } from "@/lib/server/runpod-image";
-import { isVpnDetectionConfigured } from "@/lib/server/network-risk";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,7 +23,6 @@ export async function GET() {
     (process.env.COUPON_SIGNING_SECRET?.trim().length ?? 0) >= 32 &&
       (process.env.ADMIN_ACCESS_KEY?.trim().length ?? 0) >= 32,
   );
-  const vpnDetectionConfigured = isVpnDetectionConfigured();
   const securityConfigured = Boolean(
     (process.env.RATE_LIMIT_SALT?.trim().length ?? 0) >= 32 &&
       (process.env.CRON_SECRET?.trim().length ?? 0) >= 32,
@@ -47,15 +43,16 @@ export async function GET() {
           })
           .from(previewRequests)
           .limit(1),
-        db.select({ id: freeUsageEvents.previewId }).from(freeUsageEvents).limit(1),
-        db.select({ id: couponCodes.id }).from(couponCodes).limit(1),
+        db
+          .select({
+            id: couponCodes.id,
+            claimedSessionId: couponCodes.claimedSessionId,
+          })
+          .from(couponCodes)
+          .limit(1),
         db
           .select({ id: dailyGenerationEvents.previewId })
           .from(dailyGenerationEvents)
-          .limit(1),
-        db
-          .select({ clientKey: networkRiskChecks.clientKey })
-          .from(networkRiskChecks)
           .limit(1),
       ]);
       schemaReady = true;
@@ -79,7 +76,6 @@ export async function GET() {
         schemaReady,
         aiConfigured,
         couponConfigured,
-        vpnDetectionConfigured,
         securityConfigured,
         aiProvider: "runpod",
         aiModel: getImageModelName(),

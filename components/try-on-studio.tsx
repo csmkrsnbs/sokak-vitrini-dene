@@ -316,6 +316,7 @@ export function TryOnStudio() {
   const productRef = useRef<SelectedImage | null>(null);
   const targetRef = useRef<SelectedImage | null>(null);
   const config = CATEGORY_CONFIG[category];
+  const hasCouponCredit = (access?.coupon?.remaining ?? 0) > 0;
   const loadingTitle =
     loadingStage === "submitting"
       ? "Fotoğraflar güvenli şekilde gönderiliyor…"
@@ -522,6 +523,15 @@ export function TryOnStudio() {
     event.preventDefault();
     setNotice(null);
 
+    if (access && !hasCouponCredit) {
+      setCouponOpen(true);
+      setNotice({
+        kind: "error",
+        text: "Önizleme oluşturmak için önce geçerli bir kupon etkinleştirin.",
+      });
+      return;
+    }
+
     if (!product || !target) {
       setNotice({ kind: "error", text: "İki fotoğrafı da eklemelisiniz." });
       return;
@@ -589,8 +599,7 @@ export function TryOnStudio() {
       setLoading(false);
       if (
         error instanceof ApiRequestError &&
-        (error.code === "CREDITS_REQUIRED" ||
-          error.code === "VPN_FREE_TRIAL_BLOCKED")
+        error.code === "CREDITS_REQUIRED"
       ) {
         setCouponOpen(true);
       }
@@ -848,7 +857,9 @@ export function TryOnStudio() {
                   ) : (
                     <>
                       <WandSparkles size={19} />
-                      Yapay zekâyla üzerinde gör
+                      {access && !hasCouponCredit
+                        ? "Kupon etkinleştirerek dene"
+                        : "Yapay zekâyla üzerinde gör"}
                     </>
                   )}
                 </button>

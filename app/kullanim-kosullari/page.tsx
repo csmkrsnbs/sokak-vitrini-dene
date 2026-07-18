@@ -59,7 +59,7 @@ export default function TermsPage() {
         Kaynak fotoğraflar görsel üretimden önce, oluşturulan sonuç ise kullanıcıya
         sunulmadan önce aynı güvenli GPU ortamında otomatik olarak denetlenir. Denetim
         tamamlanamazsa işlem güvenlik amacıyla durdurulur. Reddedilen işlemde görsel
-        sonucu saklanmaz ve kullanılan ücretsiz hak veya kupon kredisi iade edilir.
+        sonucu saklanmaz ve kullanılan kupon hakkı iade edilir.
         Otomatik sınıflandırma hata yapabilir; güvenli olduğu düşünülen bir içerik de
         reddedilebilir. Güvenlik önlemlerini aşmaya çalışmak veya tekrar eden yasak içerik
         denemeleri, tarayıcı, bağlantı ya da kupon için geçici erişim kısıtlamasına neden
@@ -80,24 +80,24 @@ export default function TermsPage() {
         cihaz bazlı kontroller uygulanabilir.
       </p>
 
-      <h2>Ücretsiz hak ve kupon</h2>
+      <h2>Kuponla erişim</h2>
       <p>
-        Her kullanıcıya aylık yenilenmeyen toplam 2 ücretsiz görsel üretim hakkı verilir.
-        Dönemsel kampanya, tanıtım veya iş birliklerinde ek önizleme hakkı sağlayan
-        kuponlar sunulabilir. Kuponların nakit karşılığı yoktur ve uygulama içinde satışa
-        sunulmaz. Bir kuponun hak adedi ve varsa son kullanım tarihi kupon oluşturulurken
-        belirlenir. Başarılı her önizleme bir hak kullanır; tamamlanamayan işlemde ayrılan
-        hak otomatik olarak geri verilir.
+        Uygulamada ücretsiz deneme hakkı bulunmaz. Önizleme yalnızca yönetici tarafından
+        kampanya, tanıtım veya iş birliği kapsamında oluşturulan geçerli bir kuponun
+        etkinleştirilmesiyle başlatılabilir. Kuponların nakit karşılığı yoktur ve uygulama
+        içinde satışa sunulmaz. Yeni kuponlar 1–3 önizleme hakkı ve 7–30 gün geçerlilik
+        süresiyle oluşturulur. Kupon ilk etkinleştirildiği anonim tarayıcı oturumuna
+        bağlanır ve başka bir tarayıcıda etkinleştirilemez. Tarayıcı verilerinin silinmesi
+        kupona ve geçmişe erişimi kaybettirebilir. Başarılı her önizleme bir hak kullanır;
+        tamamlanamayan işlemde ayrılan hak otomatik olarak geri verilir.
       </p>
 
       <h2>Adil kullanım ve günlük kapasite</h2>
       <p>
-        Kötüye kullanımı azaltmak için anonim oturum, bağlantı özeti, VPN/proxy/Tor risk
-        kontrolü ve günlük genel üretim kapasitesi uygulanabilir. Risk sağlayıcısı geçici
-        olarak yanıt vermezse diğer sınırlar yürürlükte kalır; açıkça VPN, proxy veya Tor
-        olarak belirlenen bağlantılarda ücretsiz deneme engellenebilir. Günlük kapasite
-        dolduğunda yeni işlem başlatılmaz ve kullanıcının hakkı düşürülmez. Kupon kodunu
-        güvenli saklamak kullanıcının sorumluluğundadır.
+        Kötüye kullanımı azaltmak için anonim oturum, bağlantı özeti, kupon ve günlük
+        genel üretim kapasitesi kontrolleri uygulanabilir. Günlük kapasite dolduğunda yeni
+        işlem başlatılmaz ve kullanıcının kupon hakkı düşürülmez. Kupon kodunu güvenli
+        saklamak kullanıcının sorumluluğundadır.
       </p>
 
       <h2>Silme ve erişim</h2>

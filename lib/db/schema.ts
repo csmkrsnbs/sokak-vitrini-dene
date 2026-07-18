@@ -106,11 +106,13 @@ export const couponCodes = pgTable(
     status: varchar("status", { length: 24 }).notNull().default("active"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     activatedAt: timestamp("activated_at", { withTimezone: true }),
+    claimedSessionId: varchar("claimed_session_id", { length: 64 }),
     expiresAt: timestamp("expires_at", { withTimezone: true }),
   },
   (table) => [
     uniqueIndex("coupon_codes_hash_uidx").on(table.codeHash),
     index("coupon_codes_status_idx").on(table.status),
+    index("coupon_codes_claimed_session_idx").on(table.claimedSessionId),
     index("coupon_codes_expires_idx").on(table.expiresAt),
   ],
 );

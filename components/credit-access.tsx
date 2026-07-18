@@ -53,7 +53,7 @@ export function CreditAccess({
       const payload = (await response.json()) as { access: AccessState };
       onAccessChange(payload.access);
       setCouponCode("");
-      setMessage("Kupon etkinleştirildi. Ek önizleme hakların kullanıma hazır.");
+      setMessage("Kupon etkinleştirildi. Önizleme hakların kullanıma hazır.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Kupon etkinleştirilemedi.");
     } finally {
@@ -61,17 +61,11 @@ export function CreditAccess({
     }
   };
 
-  const freeRemaining = access?.free.remaining ?? 0;
   const couponRemaining = access?.coupon?.remaining ?? 0;
-  const totalRemaining = freeRemaining + couponRemaining;
   const balanceText = access
-    ? freeRemaining > 0 && couponRemaining > 0
-      ? `${freeRemaining} ücretsiz + ${couponRemaining} kupon hakkı · Toplam ${totalRemaining}`
-      : freeRemaining > 0
-        ? `${freeRemaining} ücretsiz hakkın kaldı`
-        : couponRemaining > 0
-          ? `${couponRemaining} kupon hakkın kaldı`
-          : "Ücretsiz hakların tamamlandı"
+    ? couponRemaining > 0
+      ? `${couponRemaining} kupon hakkın kaldı`
+      : "Önizleme için kupon gerekli"
     : "Kullanım hakların yükleniyor";
 
   return (
@@ -83,7 +77,7 @@ export function CreditAccess({
           </span>
           <div>
             <strong>{balanceText}</strong>
-            <span>Toplam 2 ücretsiz deneme · Varsa kuponunu ekleyebilirsin</span>
+            <span>Önizlemeler yalnızca geçerli kupon bakiyesiyle oluşturulur</span>
           </div>
         </div>
         <button
@@ -94,7 +88,7 @@ export function CreditAccess({
             onOpenChange(true);
           }}
         >
-          <TicketCheck size={17} /> Kupon ekle
+          <TicketCheck size={17} /> Kupon etkinleştir
         </button>
       </div>
 
@@ -126,8 +120,8 @@ export function CreditAccess({
                 <TicketCheck size={25} />
               </span>
               <div>
-                <span className="section-kicker">Ek önizleme hakkı</span>
-                <h2 id="coupon-title">Kupon ekle</h2>
+                <span className="section-kicker">Önizleme hakkı</span>
+                <h2 id="coupon-title">Kupon etkinleştir</h2>
                 <p>Kampanya, tanıtım veya iş birliği kapsamında aldığın kodu kullan.</p>
               </div>
             </div>
@@ -162,7 +156,8 @@ export function CreditAccess({
 
             {message && <div className="coupon-message" role="status">{message}</div>}
             <p className="coupon-footnote">
-              Kuponlar yalnızca tanımlanan önizleme hakkını sağlar; nakit karşılığı yoktur.
+              Kupon ilk etkinleştirildiği anonim tarayıcı oturumuna bağlanır. Tarayıcı
+              verilerini silerseniz kupona erişiminizi kaybedebilirsiniz.
             </p>
           </div>
         </div>

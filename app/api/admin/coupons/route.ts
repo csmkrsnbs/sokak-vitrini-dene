@@ -25,9 +25,12 @@ export const dynamic = "force-dynamic";
 
 const createSchema = z.object({
   label: z.string().trim().min(2).max(120),
-  credits: z.number().int().min(1).max(100),
-  expiresAt: z.string().trim().max(40).nullable().optional(),
+  credits: z.number().int().min(1).max(3),
+  expiresAt: z.string().trim().min(1).max(40),
 });
+
+const DAY_MS = 24 * 60 * 60 * 1_000;
+const EXPIRY_TOLERANCE_MS = 5 * 60 * 1_000;
 
 function authenticated(request: NextRequest) {
   if (!isAdminAuthenticated(request)) {
@@ -76,23 +79,25 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return apiError(
         "INVALID_COUPON_REQUEST",
-        "Kampanya adı ve 1–100 arasında geçerli bir hak adedi girin.",
+        "Kampanya adı, 1–3 hak ve 7–30 gün arasında son kullanım tarihi girin.",
         400,
         noStoreHeaders(),
       );
     }
 
-    let expiresAt: Date | null = null;
-    if (parsed.data.expiresAt) {
-      expiresAt = new Date(parsed.data.expiresAt);
-      if (!Number.isFinite(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) {
-        return apiError(
-          "INVALID_COUPON_EXPIRY",
-          "Son kullanım tarihi gelecekte olmalıdır.",
-          400,
-          noStoreHeaders(),
-        );
-      }
+    const expiresAt = new Date(parsed.data.expiresAt);
+    const validityMs = expiresAt.getTime() - Date.now();
+    if (
+      !Number.isFinite(expiresAt.getTime()) ||
+      validityMs < 7 * DAY_MS - EXPIRY_TOLERANCE_MS ||
+      validityMs > 30 * DAY_MS + EXPIRY_TOLERANCE_MS
+    ) {
+      return apiError(
+        "INVALID_COUPON_EXPIRY",
+        "Son kullanım tarihi 7–30 gün arasında olmalıdır.",
+        400,
+        noStoreHeaders(),
+      );
     }
 
     const db = getDb();

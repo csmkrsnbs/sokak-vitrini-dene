@@ -21,18 +21,16 @@ export default function PrivacyPage() {
         Önizleme oluşturduğunuzda ürün fotoğrafı, hedef kişi veya mekân fotoğrafı, seçilen
         ürün türü ve isteğe bağlı yerleşim notu işlenir. Kötüye kullanımı sınırlamak için
         IP adresinizin tek yönlü ve geri döndürülemez bir özeti ile tarayıcınıza ait anonim
-        oturum kimliği kullanılabilir. Ücretsiz deneme sırasında IP adresi, VPN, proxy veya
-        Tor bağlantısı kontrolü için güvenlik sağlayıcısına anlık olarak iletilir. Ham IP
-        adresi uygulama veritabanında saklanmaz; yalnızca tuzlanmış ağ özeti, kontrol sonucu
-        ve kısa süreli önbellek tarihi tutulur.
+        oturum kimliği kullanılabilir. Ham IP adresi uygulama veritabanında saklanmaz;
+        yalnızca tuzlanmış bağlantı özeti tutulabilir.
       </p>
 
       <h2>Kupon verileri</h2>
       <p>
         Bir kupon etkinleştirildiğinde kuponun açık metni yerine tek yönlü güvenli özeti,
-        toplam ve kalan önizleme hakkı, etkinleştirme zamanı, kampanya etiketi ve varsa
-        son kullanım tarihi saklanır. Bunun dışında kullanıcıdan finansal bilgi
-        istenmez ve işlenmez.
+        toplam ve kalan önizleme hakkı, etkinleştirme zamanı, kampanya etiketi, son
+        kullanım tarihi ve kuponun bağlandığı anonim oturum kimliği saklanır. Bunun
+        dışında kullanıcıdan finansal bilgi istenmez ve işlenmez.
       </p>
 
       <h2>Fotoğrafların kullanımı</h2>
@@ -62,9 +60,9 @@ export default function PrivacyPage() {
       <p>
         Sonuç görselleri varsayılan olarak 30 gün sonra otomatik olarak silinir. Uygulama
         yöneticisi bu süreyi daha kısa belirleyebilir. Geçmiş bölümündeki silme düğmesiyle
-        kendi sonuç görselinizi daha önce de kalıcı olarak silebilirsiniz. Ücretsiz kullanım
-        hakkı kayıtları ile kupon ve hak hareketleri; kötüye kullanımı önlemek ve erişim
-        avantajını işletmek için sonuç görselinden daha uzun süre saklanabilir.
+        kendi sonuç görselinizi daha önce de kalıcı olarak silebilirsiniz. Kupon ve hak
+        hareketleri; kötüye kullanımı önlemek ve erişim avantajını işletmek için sonuç
+        görselinden daha uzun süre saklanabilir.
       </p>
 
       <h2>Erişim</h2>
@@ -77,17 +75,15 @@ export default function PrivacyPage() {
       <h2>Çerezler</h2>
       <p>
         Anonim oturum, etkin kupon ve yönetici oturumu için güvenli, HttpOnly çerezler
-        kullanılır. Kupon çerezi, kalan önizleme haklarının bu tarayıcıda kullanılabilmesini sağlar.
+        kullanılır. Kupon çerezi ve anonim oturum çerezi birlikte, kalan önizleme
+        haklarının yalnızca kuponu ilk etkinleştiren tarayıcıda kullanılabilmesini sağlar.
       </p>
 
       <h2>Üçüncü taraf hizmet</h2>
       <p>
         Yapay zekâ işlemi, sunucuda yapılandırılmış görsel üretim sağlayıcısı üzerinden
-        gerçekleştirilir. Ücretsiz denemenin kötüye kullanımını azaltmak için bağlantı riski
-        IPQualityScore üzerinden en iyi çabayla kontrol edilir. Sağlayıcı yanıt vermezse
-        oturum, bağlantı özeti ve günlük kapasite sınırları uygulanmaya devam eder. Bu
-        sağlayıcıların kendi güvenlik ve veri işleme koşulları geçerlidir. API anahtarları
-        kullanıcıya veya tarayıcıya gönderilmez.
+        gerçekleştirilir. Sağlayıcının kendi güvenlik ve veri işleme koşulları geçerlidir.
+        API anahtarları kullanıcıya veya tarayıcıya gönderilmez.
       </p>
 
       <h2>Fotoğraftaki kişiler</h2>

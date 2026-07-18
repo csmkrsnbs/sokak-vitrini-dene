@@ -27,6 +27,12 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
+function expiryInputValue(days: number) {
+  const date = new Date(Date.now() + days * 24 * 60 * 60 * 1_000);
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().slice(0, 16);
+}
+
 const statusLabels = {
   active: "Etkin",
   exhausted: "Tükendi",
@@ -41,7 +47,11 @@ export function CouponAdmin() {
   const [coupons, setCoupons] = useState<AdminCouponView[]>([]);
   const [label, setLabel] = useState("Tanıtım kuponu");
   const [credits, setCredits] = useState(1);
-  const [expiresAt, setExpiresAt] = useState("");
+  const [expiryBounds] = useState(() => ({
+    min: expiryInputValue(7),
+    max: expiryInputValue(30),
+  }));
+  const [expiresAt, setExpiresAt] = useState(expiryBounds.min);
   const [createdCode, setCreatedCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [workingId, setWorkingId] = useState<string | null>(null);
@@ -158,8 +168,8 @@ export function CouponAdmin() {
       setCoupons((current) => [payload.coupon, ...current]);
       setCreatedCode(payload.code);
       setCredits(1);
-      setExpiresAt("");
-      setMessage("Kupon oluşturuldu. Kodu şimdi güvenli bir yere kopyalayın.");
+      setExpiresAt(expiryInputValue(7));
+      setMessage("Kupon oluşturuldu. Kod ilk etkinleştiren tarayıcıya bağlanacaktır.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Kupon oluşturulamadı.");
     } finally {
@@ -276,7 +286,7 @@ export function CouponAdmin() {
                   <span className="section-kicker">Kampanya ve eşantiyon</span>
                   <h2>Yeni kupon oluştur</h2>
                 </div>
-                <small>Kod yalnızca oluşturulduğu anda gösterilir.</small>
+                <small>1–3 hak · 7–30 gün · ilk tarayıcıya bağlı</small>
               </div>
               <form onSubmit={createCoupon}>
                 <label>
@@ -293,18 +303,21 @@ export function CouponAdmin() {
                   <input
                     type="number"
                     min={1}
-                    max={100}
+                    max={3}
                     value={credits}
                     onChange={(event) => setCredits(Number(event.target.value))}
                     required
                   />
                 </label>
                 <label>
-                  <span>Son kullanım (isteğe bağlı)</span>
+                  <span>Son kullanım (7–30 gün)</span>
                   <input
                     type="datetime-local"
                     value={expiresAt}
                     onChange={(event) => setExpiresAt(event.target.value)}
+                    min={expiryBounds.min}
+                    max={expiryBounds.max}
+                    required
                   />
                 </label>
                 <button className="button button-gold" type="submit" disabled={loading}>

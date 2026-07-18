@@ -1,10 +1,10 @@
-import { and, count, eq, gt, isNull, or, sql } from "drizzle-orm";
+import { and, eq, gt, isNull, or, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
 import { getDb } from "@/lib/db";
-import { couponCodes, freeUsageEvents } from "@/lib/db/schema";
+import { couponCodes } from "@/lib/db/schema";
 import type { AccessState, PreviewCategory } from "@/lib/types";
-import { dailyGenerationLimit, FREE_PREVIEW_LIMIT } from "@/lib/server/usage-limits";
+import { dailyGenerationLimit } from "@/lib/server/usage-limits";
 import { getCouponId } from "@/lib/server/coupons";
 
 export type PreviewAccessReservation =
@@ -19,23 +19,12 @@ type PreviewReservationInput = {
   note: string | null;
   model: string;
   couponId: string | null;
-  allowFree: boolean;
-  freeTrialRestriction: "anonymizer" | null;
 };
 
 export class PreviewCreditsRequiredError extends Error {
   constructor() {
-    super("2 ücretsiz deneme hakkınız bitti. Devam etmek için kupon kullanın.");
+    super("Önizleme oluşturmak için geçerli ve bakiyesi bulunan bir kupon etkinleştirin.");
     this.name = "PreviewCreditsRequiredError";
-  }
-}
-
-export class PreviewVpnRestrictedError extends Error {
-  constructor() {
-    super(
-      "VPN, proxy veya Tor bağlantısıyla ücretsiz deneme kullanılamaz. Bağlantıyı kapatın veya kuponunuzu etkinleştirin.",
-    );
-    this.name = "PreviewVpnRestrictedError";
   }
 }
 
@@ -52,65 +41,6 @@ function resultRows(result: unknown) {
   return Array.isArray(rows) ? rows : [];
 }
 
-function isUniqueViolation(error: unknown) {
-  if (!error || typeof error !== "object") return false;
-  const candidate = error as { code?: unknown; cause?: { code?: unknown } };
-  return candidate.code === "23505" || candidate.cause?.code === "23505";
-}
-
-async function reserveFreePreview(input: PreviewReservationInput) {
-  const db = getDb();
-
-  for (let attempt = 0; attempt < FREE_PREVIEW_LIMIT; attempt += 1) {
-    try {
-      const result = await db.execute(sql`
-        WITH available_slot AS (
-          SELECT slot
-          FROM generate_series(1, ${FREE_PREVIEW_LIMIT}) AS slots(slot)
-          WHERE NOT EXISTS (
-            SELECT 1 FROM free_usage_events
-            WHERE session_id = ${input.sessionId} AND free_usage_events.slot = slots.slot
-          )
-          AND NOT EXISTS (
-            SELECT 1 FROM free_usage_events
-            WHERE client_key = ${input.clientKey} AND free_usage_events.slot = slots.slot
-          )
-          ORDER BY slot
-          LIMIT 1
-        ), inserted_preview AS (
-          INSERT INTO preview_requests (
-            id, session_id, client_key, category, note, status, model, credit_source
-          )
-          SELECT
-            ${input.id}::uuid,
-            ${input.sessionId},
-            ${input.clientKey},
-            ${input.category},
-            ${input.note},
-            'processing',
-            ${input.model},
-            'free'
-          FROM available_slot
-          RETURNING id
-        )
-        INSERT INTO free_usage_events (preview_id, session_id, client_key, slot)
-        SELECT inserted_preview.id, ${input.sessionId}, ${input.clientKey}, available_slot.slot
-        FROM inserted_preview
-        CROSS JOIN available_slot
-        RETURNING preview_id
-      `);
-
-      return resultRows(result).length > 0;
-    } catch (error) {
-      if (!isUniqueViolation(error) || attempt === FREE_PREVIEW_LIMIT - 1) {
-        if (isUniqueViolation(error)) return false;
-        throw error;
-      }
-    }
-  }
-
-  return false;
-}
 
 async function reserveCouponPreview(input: PreviewReservationInput, couponId: string) {
   const db = getDb();
@@ -119,10 +49,13 @@ async function reserveCouponPreview(input: PreviewReservationInput, couponId: st
       UPDATE coupon_codes
       SET
         remaining_credits = remaining_credits - 1,
-        status = CASE WHEN remaining_credits - 1 = 0 THEN 'exhausted' ELSE status END
+        status = CASE WHEN remaining_credits - 1 = 0 THEN 'exhausted' ELSE status END,
+        claimed_session_id = COALESCE(claimed_session_id, ${input.sessionId}),
+        activated_at = COALESCE(activated_at, NOW())
       WHERE id = ${couponId}::uuid
         AND status = 'active'
         AND remaining_credits > 0
+        AND (claimed_session_id IS NULL OR claimed_session_id = ${input.sessionId})
         AND (expires_at IS NULL OR expires_at > NOW())
       RETURNING id
     )
@@ -193,23 +126,14 @@ async function reserveDailyGeneration(previewId: string) {
 export async function reservePreviewAccess(
   input: PreviewReservationInput,
 ): Promise<PreviewAccessReservation> {
-  let reservation: PreviewAccessReservation | null = null;
-
-  if (input.allowFree && (await reserveFreePreview(input))) {
-    reservation = { source: "free", couponId: null };
-  }
-
-  if (!reservation && input.couponId && (await reserveCouponPreview(input, input.couponId))) {
-    reservation = { source: "coupon", couponId: input.couponId };
-  }
-
-  if (!reservation && input.freeTrialRestriction === "anonymizer") {
-    throw new PreviewVpnRestrictedError();
-  }
-
-  if (!reservation) {
+  if (!input.couponId || !(await reserveCouponPreview(input, input.couponId))) {
     throw new PreviewCreditsRequiredError();
   }
+
+  const reservation: PreviewAccessReservation = {
+    source: "coupon",
+    couponId: input.couponId,
+  };
 
   if (!(await reserveDailyGeneration(input.id))) {
     await releasePreviewAccess(input.id, reservation, "DAILY_CAPACITY_REACHED");
@@ -271,7 +195,6 @@ export async function releasePreviewAccess(
 export async function getAccessState({
   request,
   sessionId,
-  clientKey,
   couponIdOverride,
 }: {
   request: NextRequest;
@@ -280,17 +203,6 @@ export async function getAccessState({
   couponIdOverride?: string | null;
 }): Promise<AccessState> {
   const db = getDb();
-  const [freeUsage] = await db
-    .select({ total: count() })
-    .from(freeUsageEvents)
-    .where(
-      or(
-        eq(freeUsageEvents.sessionId, sessionId),
-        eq(freeUsageEvents.clientKey, clientKey),
-      ),
-    );
-
-  const used = Math.min(freeUsage?.total ?? 0, FREE_PREVIEW_LIMIT);
   const couponId = couponIdOverride === undefined ? getCouponId(request) : couponIdOverride;
   let coupon: AccessState["coupon"] = null;
 
@@ -306,6 +218,10 @@ export async function getAccessState({
         and(
           eq(couponCodes.id, couponId),
           or(eq(couponCodes.status, "active"), eq(couponCodes.status, "exhausted")),
+          or(
+            isNull(couponCodes.claimedSessionId),
+            eq(couponCodes.claimedSessionId, sessionId),
+          ),
           or(isNull(couponCodes.expiresAt), gt(couponCodes.expiresAt, new Date())),
         ),
       )
@@ -322,9 +238,9 @@ export async function getAccessState({
 
   return {
     free: {
-      limit: FREE_PREVIEW_LIMIT,
-      used,
-      remaining: Math.max(0, FREE_PREVIEW_LIMIT - used),
+      limit: 0,
+      used: 0,
+      remaining: 0,
     },
     coupon,
   };

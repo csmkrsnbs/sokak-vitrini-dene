@@ -8,7 +8,6 @@ import {
   getAccessState,
   DailyGenerationCapacityError,
   PreviewCreditsRequiredError,
-  PreviewVpnRestrictedError,
   type PreviewAccessReservation,
   releasePreviewAccess,
   reservePreviewAccess,
@@ -35,7 +34,6 @@ import {
   ImageValidationError,
   validateImageFile,
 } from "@/lib/server/image-validation";
-import { checkFreeTrialNetwork } from "@/lib/server/network-risk";
 import {
   cancelProductPreviewJob,
   getImageModelName,
@@ -152,11 +150,6 @@ export async function POST(request: NextRequest) {
       clientKey,
       couponId,
     });
-    const networkDecision = await checkFreeTrialNetwork({ request, clientKey });
-    const freeTrialRestriction =
-      networkDecision.status === "blocked"
-        ? "anonymizer"
-        : null;
 
     requestId = crypto.randomUUID();
     reservation = await reservePreviewAccess({
@@ -167,8 +160,6 @@ export async function POST(request: NextRequest) {
       note,
       model,
       couponId,
-      allowFree: networkDecision.status !== "blocked",
-      freeTrialRestriction,
     });
 
     const submitted = await submitProductPreview({
@@ -277,16 +268,6 @@ export async function POST(request: NextRequest) {
         "CREDITS_REQUIRED",
         error.message,
         402,
-        noStoreHeaders(),
-      );
-      return attachSessionCookie(response, session);
-    }
-
-    if (error instanceof PreviewVpnRestrictedError) {
-      const response = apiError(
-        "VPN_FREE_TRIAL_BLOCKED",
-        error.message,
-        403,
         noStoreHeaders(),
       );
       return attachSessionCookie(response, session);
