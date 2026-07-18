@@ -38,6 +38,11 @@ MAX_OUTPUT_BYTES = 10_000_000
 MAX_PROMPT_LENGTH = 4_000
 ALLOWED_OUTPUT_SIZES = {(1024, 1536), (1536, 1024)}
 
+SAFE_EVERYDAY_LABEL = (
+    "an ordinary harmless fashion, shopping product, adult portrait, home, "
+    "furniture, vehicle or everyday street photograph"
+)
+
 SEMANTIC_SAFETY_POLICIES = (
     (
         "SAFETY_MINOR_THRESHOLD",
@@ -48,25 +53,25 @@ SEMANTIC_SAFETY_POLICIES = (
     (
         "SAFETY_POLITICAL_THRESHOLD",
         "a politician, political leader, election campaign, political party, protest, rally or political propaganda",
-        "an ordinary non-political shopping product, adult portrait, room, furniture, car or street",
+        SAFE_EVERYDAY_LABEL,
         0.82,
     ),
     (
         "SAFETY_VIOLENCE_THRESHOLD",
-        "graphic violence, blood, severe injury, abuse, self-harm or a dead body",
-        "an ordinary peaceful scene without violence, blood or injury",
-        0.84,
+        "a real person being physically attacked or seriously injured, an open wound, self-harm or a dead body",
+        SAFE_EVERYDAY_LABEL,
+        0.98,
     ),
     (
         "SAFETY_WEAPON_THRESHOLD",
-        "a firearm, gun, explosive, combat weapon or threatening knife",
-        "an ordinary safe shopping product or everyday scene without weapons",
+        "a real firearm, handgun, rifle, explosive device or military combat weapon held or displayed",
+        SAFE_EVERYDAY_LABEL,
         0.84,
     ),
     (
         "SAFETY_HATE_THRESHOLD",
-        "a hate symbol, terrorist propaganda, extremist organization logo or hateful content",
-        "an ordinary neutral image without hate or extremist symbols",
+        "a visible hate symbol, terrorist propaganda or extremist organization emblem",
+        SAFE_EVERYDAY_LABEL,
         0.82,
     ),
 )
@@ -219,7 +224,7 @@ def _moderate_images(images: list[Image.Image]) -> bool:
                 risk_probability = torch.softmax(
                     image_logits[pair_start : pair_start + 2], dim=0
                 )[0].item()
-                threshold = _bounded_float(threshold_name, fallback, 0.50, 0.95)
+                threshold = _bounded_float(threshold_name, fallback, 0.50, 0.995)
                 if risk_probability >= threshold:
                     print(
                         f"Safety rejected: {threshold_name} "

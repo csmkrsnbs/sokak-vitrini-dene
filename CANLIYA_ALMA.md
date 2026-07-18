@@ -14,6 +14,7 @@
 - [ ] Worker loglarında FLUX ve güvenlik modellerinin önbellekten yüklendiği görüldü.
 - [ ] 24 GB GPU için `SAFETY_DEVICE=cpu` ayarlandı; FLUX GPU belleği güvenlik modelleriyle paylaşmıyor.
 - [ ] Uygun test tamamlandı; yasak içerik `UNSAFE_CONTENT` ile reddedildi.
+- [ ] Kırmızı kıyafet gibi güvenli örnekler şiddet filtresinde yanlış pozitif üretmedi.
 - [ ] RunPod düşük bakiye bildirimi etkinleştirildi.
 
 ## Vercel
