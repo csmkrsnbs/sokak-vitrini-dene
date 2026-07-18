@@ -40,7 +40,12 @@ export default function TermsPage() {
         içinde kullanılamaz:
       </p>
       <ul>
-        <li>Çıplaklık, pornografi, cinsel veya fetiş içerik ve mahrem görüntüler.</li>
+        <li>
+          Açık çıplaklık, pornografi, cinsel eylem, mahrem görüntüler veya kişiyi
+          cinsel bir bağlamda izinsiz gösteren içerikler. Açık çıplaklık içermeyen,
+          yetişkinlere ait iç çamaşırı, mayo, korse, body ve fantezi giyim ürünlerinin
+          katalog ya da sanal deneme amaçlı kullanımı izinlidir.
+        </li>
         <li>18 yaş altındaki veya yaşı açıkça yetişkin görünmeyen kişilerin fotoğrafları.</li>
         <li>Şiddet, kan, yaralanma, istismar, kendine zarar verme, silah veya patlayıcı.</li>
         <li>Nefret sembolleri, terör veya aşırılık propagandası ve hedef gösterme.</li>
@@ -56,10 +61,12 @@ export default function TermsPage() {
 
       <h2>Otomatik güvenlik denetimi</h2>
       <p>
-        Kaynak fotoğraflar görsel üretimden önce, oluşturulan sonuç ise kullanıcıya
-        sunulmadan önce aynı güvenli GPU ortamında otomatik olarak denetlenir. Denetim
-        tamamlanamazsa işlem güvenlik amacıyla durdurulur. Reddedilen işlemde görsel
-        sonucu saklanmaz ve kullanılan kupon hakkı iade edilir.
+        Giyim kategorisindeki kaynak fotoğraflar ve oluşturulan sonuç, self-host VTON
+        worker’ındaki izinli yetişkin moda içeriğini destekleyen güvenlik katmanıyla;
+        diğer kategoriler ise FLUX worker’ındaki güvenlik katmanıyla otomatik olarak
+        denetlenir. Güvenlik denetimi kapatılamaz. Denetim tamamlanamazsa işlem
+        güvenlik amacıyla durdurulur. Reddedilen işlemde görsel sonucu saklanmaz ve
+        kullanılan kupon hakkı iade edilir.
         Otomatik sınıflandırma hata yapabilir; güvenli olduğu düşünülen bir içerik de
         reddedilebilir. Güvenlik önlemlerini aşmaya çalışmak veya tekrar eden yasak içerik
         denemeleri, tarayıcı, bağlantı ya da kupon için geçici erişim kısıtlamasına neden

@@ -74,6 +74,9 @@ function terminalMessage(errorCode: string | null) {
   if (errorCode === "AI_MODEL_LOAD_FAILED") {
     return "Görsel üretim modeli worker üzerinde yüklenemedi. Kullanım hakkınız iade edildi; yönetici RunPod loglarını ve volume bağlantısını kontrol etmelidir.";
   }
+  if (errorCode === "VTON_INPUT_INVALID") {
+    return "Giyim motoru kişi pozunu veya ürünü yeterince net algılayamadı. Önden çekilmiş yetişkin fotoğrafı ve ürünün tamamını gösteren net bir fotoğrafla yeniden deneyin. Kullanım hakkınız iade edildi.";
+  }
   return "Görsel hazırlanamadı. Kullanım hakkınız iade edildi.";
 }
 
@@ -181,7 +184,7 @@ export async function GET(
 
     const submittedAt = row.providerSubmittedAt ?? row.createdAt;
     if (Date.now() - submittedAt.getTime() > getPreviewJobMaxAgeMs()) {
-      await cancelProductPreviewJob(row.providerJobId);
+      await cancelProductPreviewJob(row.providerJobId, row.category);
       return failProcessing(
         "TIMED_OUT",
         "AI_TIMEOUT",
@@ -189,7 +192,7 @@ export async function GET(
       );
     }
 
-    const job = await getProductPreviewJob(row.providerJobId);
+    const job = await getProductPreviewJob(row.providerJobId, row.category);
     if (job.state === "completed") {
       const [completed] = await db
         .update(previewRequests)
@@ -280,6 +283,7 @@ export async function DELETE(
     const [existing] = await db
       .select({
         status: previewRequests.status,
+        category: previewRequests.category,
         providerJobId: previewRequests.providerJobId,
         creditSource: previewRequests.creditSource,
         couponId: previewRequests.couponId,
@@ -299,7 +303,7 @@ export async function DELETE(
 
     if (existing.status === "processing") {
       if (existing.providerJobId) {
-        await cancelProductPreviewJob(existing.providerJobId);
+        await cancelProductPreviewJob(existing.providerJobId, existing.category);
       }
       const reservation = reservationFor(existing);
       if (reservation) {

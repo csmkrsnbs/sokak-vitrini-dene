@@ -1,4 +1,8 @@
-import type { PreviewCategory } from "@/lib/types";
+import type {
+  ClothingType,
+  GarmentPhotoType,
+  PreviewCategory,
+} from "@/lib/types";
 
 type CategoryConfig = {
   label: string;
@@ -36,9 +40,11 @@ export const CATEGORY_CONFIG: Record<PreviewCategory, CategoryConfig> = {
     label: "Giyim",
     shortLabel: "Giyim",
     title: "Kıyafeti üzerinde gör",
-    description: "Vitrinde beğendiğin gömlek, ceket veya elbiseyi fotoğrafında dene.",
+    description:
+      "Gömlek, ceket, elbise, iç çamaşırı veya fantezi kostümü yetişkin fotoğrafında dene.",
     productLabel: "Kıyafetin fotoğrafı",
-    productHint: "Ürünün tamamı ve kesimi görünür olsun.",
+    productHint:
+      "Ürünü başka biri üzerinde değil; sade fonda, askıda veya düz serilmiş ve tamamı görünür biçimde çek.",
     targetLabel: "Senin veya arkadaşının fotoğrafı",
     targetHint: "Önden çekilmiş, vücudu net gösteren bir fotoğraf seç.",
     notePlaceholder: "Örn. Gömleği üzerime normal kesim olarak giydir",
@@ -85,6 +91,68 @@ export const CATEGORY_CONFIG: Record<PreviewCategory, CategoryConfig> = {
   },
 };
 
+type ClothingTypeConfig = {
+  label: string;
+  shortLabel: string;
+  description: string;
+  productHint: string;
+  targetHint: string;
+};
+
+export const CLOTHING_TYPE_CONFIG: Record<ClothingType, ClothingTypeConfig> = {
+  tops: {
+    label: "Üst giyim",
+    shortLabel: "Gömlek · Ceket · Sütyen",
+    description:
+      "Gömlek, tişört, bluz, ceket, sütyen veya korseyi üst gövdeye uygular.",
+    productHint: "Üst ürünün tamamı, askıları ve kolları görünür olsun.",
+    targetHint:
+      "Yalnızca 18 yaşından büyük, önden çekilmiş ve üst gövdesi net görünen bir fotoğraf seç.",
+  },
+  bottoms: {
+    label: "Alt giyim",
+    shortLabel: "Pantolon · Etek · Alt iç giyim",
+    description:
+      "Pantolon, etek, şort veya alt iç giyim ürününü bel ve bacak bölgesine uygular.",
+    productHint: "Alt ürünün tamamı ve bel kesimi görünür olsun.",
+    targetHint:
+      "Yalnızca 18 yaşından büyük, belden ayaklara kadar görünen önden çekilmiş bir fotoğraf seç.",
+  },
+  "one-pieces": {
+    label: "Tek parça",
+    shortLabel: "Elbise · Tulum · Body",
+    description:
+      "Elbise, tulum, body veya tek parça kostümü tam vücut kıyafeti olarak uygular.",
+    productHint: "Tek parça ürünün omuzdan etek ucuna kadar tamamı görünsün.",
+    targetHint:
+      "Yalnızca 18 yaşından büyük, baştan ayağa görünen ve önden çekilmiş bir fotoğraf seç.",
+  },
+};
+
+type GarmentPhotoTypeConfig = {
+  label: string;
+  description: string;
+};
+
+export const GARMENT_PHOTO_TYPE_CONFIG: Record<
+  GarmentPhotoType,
+  GarmentPhotoTypeConfig
+> = {
+  "flat-lay": {
+    label: "Tek başına / askıda",
+    description:
+      "Ürün sade fonda, askıda veya düz serilmiş halde ve tamamı görünür olmalı.",
+  },
+};
+
 export function isPreviewCategory(value: unknown): value is PreviewCategory {
   return typeof value === "string" && value in CATEGORY_CONFIG;
+}
+
+export function isClothingType(value: unknown): value is ClothingType {
+  return typeof value === "string" && value in CLOTHING_TYPE_CONFIG;
+}
+
+export function isGarmentPhotoType(value: unknown): value is GarmentPhotoType {
+  return typeof value === "string" && value in GARMENT_PHOTO_TYPE_CONFIG;
 }

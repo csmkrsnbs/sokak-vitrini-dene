@@ -18,6 +18,18 @@
 - [ ] Kırmızı kıyafet gibi güvenli örnekler şiddet filtresinde yanlış pozitif üretmedi.
 - [ ] RunPod düşük bakiye bildirimi etkinleştirildi.
 
+## Self-host FASHN VTON giyim motoru
+
+- [ ] `runpod-vton-worker` GitHub Actions imajı başarıyla oluşturuldu.
+- [ ] GHCR VTON paketi public yapıldı veya RunPod registry kimliği tanımlandı.
+- [ ] 24 GB RTX 3090 ile ayrı Serverless VTON endpoint'i oluşturuldu.
+- [ ] Endpoint'e en az bir uygun network volume `/runpod-volume` olarak bağlandı.
+- [ ] Vercel Production ortamına `RUNPOD_VTON_ENDPOINT_ID` eklendi.
+- [ ] Düz zeminde/askıda gömlek, ceket, elbise ve yetişkin iç çamaşırı testleri tamamlandı.
+- [ ] Başka bir kişi üzerinde çekilmiş ürün fotoğrafının arayüzde sunulmadığı doğrulandı.
+- [ ] Açık çıplaklık veya uygunsuz cinsel içerik `UNSAFE_CONTENT` ile reddedildi.
+- [ ] Başarısız VTON işinde kupon hakkının iade edildiği doğrulandı.
+
 ## Vercel
 
 - [ ] `.env.example` içindeki Production değişkenleri eklendi.
@@ -42,7 +54,7 @@
 
 ## Kapasite testi
 
-- [ ] Günlük genel kapasite dolduğunda RunPod işi oluşmadı ve kullanıcı hakkı düşmedi.
+- [ ] Günlük genel kapasite dolduğunda hiçbir sağlayıcı işi oluşmadı ve kullanıcı hakkı düşmedi.
 - [ ] Günlük sınır İstanbul tarihinde yenilendi.
 
 ## Yayın öncesi

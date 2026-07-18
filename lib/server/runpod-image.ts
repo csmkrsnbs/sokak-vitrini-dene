@@ -1,5 +1,20 @@
 import { CATEGORY_CONFIG } from "@/lib/categories";
-import type { PreviewCategory, PreviewProviderStatus } from "@/lib/types";
+import {
+  cancelRunPodVtonJob,
+  getRunPodVtonJob,
+  getRunPodVtonModelName,
+  isRunPodVtonConfigured,
+  submitRunPodVtonTryOn,
+} from "@/lib/server/runpod-vton-image";
+import { ImageGenerationError } from "@/lib/server/image-generation-error";
+import type {
+  ClothingType,
+  GarmentPhotoType,
+  PreviewCategory,
+  PreviewProviderStatus,
+} from "@/lib/types";
+
+export { ImageGenerationError } from "@/lib/server/image-generation-error";
 
 type RunPodJobResponse = {
   id?: unknown;
@@ -21,17 +36,6 @@ const DEFAULT_MODEL = "black-forest-labs/FLUX.2-klein-4B";
 const RUNPOD_API_BASE = "https://api.runpod.ai/v2";
 const ENDPOINT_ID_PATTERN = /^[a-zA-Z0-9_-]{3,80}$/;
 const JOB_ID_PATTERN = /^[a-zA-Z0-9_-]{3,160}$/;
-
-export class ImageGenerationError extends Error {
-  constructor(
-    public readonly code: string,
-    message: string,
-    public readonly status = 502,
-  ) {
-    super(message);
-    this.name = "ImageGenerationError";
-  }
-}
 
 function categoryPrompt(category: PreviewCategory) {
   const prompts: Record<PreviewCategory, string> = {
@@ -112,7 +116,7 @@ function getRunPodConfig() {
   };
 }
 
-export function isImageGenerationConfigured() {
+function isRunPodConfigured() {
   const endpointId = process.env.RUNPOD_ENDPOINT_ID?.trim();
   return Boolean(
     process.env.RUNPOD_API_KEY?.trim() &&
@@ -121,7 +125,14 @@ export function isImageGenerationConfigured() {
   );
 }
 
-export function getImageModelName() {
+export function isImageGenerationConfigured(category?: PreviewCategory) {
+  if (category === "clothing") return isRunPodVtonConfigured();
+  if (category) return isRunPodConfigured();
+  return isRunPodConfigured() && isRunPodVtonConfigured();
+}
+
+export function getImageModelName(category: PreviewCategory = "jewelry") {
+  if (category === "clothing") return getRunPodVtonModelName();
   const configured = process.env.FLUX_IMAGE_MODEL?.trim();
   return (configured || DEFAULT_MODEL).slice(0, 80);
 }
@@ -318,7 +329,7 @@ function parseCompletedOutput(payload: RunPodJobResponse) {
   const model =
     typeof output.model === "string" && output.model.trim()
       ? output.model.trim().slice(0, 80)
-      : getImageModelName();
+      : getImageModelName("jewelry");
 
   return { model, imageBase64, mime, bytes };
 }
@@ -353,7 +364,18 @@ export async function submitProductPreview(input: {
   product: File;
   target: File;
   note: string | null;
+  clothingType: ClothingType;
+  garmentPhotoType: GarmentPhotoType;
 }) {
+  if (input.category === "clothing") {
+    return submitRunPodVtonTryOn({
+      product: input.product,
+      target: input.target,
+      clothingType: input.clothingType,
+      garmentPhotoType: input.garmentPhotoType,
+    });
+  }
+
   const config = getRunPodConfig();
   const { width, height } = outputDimensions(input.category);
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
@@ -419,10 +441,15 @@ export async function submitProductPreview(input: {
     );
   }
 
-  return { jobId: payload.id, providerStatus };
+  return { jobId: payload.id, providerStatus, result: undefined };
 }
 
-export async function getProductPreviewJob(jobId: string) {
+export async function getProductPreviewJob(
+  jobId: string,
+  category: PreviewCategory,
+) {
+  if (category === "clothing") return getRunPodVtonJob(jobId);
+
   if (!JOB_ID_PATTERN.test(jobId)) {
     throw new ImageGenerationError(
       "INVALID_AI_RESPONSE",
@@ -503,7 +530,11 @@ export async function getProductPreviewJob(jobId: string) {
   };
 }
 
-export async function cancelProductPreviewJob(jobId: string) {
+export async function cancelProductPreviewJob(
+  jobId: string,
+  category: PreviewCategory,
+) {
+  if (category === "clothing") return cancelRunPodVtonJob(jobId);
   if (!JOB_ID_PATTERN.test(jobId)) return;
   const config = getRunPodConfig();
   await cancelJob(config.endpointId, jobId, config.apiKey);

@@ -1,7 +1,11 @@
 import { and, desc, eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-import { isPreviewCategory } from "@/lib/categories";
+import {
+  isClothingType,
+  isGarmentPhotoType,
+  isPreviewCategory,
+} from "@/lib/categories";
 import { getDb, MissingDatabaseConfigurationError } from "@/lib/db";
 import { previewRequests } from "@/lib/db/schema";
 import {
@@ -44,6 +48,11 @@ import {
   previewListSelection,
   serializePreview,
 } from "@/lib/server/preview-select";
+import type {
+  ClothingType,
+  GarmentPhotoType,
+  PreviewCategory,
+} from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -112,12 +121,39 @@ export async function POST(request: NextRequest) {
   let reservation: PreviewAccessReservation | null = null;
   let providerJobId: string | null = null;
   let providerJobStored = false;
+  let providerCategory: PreviewCategory | null = null;
 
   try {
     const formData = await request.formData();
     const categoryValue = formData.get("category");
     if (!isPreviewCategory(categoryValue)) {
       return apiError("INVALID_CATEGORY", "Geçerli bir ürün türü seçin.", 400);
+    }
+    providerCategory = categoryValue;
+
+    const clothingTypeValue = formData.get("clothingType");
+    const garmentPhotoTypeValue = formData.get("garmentPhotoType");
+    const clothingType: ClothingType =
+      categoryValue === "clothing" && isClothingType(clothingTypeValue)
+        ? clothingTypeValue
+        : "tops";
+    const garmentPhotoType: GarmentPhotoType =
+      categoryValue === "clothing" && isGarmentPhotoType(garmentPhotoTypeValue)
+        ? garmentPhotoTypeValue
+        : "flat-lay";
+
+    if (categoryValue === "clothing" && !isClothingType(clothingTypeValue)) {
+      return apiError("INVALID_CLOTHING_TYPE", "Geçerli bir kıyafet türü seçin.", 400);
+    }
+    if (
+      categoryValue === "clothing" &&
+      !isGarmentPhotoType(garmentPhotoTypeValue)
+    ) {
+      return apiError(
+        "INVALID_GARMENT_PHOTO_TYPE",
+        "Ürün fotoğrafının biçimini seçin.",
+        400,
+      );
     }
 
     if (formData.get("consent") !== "true") {
@@ -140,9 +176,10 @@ export async function POST(request: NextRequest) {
       validateImageFile(formData.get("product"), "Ürün fotoğrafı"),
       validateImageFile(formData.get("target"), "Hedef fotoğraf"),
     ]);
-    const note = normalizeNote(formData.get("note"));
-    validatePlacementNote(note);
-    const model = getImageModelName();
+    const note =
+      categoryValue === "clothing" ? null : normalizeNote(formData.get("note"));
+    if (categoryValue !== "clothing") validatePlacementNote(note);
+    const model = getImageModelName(categoryValue);
     const db = getDb();
     const couponId = getCouponId(request);
     await assertContentSafetyAllowed({
@@ -167,6 +204,8 @@ export async function POST(request: NextRequest) {
       product,
       target,
       note,
+      clothingType,
+      garmentPhotoType,
     });
     providerJobId = submitted.jobId;
 
@@ -245,8 +284,8 @@ export async function POST(request: NextRequest) {
     );
     return attachSessionCookie(response, session);
   } catch (error) {
-    if (!providerJobStored && providerJobId) {
-      await cancelProductPreviewJob(providerJobId);
+    if (!providerJobStored && providerJobId && providerCategory) {
+      await cancelProductPreviewJob(providerJobId, providerCategory);
     }
 
     if (!providerJobStored && requestId && reservation) {

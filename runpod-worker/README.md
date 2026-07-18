@@ -1,8 +1,9 @@
 # RunPod FLUX.2 Worker
 
 Bu worker, ürün ve hedef fotoğrafını Apache 2.0 lisanslı
-`black-forest-labs/FLUX.2-klein-4B` modeliyle birleştirir. Model takı, giyim,
-mobilya ve otomobil kategorilerinin tamamında aynı iki referanslı akışı kullanır.
+`black-forest-labs/FLUX.2-klein-4B` modeliyle birleştirir. Bu endpoint takı,
+mobilya ve otomobil kategorilerinde kullanılır. Giyim için ayrı
+`runpod-vton-worker` endpoint'i vardır.
 Kaynak görseller FLUX çalışmadan önce, üretilen sonuç da kullanıcıya dönmeden önce
 aynı worker içinde iki açık kaynaklı güvenlik modeliyle denetlenir. Ayrı moderasyon
 API çağrısı yapılmadığı için ikinci bir ağ gecikmesi oluşmaz.
@@ -102,7 +103,7 @@ https://dene.sokakvitrini.com/api/health
 ```
 
 cevabında `databaseReachable` ve `aiConfigured` değerleri `true` olmalıdır.
-Ardından dört kategorinin her birini mobil cihazdan iki gerçek fotoğrafla test
-edin. Uygun bir isteğin tamamlandığını, kurala aykırı kontrollü bir test
+Ardından takı, mobilya ve otomobil kategorilerini mobil cihazdan iki gerçek
+fotoğrafla test edin. Uygun bir isteğin tamamlandığını, kurala aykırı kontrollü bir test
 örneğinin `UNSAFE_CONTENT` ile reddedildiğini ve reddedilen işlemde kullanım
 hakkının iade edildiğini ayrıca doğrulayın.

@@ -32,10 +32,16 @@ import {
 } from "react";
 
 import { CreditAccess } from "@/components/credit-access";
-import { CATEGORY_CONFIG } from "@/lib/categories";
+import {
+  CATEGORY_CONFIG,
+  CLOTHING_TYPE_CONFIG,
+  GARMENT_PHOTO_TYPE_CONFIG,
+} from "@/lib/categories";
 import type {
   AccessState,
   ApiErrorBody,
+  ClothingType,
+  GarmentPhotoType,
   PreviewCategory,
   PreviewListItem,
   PreviewProviderStatus,
@@ -297,6 +303,8 @@ function UploadCard({
 
 export function TryOnStudio() {
   const [category, setCategory] = useState<PreviewCategory>("jewelry");
+  const [clothingType, setClothingType] = useState<ClothingType>("tops");
+  const garmentPhotoType: GarmentPhotoType = "flat-lay";
   const [product, setProduct] = useState<SelectedImage | null>(null);
   const [target, setTarget] = useState<SelectedImage | null>(null);
   const [note, setNote] = useState("");
@@ -316,18 +324,23 @@ export function TryOnStudio() {
   const productRef = useRef<SelectedImage | null>(null);
   const targetRef = useRef<SelectedImage | null>(null);
   const config = CATEGORY_CONFIG[category];
+  const clothingConfig = CLOTHING_TYPE_CONFIG[clothingType];
+  const productHint =
+    category === "clothing" ? clothingConfig.productHint : config.productHint;
+  const targetHint =
+    category === "clothing" ? clothingConfig.targetHint : config.targetHint;
   const hasCouponCredit = (access?.coupon?.remaining ?? 0) > 0;
   const loadingTitle =
     loadingStage === "submitting"
       ? "Fotoğraflar güvenli şekilde gönderiliyor…"
       : loadingStage === "queued"
-        ? "Uygun GPU sırası bekleniyor…"
+        ? "Uygun işlem sırası bekleniyor…"
         : loadingMessages[loadingIndex];
   const loadingDescription =
     loadingStage === "queued"
       ? "Yoğunluğa göre bekleme uzayabilir. Sayfayı yenilesen de işlem kaldığı yerden izlenir."
       : loadingStage === "running"
-        ? "GPU çalışıyor; gerçekçi önizlemen oluşturuluyor."
+        ? "Görsel motoru çalışıyor; gerçekçi önizlemen oluşturuluyor."
         : "İşlem kaydı oluşturuluyor; bu adım kısa sürer.";
   const loadingProgress =
     loadingStage === "submitting"
@@ -558,6 +571,10 @@ export function TryOnStudio() {
 
     const formData = new FormData();
     formData.append("category", category);
+    if (category === "clothing") {
+      formData.append("clothingType", clothingType);
+      formData.append("garmentPhotoType", garmentPhotoType);
+    }
     formData.append("product", product.file);
     formData.append("target", target.file);
     formData.append("note", note.trim());
@@ -623,7 +640,9 @@ export function TryOnStudio() {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `sokak-vitrini-${CATEGORY_CONFIG[item.category].shortLabel.toLocaleLowerCase("tr-TR")}.webp`;
+      const extension =
+        blob.type === "image/png" ? "png" : blob.type === "image/jpeg" ? "jpg" : "webp";
+      anchor.download = `sokak-vitrini-${CATEGORY_CONFIG[item.category].shortLabel.toLocaleLowerCase("tr-TR")}.${extension}`;
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
@@ -639,7 +658,11 @@ export function TryOnStudio() {
   const shareResult = async (item: PreviewListItem) => {
     try {
       const blob = await fetchResultBlob(item);
-      const file = new File([blob], "sokak-vitrini-deneme.webp", { type: blob.type });
+      const extension =
+        blob.type === "image/png" ? "png" : blob.type === "image/jpeg" ? "jpg" : "webp";
+      const file = new File([blob], `sokak-vitrini-deneme.${extension}`, {
+        type: blob.type,
+      });
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           title: "Sokak Vitrini Dene",
@@ -738,12 +761,60 @@ export function TryOnStudio() {
                   </div>
                 </div>
 
+                {category === "clothing" && (
+                  <div className="vton-options">
+                    <div className="vton-option-group">
+                      <div className="vton-option-heading">
+                        <strong>Kıyafet türü</strong>
+                        <span>Ürünün uygulanacağı vücut bölgesini seç.</span>
+                      </div>
+                      <div
+                        className="vton-choice-grid vton-choice-grid-three"
+                        role="group"
+                        aria-label="Kıyafet türü"
+                      >
+                        {(Object.keys(CLOTHING_TYPE_CONFIG) as ClothingType[]).map(
+                          (item) => {
+                            const itemConfig = CLOTHING_TYPE_CONFIG[item];
+                            return (
+                              <button
+                                type="button"
+                                className={clothingType === item ? "active" : ""}
+                                aria-pressed={clothingType === item}
+                                onClick={() => {
+                                  setClothingType(item);
+                                  setResult(null);
+                                }}
+                                disabled={loading}
+                                key={item}
+                              >
+                                <strong>{itemConfig.label}</strong>
+                                <span>{itemConfig.shortLabel}</span>
+                              </button>
+                            );
+                          },
+                        )}
+                      </div>
+                      <p className="vton-selection-description">
+                        {clothingConfig.description}
+                      </p>
+                    </div>
+
+                    <div className="vton-option-group">
+                      <div className="vton-option-heading">
+                        <strong>Ürün fotoğrafı</strong>
+                        <span>{GARMENT_PHOTO_TYPE_CONFIG["flat-lay"].description}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="uploads-grid">
                   <UploadCard
                     id="product-image"
                     step="1"
                     label={config.productLabel}
-                    hint={config.productHint}
+                    hint={productHint}
                     image={product}
                     onSelect={(file) => chooseImage(file, product, setProduct)}
                     onRemove={() => removeImage(product, setProduct)}
@@ -753,7 +824,7 @@ export function TryOnStudio() {
                     id="target-image"
                     step="2"
                     label={config.targetLabel}
-                    hint={config.targetHint}
+                    hint={targetHint}
                     image={target}
                     onSelect={(file) => chooseImage(file, target, setTarget)}
                     onRemove={() => removeImage(target, setTarget)}
@@ -761,38 +832,55 @@ export function TryOnStudio() {
                   />
                 </div>
 
-                <div className="note-field">
-                  <label htmlFor="placement-note">
-                    Kendi yerleşim notun <em>isteğe bağlı</em>
-                  </label>
-                  <div className="note-suggestions" aria-label={`${config.label} için hazır yerleşim notları`}>
-                    <strong>Hazır notlardan seç</strong>
+                {category === "clothing" ? (
+                  <div className="vton-engine-note">
+                    <Sparkles size={18} />
                     <div>
-                      {config.noteSuggestions.map((suggestion) => (
-                        <button
-                          type="button"
-                          className={note === suggestion ? "active" : ""}
-                          aria-pressed={note === suggestion}
-                          onClick={() => setNote(suggestion)}
-                          disabled={loading}
-                          key={suggestion}
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
+                      <strong>Giyime özel sanal deneme motoru kullanılacak</strong>
+                      <p>
+                        Yetişkin iç çamaşırı, mayo, korse, body ve fantezi giyim
+                        desteklenir. Açık çıplaklık, cinsel eylem, çocuk veya yaşı
+                        belirsiz kişi fotoğrafı kabul edilmez.
+                      </p>
                     </div>
                   </div>
-                  <textarea
-                    id="placement-note"
-                    value={note}
-                    maxLength={300}
-                    rows={2}
-                    placeholder={config.notePlaceholder}
-                    onChange={(event) => setNote(event.target.value)}
-                    disabled={loading}
-                  />
-                  <small>{note.length}/300</small>
-                </div>
+                ) : (
+                  <div className="note-field">
+                    <label htmlFor="placement-note">
+                      Kendi yerleşim notun <em>isteğe bağlı</em>
+                    </label>
+                    <div
+                      className="note-suggestions"
+                      aria-label={`${config.label} için hazır yerleşim notları`}
+                    >
+                      <strong>Hazır notlardan seç</strong>
+                      <div>
+                        {config.noteSuggestions.map((suggestion) => (
+                          <button
+                            type="button"
+                            className={note === suggestion ? "active" : ""}
+                            aria-pressed={note === suggestion}
+                            onClick={() => setNote(suggestion)}
+                            disabled={loading}
+                            key={suggestion}
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <textarea
+                      id="placement-note"
+                      value={note}
+                      maxLength={300}
+                      rows={2}
+                      placeholder={config.notePlaceholder}
+                      onChange={(event) => setNote(event.target.value)}
+                      disabled={loading}
+                    />
+                    <small>{note.length}/300</small>
+                  </div>
+                )}
 
                 <label className="consent-row">
                   <input
@@ -820,9 +908,10 @@ export function TryOnStudio() {
                     <Check size={14} />
                   </span>
                   <span>
-                    Fotoğraflarda 18 yaş altı kişi, çıplaklık veya cinsel içerik;
-                    şiddet, silah, nefret sembolü ya da siyasi kişi ve propaganda
-                    bulunmadığını onaylıyorum. {" "}
+                    Fotoğraftaki herkesin 18 yaşından büyük olduğunu; açık çıplaklık,
+                    cinsel eylem, izinsiz kişi fotoğrafı, şiddet, silah, nefret sembolü
+                    ya da siyasi propaganda bulunmadığını onaylıyorum. Yetişkinlere ait
+                    iç çamaşırı ve fantezi giyim ürün fotoğrafı kullanılabilir. {" "}
                     <Link
                       href="/kullanim-kosullari"
                       target="_blank"
@@ -849,7 +938,7 @@ export function TryOnStudio() {
                     <>
                       <LoaderCircle className="spin" size={19} />
                       {loadingStage === "queued"
-                        ? "GPU sırası bekleniyor"
+                        ? "İşlem sırası bekleniyor"
                         : loadingStage === "submitting"
                           ? "Fotoğraflar gönderiliyor"
                           : "Önizleme hazırlanıyor"}
@@ -876,7 +965,7 @@ export function TryOnStudio() {
                       <Sparkles size={34} />
                     </div>
                     <span className="section-kicker">
-                      {loadingStage === "queued" ? "GPU hazırlanıyor" : "Yapay zekâ çalışıyor"}
+                      {loadingStage === "queued" ? "İşlem hazırlanıyor" : "Yapay zekâ çalışıyor"}
                     </span>
                     <h3>{loadingTitle}</h3>
                     <p>{loadingDescription}</p>

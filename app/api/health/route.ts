@@ -18,7 +18,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const databaseConfigured = Boolean(process.env.DATABASE_URL?.trim());
-  const aiConfigured = isImageGenerationConfigured();
+  const fluxConfigured = isImageGenerationConfigured("jewelry");
+  const clothingConfigured = isImageGenerationConfigured("clothing");
+  const aiConfigured = fluxConfigured && clothingConfigured;
   const couponConfigured = Boolean(
     (process.env.COUPON_SIGNING_SECRET?.trim().length ?? 0) >= 32 &&
       (process.env.ADMIN_ACCESS_KEY?.trim().length ?? 0) >= 32,
@@ -75,10 +77,15 @@ export async function GET() {
         databaseReachable,
         schemaReady,
         aiConfigured,
+        fluxConfigured,
+        clothingConfigured,
         couponConfigured,
         securityConfigured,
-        aiProvider: "runpod",
-        aiModel: getImageModelName(),
+        aiProvider: "runpod-self-hosted",
+        aiModels: {
+          productPlacement: getImageModelName("jewelry"),
+          clothingTryOn: getImageModelName("clothing"),
+        },
       },
     },
     { status: ready ? 200 : 503, headers: noStoreHeaders() },

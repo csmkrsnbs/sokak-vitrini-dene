@@ -36,20 +36,22 @@ export default function PrivacyPage() {
       <h2>Fotoğrafların kullanımı</h2>
       <p>
         Yüklediğiniz ürün ve hedef fotoğrafları yalnızca talep ettiğiniz önizlemeyi
-        oluşturmak amacıyla yapay zekâ hizmet sağlayıcısına iletilir. Bu iki kaynak
-        fotoğraf Sokak Vitrini Dene veritabanında kalıcı olarak saklanmaz; işlem
-        tamamlanana veya geçici iş süresi dolana kadar sağlayıcının iş kuyruğunda
-        bulunabilir. Oluşturulan sonuç görseli, geçmişinizde gösterilebilmesi için
-        sınırlı süreyle saklanır.
+        oluşturmak amacıyla kategoriye göre yapay zekâ hizmet sağlayıcısına iletilir.
+        Fotoğraflar kategoriye göre kendi RunPod Serverless FLUX veya VTON worker’ımıza
+        Base64 veri olarak gönderilir. Bu iki kaynak fotoğraf Sokak Vitrini Dene
+        veritabanında kalıcı olarak saklanmaz. Girdiler RunPod işinin işlenmesi ve iş
+        yaşam süresi boyunca geçici olarak bulunabilir; sonuç üçüncü taraf CDN adresi
+        yerine Base64 olarak alınır. Oluşturulan sonuç görseli, size geçmişte
+        gösterilebilmesi için Sokak Vitrini Dene veritabanında sınırlı süreyle saklanır.
       </p>
 
       <h2>İçerik güvenliği denetimi</h2>
       <p>
-        Kaynak fotoğraflar ve oluşturulan sonuç; çıplaklık veya cinsel içerik, 18 yaş
-        altındaki kişiler, şiddet, silah, nefret veya aşırılık sembolleri ve siyasi içerik
-        riskini belirlemek amacıyla aynı RunPod GPU worker’ında otomatik sınıflandırmadan
-        geçirilir. Bu denetim için ayrı bir üçüncü taraf moderasyon servisine ikinci kez
-        gönderim yapılmaz. Sınıflandırma puanları uygulama veritabanında saklanmaz.
+        Giyim worker’ındaki yerel güvenlik denetimi yetişkinlere ait iç çamaşırı, mayo ve
+        kostüm katalog görüntülerini kabul ederken açık çıplaklığı ve cinsel eylemi
+        engellemeyi amaçlar; denetim tamamen kapatılmaz. Diğer kategorilerde de kaynak ve
+        sonuç görselleri RunPod GPU worker’ındaki güvenlik sınıflandırmasından geçirilir.
+        Sınıflandırma puanları uygulama veritabanında saklanmaz.
         Reddedilen denemede yalnızca genel güvenlik hata kodu, anonim oturum veya
         tuzlanmış bağlantı özeti ve işlem zamanı; tekrar eden kötüye kullanımı sınırlamak
         için normal önizleme saklama süresi boyunca tutulabilir. Otomatik denetim hata
@@ -81,9 +83,11 @@ export default function PrivacyPage() {
 
       <h2>Üçüncü taraf hizmet</h2>
       <p>
-        Yapay zekâ işlemi, sunucuda yapılandırılmış görsel üretim sağlayıcısı üzerinden
-        gerçekleştirilir. Sağlayıcının kendi güvenlik ve veri işleme koşulları geçerlidir.
-        API anahtarları kullanıcıya veya tarayıcıya gönderilmez.
+        Tüm önizlemeler kategoriye göre iki ayrı self-host RunPod Serverless endpoint’i
+        üzerinden gerçekleştirilir. Model ağırlıkları ilk kurulumda Hugging Face’den
+        indirilebilir; kullanıcı fotoğrafları model indirme hizmetine gönderilmez.
+        RunPod’ın güvenlik ve veri işleme koşulları geçerlidir. API anahtarı kullanıcıya
+        veya tarayıcıya gönderilmez.
       </p>
 
       <h2>Fotoğraftaki kişiler</h2>

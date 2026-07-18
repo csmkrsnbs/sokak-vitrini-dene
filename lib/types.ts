@@ -7,6 +7,14 @@ export const previewCategories = [
 
 export type PreviewCategory = (typeof previewCategories)[number];
 
+export const clothingTypes = ["tops", "bottoms", "one-pieces"] as const;
+
+export type ClothingType = (typeof clothingTypes)[number];
+
+export const garmentPhotoTypes = ["flat-lay"] as const;
+
+export type GarmentPhotoType = (typeof garmentPhotoTypes)[number];
+
 export type PreviewStatus = "processing" | "completed" | "failed";
 
 export type PreviewProviderStatus =
