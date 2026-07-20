@@ -2,10 +2,5 @@ runpod==1.9.1
 transformers==5.13.0
 huggingface-hub==1.23.0
 Pillow==11.3.0
-safetensors>=0.3.0,<1
-numpy>=1.26,<3
-opencv-python-headless>=4.10,<5
-tqdm>=4.65,<5
-einops>=0.6,<1
-onnxruntime-gpu>=1.21,<2
-matplotlib>=3.8,<4
+fashn-human-parser==0.1.1
+git+https://github.com/fashn-AI/fashn-vton-1.5.git@7c0f10af3f91ad4048fe9729c470a13ef905d25a

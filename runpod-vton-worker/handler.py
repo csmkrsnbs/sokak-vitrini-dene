@@ -7,7 +7,7 @@ from threading import Lock
 import runpod
 import torch
 from fashn_vton import TryOnPipeline
-from huggingface_hub import hf_hub_download
+from model_assets import prepare_weights_dir
 from PIL import Image, ImageOps, UnidentifiedImageError
 from transformers import (
     AutoImageProcessor,
@@ -25,8 +25,10 @@ DWPOSE_REPO_ID = os.getenv("VTON_DWPOSE_REPO_ID", "fashn-ai/DWPose")
 DWPOSE_REVISION = os.getenv(
     "VTON_DWPOSE_REVISION", "548b5df25b84d9f4aac0611dfa1c2a7a12f15571"
 )
-WEIGHTS_DIR = os.getenv(
-    "VTON_WEIGHTS_DIR", "/runpod-volume/fashn-vton-1.5-flat-lay"
+WEIGHTS_DIR = os.getenv("VTON_WEIGHTS_DIR", "/tmp/fashn-vton-1.5")
+STATIC_ASSETS_DIR = os.getenv("VTON_STATIC_ASSETS_DIR", "/opt/vton-assets")
+MODEL_CACHE_ROOT = os.getenv(
+    "RUNPOD_MODEL_CACHE_ROOT", "/runpod-volume/huggingface-cache/hub"
 )
 
 NSFW_MODEL_ID = os.getenv(
@@ -43,48 +45,43 @@ CLIP_MODEL_REVISION = os.getenv(
 MAX_INPUT_BYTES = 2_500_000
 MAX_OUTPUT_BYTES = 10_000_000
 GARMENT_CATEGORIES = {"tops", "bottoms", "one-pieces"}
+GARMENT_PHOTO_TYPES = {"flat-lay", "model"}
 
-SAFE_FASHION_LABEL = (
-    "a harmless product-only clothing photo or a clearly adult person in an ordinary "
-    "non-sexual fashion catalogue photo, including lingerie, swimwear or a costume"
+SAFE_EVERYDAY_LABEL = (
+    "an ordinary harmless fashion, shopping product, adult portrait, home, "
+    "furniture, vehicle or everyday street photograph"
 )
 
 SEMANTIC_SAFETY_POLICIES = (
     (
-        "SAFETY_EXPLICIT_THRESHOLD",
-        "explicit nudity with visible genitals or nipples, pornography or a sexual act",
-        SAFE_FASHION_LABEL,
-        0.980,
-    ),
-    (
         "SAFETY_MINOR_THRESHOLD",
-        "a child or teenager under 18 years old",
-        "a clearly adult person over 18 years old or an inanimate clothing product",
-        0.950,
+        "a photo whose subject is a child or teenager under 18 years old",
+        "a photo of an adult person or an inanimate shopping product, room, furniture, car or street",
+        0.84,
     ),
     (
         "SAFETY_POLITICAL_THRESHOLD",
-        "a politician, election campaign, political party, rally, protest or political propaganda",
-        SAFE_FASHION_LABEL,
-        0.990,
+        "a politician, political leader, election campaign, political party, protest, rally or political propaganda",
+        SAFE_EVERYDAY_LABEL,
+        0.82,
     ),
     (
         "SAFETY_VIOLENCE_THRESHOLD",
-        "graphic bloody violence, an open wound, self-harm, a dead body or a real physical attack",
-        SAFE_FASHION_LABEL,
-        0.990,
+        "a real person being physically attacked or seriously injured, an open wound, self-harm or a dead body",
+        SAFE_EVERYDAY_LABEL,
+        0.98,
     ),
     (
         "SAFETY_WEAPON_THRESHOLD",
-        "a real firearm, explosive device or military combat weapon",
-        SAFE_FASHION_LABEL,
-        0.980,
+        "a real firearm, handgun, rifle, explosive device or military combat weapon held or displayed",
+        SAFE_EVERYDAY_LABEL,
+        0.84,
     ),
     (
         "SAFETY_HATE_THRESHOLD",
-        "a hate symbol, terrorist propaganda or extremist organization emblem",
-        SAFE_FASHION_LABEL,
-        0.980,
+        "a visible hate symbol, terrorist propaganda or extremist organization emblem",
+        SAFE_EVERYDAY_LABEL,
+        0.82,
     ),
 )
 
@@ -97,6 +94,13 @@ _weights_lock = Lock()
 _safety_bundle = None
 _safety_load_lock = Lock()
 _safety_inference_lock = Lock()
+
+
+def _env_true(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _bounded_int(value: object, fallback: int, minimum: int, maximum: int) -> int:
@@ -146,7 +150,7 @@ def _get_safety_bundle():
 
         device = torch.device(configured_device)
         dtype = torch.float16 if device.type == "cuda" else torch.float32
-        model_options = {
+        common_model_options = {
             "dtype": dtype,
             "use_safetensors": True,
             "trust_remote_code": False,
@@ -161,7 +165,7 @@ def _get_safety_bundle():
         nsfw_model = AutoModelForImageClassification.from_pretrained(
             NSFW_MODEL_ID,
             revision=NSFW_MODEL_REVISION,
-            **model_options,
+            **common_model_options,
         ).to(device)
         nsfw_model.eval()
 
@@ -173,7 +177,7 @@ def _get_safety_bundle():
         clip_model = CLIPModel.from_pretrained(
             CLIP_MODEL_ID,
             revision=CLIP_MODEL_REVISION,
-            **model_options,
+            **common_model_options,
         ).to(device)
         clip_model.eval()
 
@@ -207,7 +211,7 @@ def _moderate_images(images: list[Image.Image]) -> bool:
             raise RuntimeError("NSFW model label mapping is invalid")
 
         nsfw_threshold = _bounded_float(
-            "SAFETY_NSFW_THRESHOLD", 0.985, 0.50, 0.999
+            "SAFETY_NSFW_THRESHOLD", 0.72, 0.10, 0.95
         )
         nsfw_score = float(torch.max(nsfw_probabilities[:, nsfw_index]).item())
         if nsfw_score >= nsfw_threshold:
@@ -238,7 +242,7 @@ def _moderate_images(images: list[Image.Image]) -> bool:
                 risk_probability = torch.softmax(
                     image_logits[pair_start : pair_start + 2], dim=0
                 )[0].item()
-                threshold = _bounded_float(threshold_name, fallback, 0.50, 0.999)
+                threshold = _bounded_float(threshold_name, fallback, 0.50, 0.995)
                 if risk_probability >= threshold:
                     print(
                         f"Safety rejected: {threshold_name} "
@@ -249,36 +253,22 @@ def _moderate_images(images: list[Image.Image]) -> bool:
     return True
 
 
-def _error(code: str):
+def _safety_error(code: str):
     messages = {
         "UNSAFE_CONTENT": "Content rejected by safety policy",
         "MODERATION_UNAVAILABLE": "Safety moderation is unavailable",
+    }
+    return {"error_code": code, "error": messages[code]}
+
+
+def _generation_error(code: str):
+    messages = {
         "GPU_MEMORY_EXHAUSTED": "GPU memory exhausted during generation",
         "MODEL_LOAD_FAILED": "Virtual try-on model could not be loaded",
         "VTON_INPUT_INVALID": "Person or garment image is not suitable for virtual try-on",
         "VTON_GENERATION_FAILED": "Virtual try-on generation failed",
     }
     return {"error_code": code, "error": messages[code]}
-
-
-def _download_weights():
-    os.makedirs(WEIGHTS_DIR, exist_ok=True)
-    dwpose_dir = os.path.join(WEIGHTS_DIR, "dwpose")
-    os.makedirs(dwpose_dir, exist_ok=True)
-
-    hf_hub_download(
-        repo_id=MODEL_REPO_ID,
-        filename="model.safetensors",
-        revision=MODEL_REVISION,
-        local_dir=WEIGHTS_DIR,
-    )
-    for filename in ("yolox_l.onnx", "dw-ll_ucoco_384.onnx"):
-        hf_hub_download(
-            repo_id=DWPOSE_REPO_ID,
-            filename=filename,
-            revision=DWPOSE_REVISION,
-            local_dir=dwpose_dir,
-        )
 
 
 def _ensure_weights():
@@ -292,7 +282,20 @@ def _ensure_weights():
 
     with _weights_lock:
         if not all(os.path.isfile(path) for path in required):
-            _download_weights()
+            resolved = prepare_weights_dir(
+                weights_dir=WEIGHTS_DIR,
+                static_assets_dir=STATIC_ASSETS_DIR,
+                model_cache_root=MODEL_CACHE_ROOT,
+                model_repo_id=MODEL_REPO_ID,
+                model_revision=MODEL_REVISION,
+                dwpose_repo_id=DWPOSE_REPO_ID,
+                dwpose_revision=DWPOSE_REVISION,
+                explicit_cached_model_path=os.getenv("VTON_CACHED_MODEL_PATH"),
+                allow_download_fallback=_env_true(
+                    "VTON_ALLOW_DOWNLOAD_FALLBACK", False
+                ),
+            )
+            print(f"VTON weights ready: {resolved}")
 
 
 def _get_pipeline() -> TryOnPipeline:
@@ -376,22 +379,23 @@ def handler(job):
     photo_type = job_input.get("garment_photo_type")
     if category not in GARMENT_CATEGORIES:
         raise ValueError("garment_category is invalid")
-    if photo_type != "flat-lay":
-        raise ValueError("only flat-lay garment photos are accepted")
+    if photo_type not in GARMENT_PHOTO_TYPES:
+        raise ValueError("garment_photo_type is invalid")
 
     seed = _bounded_int(job_input.get("seed"), 42, 0, 2**32 - 1)
     timesteps = _bounded_int(os.getenv("VTON_TIMESTEPS"), 30, 20, 50)
     guidance_scale = _bounded_float("VTON_GUIDANCE_SCALE", 1.5, 1.0, 2.5)
+    segmentation_free = _env_true("VTON_SEGMENTATION_FREE", True)
 
     runpod.serverless.progress_update(
         job, "Görseller güvenlik kontrolünden geçiriliyor"
     )
     try:
         if not _moderate_images([product, target]):
-            return _error("UNSAFE_CONTENT")
+            return _safety_error("UNSAFE_CONTENT")
     except Exception as error:
-        print("Safety moderation unavailable:", type(error).__name__, str(error)[:300])
-        return _error("MODERATION_UNAVAILABLE")
+        print("Safety moderation unavailable:", type(error).__name__)
+        return _safety_error("MODERATION_UNAVAILABLE")
 
     runpod.serverless.progress_update(job, "Giyim modeli hazırlanıyor")
     try:
@@ -399,10 +403,10 @@ def handler(job):
     except torch.cuda.OutOfMemoryError:
         print("Model load failed: CUDA out of memory")
         torch.cuda.empty_cache()
-        return _error("GPU_MEMORY_EXHAUSTED")
+        return _generation_error("GPU_MEMORY_EXHAUSTED")
     except Exception as error:
         print("Model load failed:", type(error).__name__, str(error)[:500])
-        return _error("MODEL_LOAD_FAILED")
+        return _generation_error("MODEL_LOAD_FAILED")
 
     runpod.serverless.progress_update(job, "Kıyafet kişiye uygulanıyor")
     try:
@@ -411,41 +415,41 @@ def handler(job):
                 person_image=target,
                 garment_image=product,
                 category=category,
-                garment_photo_type="flat-lay",
+                garment_photo_type=photo_type,
                 num_samples=1,
                 num_timesteps=timesteps,
                 guidance_scale=guidance_scale,
                 skip_cfg_last_n_steps=1,
                 seed=seed,
-                segmentation_free=True,
+                segmentation_free=segmentation_free,
             ).images[0]
     except torch.cuda.OutOfMemoryError:
         print("Generation failed: CUDA out of memory")
         torch.cuda.empty_cache()
-        return _error("GPU_MEMORY_EXHAUSTED")
+        return _generation_error("GPU_MEMORY_EXHAUSTED")
     except (ValueError, IndexError) as error:
         print("Input validation failed:", type(error).__name__, str(error)[:500])
-        return _error("VTON_INPUT_INVALID")
+        return _generation_error("VTON_INPUT_INVALID")
     except Exception as error:
         print("Generation failed:", type(error).__name__, str(error)[:500])
-        return _error("VTON_GENERATION_FAILED")
+        return _generation_error("VTON_GENERATION_FAILED")
 
     runpod.serverless.progress_update(
         job, "Sonuç güvenlik kontrolünden geçiriliyor"
     )
     try:
         if not _moderate_images([result]):
-            return _error("UNSAFE_CONTENT")
+            return _safety_error("UNSAFE_CONTENT")
     except Exception as error:
-        print("Safety moderation unavailable:", type(error).__name__, str(error)[:300])
-        return _error("MODERATION_UNAVAILABLE")
+        print("Safety moderation unavailable:", type(error).__name__)
+        return _safety_error("MODERATION_UNAVAILABLE")
 
     image_base64, mime_type, byte_count = _encode_result(result)
     return {
         "image_base64": image_base64,
         "mime_type": mime_type,
         "bytes": byte_count,
-        "model": "fashn-ai/fashn-vton-1.5-flat-lay",
+        "model": "fashn-ai/fashn-vton-1.5",
         "seed": seed,
         "garment_category": category,
     }

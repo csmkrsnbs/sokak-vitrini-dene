@@ -4,57 +4,52 @@
 
 - [ ] Pooled bağlantı `DATABASE_URL` olarak tanımlandı.
 - [ ] `npm run db:migrate` başarıyla tamamlandı.
-- [ ] `coupon_codes.claimed_session_id` kolonu migration ile oluştu.
 - [ ] Mevcut etkin kuponların kalan hakları migration sonrasında korundu.
 
 ## RunPod
 
-- [ ] Worker imajı GHCR'a gönderildi ve endpoint'e bağlandı.
-- [ ] Farklı veri merkezlerindeki network volume seçenekleri endpoint'e eklendi.
-- [ ] `workersMin=0`, `workersMax=1` ve uygun idle timeout seçildi.
+- [ ] FLUX ve VTON worker imajları GHCR'a gönderildi; iki ayrı endpoint'e bağlandı.
+- [ ] FLUX network volume'ları yalnızca FLUX endpoint'inde kaldı.
+- [ ] VTON endpoint'inde network volume kaldırıldı ve Cached model alanına `fashn-ai/fashn-vton-1.5` yazıldı.
+- [ ] VTON data center kısıtı kaldırıldı; 16 GB GPU'lar birinci, standart 24 GB GPU'lar ikinci öncelikte.
+- [ ] VTON için `workersMin=0`, `workersMax=1`, `GPU count=1` ve idle timeout `10` saniye seçildi.
+- [ ] VTON container disk en az `10 GB` ve FlashBoot açık.
 - [ ] Worker loglarında FLUX ve güvenlik modellerinin önbellekten yüklendiği görüldü.
-- [ ] 24 GB GPU için `SAFETY_DEVICE=cpu` ayarlandı; FLUX GPU belleği güvenlik modelleriyle paylaşmıyor.
+- [ ] VTON logunda `VTON weights ready` görüldü; çalışma anında Hugging Face indirmesi başlamadı.
+- [ ] VTON loglarında FASHN, DWPose ve insan ayrıştırma modellerinin yüklendiği görüldü.
+- [ ] `SAFETY_DEVICE=cpu` ayarlandı; güvenlik modelleri 16 GB GPU belleğini tüketmiyor.
 - [ ] Uygun test tamamlandı; yasak içerik `UNSAFE_CONTENT` ile reddedildi.
+- [ ] Gömlek/ceket `tops`, pantolon/etek `bottoms`, elbise/tulum `one-pieces` ile test edildi.
 - [ ] Kırmızı kıyafet gibi güvenli örnekler şiddet filtresinde yanlış pozitif üretmedi.
 - [ ] RunPod düşük bakiye bildirimi etkinleştirildi.
-
-## Self-host FASHN VTON giyim motoru
-
-- [ ] `runpod-vton-worker` GitHub Actions imajı başarıyla oluşturuldu.
-- [ ] GHCR VTON paketi public yapıldı veya RunPod registry kimliği tanımlandı.
-- [ ] 24 GB RTX 3090 ile ayrı Serverless VTON endpoint'i oluşturuldu.
-- [ ] Endpoint'e en az bir uygun network volume `/runpod-volume` olarak bağlandı.
-- [ ] Vercel Production ortamına `RUNPOD_VTON_ENDPOINT_ID` eklendi.
-- [ ] Düz zeminde/askıda gömlek, ceket, elbise ve yetişkin iç çamaşırı testleri tamamlandı.
-- [ ] Başka bir kişi üzerinde çekilmiş ürün fotoğrafının arayüzde sunulmadığı doğrulandı.
-- [ ] Açık çıplaklık veya uygunsuz cinsel içerik `UNSAFE_CONTENT` ile reddedildi.
-- [ ] Başarısız VTON işinde kupon hakkının iade edildiği doğrulandı.
 
 ## Vercel
 
 - [ ] `.env.example` içindeki Production değişkenleri eklendi.
+- [ ] `RUNPOD_VTON_ENDPOINT_ID` ve `VTON_IMAGE_MODEL` Production ortamına eklendi.
+- [ ] `IP_RISK_CACHE_HOURS=168` ayarlandı.
 - [ ] `DAILY_GENERATION_LIMIT=20` veya seçilen günlük tavan eklendi.
 - [ ] `ADMIN_ACCESS_KEY` ve `COUPON_SIGNING_SECRET` birbirinden farklı uzun değerler.
 - [ ] Build komutu `npm run vercel-build`.
-- [ ] Deploy başarılı ve `/api/health` durumu `ready`.
+- [ ] Deploy başarılı; `/api/health` içinde `fluxConfigured`, `clothingConfigured` ve durum `ready`.
 - [ ] Özel alan adı ile `NEXT_PUBLIC_APP_URL` eşleşiyor.
 
 ## Hak ve kupon testi
 
 - [ ] Kullanıcı ekranında fiyat, paket, IBAN veya ödeme ifadesi görünmüyor.
-- [ ] Kupon etkinleştirilmeden önizleme isteği `CREDITS_REQUIRED` ile reddediliyor.
+- [ ] İlk 2 başarılı üretimden sonra yalnızca “Kupon ekle” ekranı açılıyor.
 - [ ] `/yonetim/kuponlar` adresinde 1 haklı test kuponu oluşturuldu.
 - [ ] Açık kod yalnızca oluşturma sonucunda gösterildi ve kopyalandı.
 - [ ] Kupon etkinleştirildi; başarılı üretimde hak 1 azaldı.
-- [ ] Aynı kupon aynı tarayıcıda kullanılabildi, farklı tarayıcıda `COUPON_ALREADY_CLAIMED` ile reddedildi.
-- [ ] Yönetim API'si 3'ten fazla hak ve 7–30 gün dışındaki süreyi reddetti.
-- [ ] Başarısız üretimde kupon hakkı geri geldi.
+- [ ] Başarısız üretimde ücretsiz veya kupon hakkı geri geldi.
 - [ ] Etkin kupon yönetim ekranından kapatıldı.
 - [ ] Son kullanım tarihi geçmiş kupon kabul edilmedi.
 
-## Kapasite testi
+## Ağ ve kapasite testi
 
-- [ ] Günlük genel kapasite dolduğunda hiçbir sağlayıcı işi oluşmadı ve kullanıcı hakkı düşmedi.
+- [ ] IPQualityScore çalışırken tespit edilen VPN/proxy/Tor ücretsiz denemede engellendi.
+- [ ] IPQualityScore kota veya zaman aşımı verirken site diğer sınırlarla üretime devam etti.
+- [ ] Günlük genel kapasite dolduğunda RunPod işi oluşmadı ve kullanıcı hakkı düşmedi.
 - [ ] Günlük sınır İstanbul tarihinde yenilendi.
 
 ## Yayın öncesi
