@@ -40,7 +40,7 @@ _RUNTIME_DEPS_LOCK = Lock()
 
 
 RUNTIME_PACKAGES_DIR = Path(os.getenv("VTON_RUNTIME_PACKAGES_DIR", "/runpod-volume/python-packages"))
-RUNTIME_MARKER = RUNTIME_PACKAGES_DIR / ".sv-vton-runtime-v1"
+RUNTIME_MARKER = RUNTIME_PACKAGES_DIR / ".sv-vton-runtime-v2"
 RUNTIME_MODULES = (
     "fashn_vton",
     "fashn_human_parser",
@@ -49,7 +49,23 @@ RUNTIME_MODULES = (
     "onnxruntime",
     "safetensors",
     "einops",
+    "matplotlib",
+    "scipy",
+    "huggingface_hub",
+    "tqdm",
 )
+
+RUNTIME_PACKAGE_SPECS = {
+    "transformers": "transformers>=4.30,<5",
+    "cv2": "opencv-python-headless>=4.8,<5",
+    "safetensors": "safetensors>=0.3,<1",
+    "tqdm": "tqdm>=4.65,<5",
+    "einops": "einops>=0.6,<1",
+    "onnxruntime": "onnxruntime-gpu>=1.20,<2",
+    "scipy": "scipy>=1.13,<2",
+    "huggingface_hub": "huggingface_hub>=0.34,<2",
+    "matplotlib": "matplotlib>=3.5,<4",
+}
 
 
 def _activate_runtime_packages() -> None:
@@ -100,48 +116,73 @@ def ensure_runtime_dependencies() -> dict[str, object]:
     _activate_runtime_packages()
     status = runtime_dependency_status()
     if status["ready"]:
-        return status
+        if not RUNTIME_MARKER.is_file():
+            RUNTIME_MARKER.parent.mkdir(parents=True, exist_ok=True)
+            RUNTIME_MARKER.write_text("v2\n", encoding="utf-8")
+        return runtime_dependency_status()
 
     with _RUNTIME_DEPS_LOCK:
         _activate_runtime_packages()
         status = runtime_dependency_status()
         if status["ready"]:
-            return status
+            if not RUNTIME_MARKER.is_file():
+                RUNTIME_MARKER.parent.mkdir(parents=True, exist_ok=True)
+                RUNTIME_MARKER.write_text("v2\n", encoding="utf-8")
+            return runtime_dependency_status()
 
         RUNTIME_PACKAGES_DIR.mkdir(parents=True, exist_ok=True)
+        missing = {
+            name
+            for name, available in status["modules"].items()
+            if not available
+        }
 
-        # Büyük ML bağımlılıkları Flash'ın 1.5 GB deployment arşivine eklenmez.
-        # İlk warmup çağrısında kalıcı RunPod volume'a yalnızca bir kez kurulur.
-        _pip_install(
-            [
-                "transformers>=4.30,<5",
-                "opencv-python-headless>=4.8,<5",
-                "safetensors>=0.3,<1",
-                "tqdm>=4.65,<5",
-                "einops>=0.6,<1",
-                "onnxruntime-gpu>=1.20,<2",
-                "scipy>=1.13,<2",
-                "huggingface_hub>=0.34,<2",
-                "pillow>=10.4,<12",
-                "numpy>=1.26,<2",
-            ]
-        )
-        _pip_install(
-            [
-                "fashn-human-parser==0.1.1",
-                "fashn-vton @ git+https://github.com/fashn-AI/fashn-vton-1.5.git@38aafe2185df40a3e8a5442e950c422c3d9dcb5a",
-            ],
-            no_deps=True,
-        )
+        # Yalnız eksik destek paketlerini kur. Böylece önceki warmup'ta
+        # volume'a kurulmuş büyük paketler her düzeltmede yeniden indirilmez.
+        support_specs = [
+            spec
+            for module, spec in RUNTIME_PACKAGE_SPECS.items()
+            if module in missing
+        ]
+        if support_specs:
+            _pip_install(support_specs)
+
+        _activate_runtime_packages()
+        status = runtime_dependency_status()
+        missing = {
+            name
+            for name, available in status["modules"].items()
+            if not available
+        }
+
+        model_packages = []
+        if "fashn_human_parser" in missing:
+            model_packages.append("fashn-human-parser==0.1.1")
+        if "fashn_vton" in missing:
+            model_packages.append(
+                "fashn-vton @ git+https://github.com/fashn-AI/"
+                "fashn-vton-1.5.git@38aafe2185df40a3e8a5442e950c422c3d9dcb5a"
+            )
+        if model_packages:
+            _pip_install(model_packages, no_deps=True)
 
         _activate_runtime_packages()
         status = runtime_dependency_status()
         if not status["ready"]:
-            missing = [name for name, available in status["modules"].items() if not available]
-            raise RuntimeError(f"Runtime bağımlılıkları kurulamadı: {', '.join(missing)}")
+            missing = [
+                name
+                for name, available in status["modules"].items()
+                if not available
+            ]
+            raise RuntimeError(
+                f"Runtime bağımlılıkları kurulamadı: {', '.join(missing)}"
+            )
 
-        RUNTIME_MARKER.write_text("v1\n", encoding="utf-8")
-        print(f"[runtime] dependencies ready at {RUNTIME_PACKAGES_DIR}", flush=True)
+        RUNTIME_MARKER.write_text("v2\n", encoding="utf-8")
+        print(
+            f"[runtime] dependencies ready at {RUNTIME_PACKAGES_DIR}",
+            flush=True,
+        )
         return runtime_dependency_status()
 
 
