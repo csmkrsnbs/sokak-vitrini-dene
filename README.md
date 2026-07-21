@@ -32,7 +32,7 @@ VTON_REQUEST_TIMEOUT_MS="180000"
 VTON_MAX_UPLOAD_MB="12"
 ```
 
-RunPod Serverless kullanılırsa:
+RunPod Serverless Queue kullanılırsa `gpu-service/Dockerfile.runpod` dosyasını seçin:
 
 ```env
 VTON_PROVIDER="runpod"

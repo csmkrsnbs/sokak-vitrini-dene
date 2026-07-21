@@ -22,11 +22,22 @@ VTON_SHARED_SECRET="uzun-rastgele-deger"
 
 ## RunPod Serverless
 
-Aynı Docker imajında varsayılan komutu aşağıdaki şekilde değiştirin:
+RunPod Queue endpoint için ayrı Dockerfile hazırdır:
 
 ```text
-python -u runpod_handler.py
+gpu-service/Dockerfile.runpod
 ```
+
+GitHub üzerinden endpoint oluştururken:
+
+```text
+Dockerfile Path: gpu-service/Dockerfile.runpod
+Endpoint Type: Queue
+Minimum Worker: 0
+Maximum Worker: 1
+```
+
+Bu Dockerfile depo kökünü build context olarak kullanır ve doğrudan `runpod_handler.py` dosyasını başlatır.
 
 Web `.env`:
 
