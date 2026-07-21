@@ -52,7 +52,8 @@ RUNPOD_API_KEY="..."
 
 ## Notlar
 
-- İlk Docker imajı model ağırlıkları nedeniyle büyüktür.
+- RunPod imajına 1.94 GB ana model ağırlığı gömülmez. Endpoint ayarındaki **Cached model** alanına `fashn-ai/fashn-vton-1.5` yazılmalıdır.
+- DWPose dosyaları worker ilk açıldığında çalışma klasörüne indirilir; sonraki FlashBoot açılışlarında yeniden kullanılabilir.
 - Tek worker kullanın; model GPU belleğinde bir kez yüklenir.
 - `VTON_RETURN_REJECTED_IMAGE=false` olduğunda düşük sadakatli sonuç kullanıcıya gönderilmez.
 - Sadakat skoru renk dağılımı ve görsel yapı üzerinden yapılan otomatik bir ön kontroldür; insan kalite kontrolünün yerine geçmez.

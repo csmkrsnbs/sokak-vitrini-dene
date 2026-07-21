@@ -3,8 +3,10 @@ from __future__ import annotations
 import base64
 import io
 import os
+import shutil
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from threading import Lock
 from typing import Literal
 
@@ -17,6 +19,8 @@ PhotoType = Literal["auto", "flat-lay", "model"]
 _PIPELINE = None
 _PIPELINE_LOCK = Lock()
 _INFERENCE_LOCK = Lock()
+_WEIGHTS_LOCK = Lock()
+_PREPARED_WEIGHTS_DIR: str | None = None
 
 
 @dataclass
@@ -39,6 +43,147 @@ class FidelityResult:
         }
 
 
+def _resolve_hf_snapshot(model_id: str) -> Path | None:
+    """RunPod Cached Model ile bağlanan Hugging Face snapshot yolunu bul."""
+    if "/" not in model_id:
+        return None
+
+    org, name = model_id.split("/", 1)
+    cache_root = Path(os.getenv("HF_CACHE_ROOT", "/runpod-volume/huggingface-cache/hub"))
+    model_root = cache_root / f"models--{org}--{name}"
+    refs_main = model_root / "refs" / "main"
+    snapshots_dir = model_root / "snapshots"
+
+    if refs_main.is_file():
+        snapshot_hash = refs_main.read_text(encoding="utf-8").strip()
+        candidate = snapshots_dir / snapshot_hash
+        if candidate.is_dir():
+            return candidate
+
+    if snapshots_dir.is_dir():
+        candidates = sorted(path for path in snapshots_dir.iterdir() if path.is_dir())
+        if candidates:
+            return candidates[-1]
+
+    return None
+
+
+def _select_runtime_root() -> Path:
+    preferred = Path(os.getenv("FASHN_RUNTIME_ROOT", "/runpod-volume/sv-vton-runtime"))
+    candidates = [preferred, Path("/tmp/sv-vton-runtime")]
+
+    for candidate in candidates:
+        try:
+            candidate.mkdir(parents=True, exist_ok=True)
+            probe = candidate / ".write-test"
+            probe.write_text("ok", encoding="utf-8")
+            probe.unlink(missing_ok=True)
+            return candidate
+        except OSError:
+            continue
+
+    raise RuntimeError("Model çalışma klasörü oluşturulamadı.")
+
+
+def _link_or_copy(source: Path, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists() or destination.is_symlink():
+        return
+
+    try:
+        destination.symlink_to(source)
+    except OSError:
+        shutil.copy2(source, destination)
+
+
+def _download_hf_file(repo_id: str, filename: str, local_dir: Path) -> Path:
+    from huggingface_hub import hf_hub_download
+
+    last_error: Exception | None = None
+    for attempt in range(1, 4):
+        try:
+            downloaded = hf_hub_download(
+                repo_id=repo_id,
+                filename=filename,
+                local_dir=str(local_dir),
+            )
+            return Path(downloaded)
+        except Exception as exc:  # pragma: no cover - ağ koşuluna bağlı
+            last_error = exc
+            print(f"[weights] {repo_id}/{filename} indirme denemesi {attempt}/3 başarısız: {exc}")
+            if attempt < 3:
+                time.sleep(attempt * 3)
+
+    raise RuntimeError(f"Model dosyası indirilemedi: {repo_id}/{filename}") from last_error
+
+
+def prepare_weights_dir() -> str:
+    """
+    Ana 1.94 GB modeli RunPod Cached Model alanından kullanır.
+    Küçük DWPose ONNX dosyalarını ilk worker açılışında indirir ve aynı runtime
+    klasöründe saklar. Cached model bulunamazsa geliştirme ortamında ana modeli
+    Hugging Face üzerinden indirmeye geri döner.
+    """
+    global _PREPARED_WEIGHTS_DIR
+    if _PREPARED_WEIGHTS_DIR:
+        return _PREPARED_WEIGHTS_DIR
+
+    with _WEIGHTS_LOCK:
+        if _PREPARED_WEIGHTS_DIR:
+            return _PREPARED_WEIGHTS_DIR
+
+        explicit = os.getenv("FASHN_WEIGHTS_DIR", "").strip()
+        if explicit:
+            explicit_path = Path(explicit)
+            required = [
+                explicit_path / "model.safetensors",
+                explicit_path / "dwpose" / "yolox_l.onnx",
+                explicit_path / "dwpose" / "dw-ll_ucoco_384.onnx",
+            ]
+            if all(path.is_file() for path in required):
+                _PREPARED_WEIGHTS_DIR = str(explicit_path)
+                return _PREPARED_WEIGHTS_DIR
+
+        runtime_root = _select_runtime_root()
+        weights_dir = runtime_root / "weights"
+        dwpose_dir = weights_dir / "dwpose"
+        weights_dir.mkdir(parents=True, exist_ok=True)
+        dwpose_dir.mkdir(parents=True, exist_ok=True)
+
+        model_id = os.getenv("FASHN_MODEL_ID", "fashn-ai/fashn-vton-1.5")
+        cached_snapshot = _resolve_hf_snapshot(model_id)
+        cached_model = cached_snapshot / "model.safetensors" if cached_snapshot else None
+        model_destination = weights_dir / "model.safetensors"
+
+        if not model_destination.is_file():
+            if cached_model and cached_model.is_file():
+                print(f"[weights] RunPod cached model kullanılıyor: {cached_model}")
+                _link_or_copy(cached_model, model_destination)
+            else:
+                print("[weights] Cached model bulunamadı; ana model Hugging Face üzerinden indiriliyor.")
+                _download_hf_file(model_id, "model.safetensors", weights_dir)
+
+        dwpose_repo = os.getenv("FASHN_DWPOSE_MODEL_ID", "fashn-ai/DWPose")
+        for filename in ("yolox_l.onnx", "dw-ll_ucoco_384.onnx"):
+            destination = dwpose_dir / filename
+            if not destination.is_file():
+                print(f"[weights] DWPose indiriliyor: {filename}")
+                _download_hf_file(dwpose_repo, filename, dwpose_dir)
+
+        required = [
+            model_destination,
+            dwpose_dir / "yolox_l.onnx",
+            dwpose_dir / "dw-ll_ucoco_384.onnx",
+        ]
+        missing = [str(path) for path in required if not path.is_file()]
+        if missing:
+            raise RuntimeError(f"Eksik model dosyaları: {', '.join(missing)}")
+
+        _PREPARED_WEIGHTS_DIR = str(weights_dir)
+        print(f"[weights] Hazır: {_PREPARED_WEIGHTS_DIR}")
+        return _PREPARED_WEIGHTS_DIR
+
+
 def get_pipeline():
     global _PIPELINE
     if _PIPELINE is not None:
@@ -48,7 +193,7 @@ def get_pipeline():
         if _PIPELINE is None:
             from fashn_vton import TryOnPipeline
 
-            weights_dir = os.getenv("FASHN_WEIGHTS_DIR", "/opt/fashn-vton/weights")
+            weights_dir = prepare_weights_dir()
             device = os.getenv("VTON_DEVICE") or None
             kwargs = {"weights_dir": weights_dir}
             if device:
@@ -171,11 +316,14 @@ def _pipeline_call(
     seed: int,
 ) -> Image.Image:
     pipeline = get_pipeline()
+    resolved_photo_type: Literal["flat-lay", "model"] = (
+        "model" if garment_photo_type == "model" else "flat-lay"
+    )
     kwargs = {
         "person_image": person,
         "garment_image": garment,
         "category": category,
-        "garment_photo_type": garment_photo_type,
+        "garment_photo_type": resolved_photo_type,
         "num_samples": 1,
         "num_timesteps": int(os.getenv("VTON_NUM_TIMESTEPS", "30")),
         "guidance_scale": float(os.getenv("VTON_GUIDANCE_SCALE", "1.5")),

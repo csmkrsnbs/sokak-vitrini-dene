@@ -74,10 +74,13 @@ GPU count: 1
 Idle timeout: 5 sec
 Execution timeout: 600 sec
 FlashBoot: açık
+Cached model: fashn-ai/fashn-vton-1.5
 Network volume: yok
 Auto scaling: Queue delay
 Queue delay: 4 sec
 ```
+
+RunPod bu model deposunu worker başlamadan önce önbelleğe alır. Worker, `model.safetensors` dosyasını `/runpod-volume/huggingface-cache/hub/` altından bulur.
 
 ## 6. Vercel değişkenleri
 

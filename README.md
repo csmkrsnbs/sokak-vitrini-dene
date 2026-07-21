@@ -40,6 +40,8 @@ RUNPOD_ENDPOINT_ID="..."
 RUNPOD_API_KEY="..."
 ```
 
+RunPod endpoint ayarında **Cached model** olarak `fashn-ai/fashn-vton-1.5` kullanılmalıdır.
+
 Kurulum: `GHCR_RUNPOD_KURULUM.md`
 
 ## GPU servisi

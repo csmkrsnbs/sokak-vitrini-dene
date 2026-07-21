@@ -3,23 +3,32 @@ FROM pytorch/pytorch:2.5.1-cuda12.1-cudnn9-runtime
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    FASHN_WEIGHTS_DIR=/opt/fashn-vton/weights \
-    HF_HOME=/opt/huggingface
+    HF_HOME=/runpod-volume/huggingface-cache \
+    FASHN_MODEL_ID=fashn-ai/fashn-vton-1.5 \
+    FASHN_DWPOSE_MODEL_ID=fashn-ai/DWPose \
+    FASHN_RUNTIME_ROOT=/runpod-volume/sv-vton-runtime
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git curl \
+    && apt-get install -y --no-install-recommends \
+       ca-certificates \
+       git \
+       curl \
+       libgl1 \
+       libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt
+RUN python -m pip install --upgrade pip setuptools wheel
+
+# Model kodunu sabit commit'ten kur. Büyük model ağırlıkları imaja gömülmez;
+# RunPod Cached Model alanından /runpod-volume altında sağlanır.
 RUN git clone https://github.com/fashn-AI/fashn-vton-1.5.git /opt/fashn-vton \
     && cd /opt/fashn-vton \
     && git checkout 38aafe2185df40a3e8a5442e950c422c3d9dcb5a \
-    && pip install -e . \
-    && python scripts/download_weights.py --weights-dir /opt/fashn-vton/weights
+    && python -m pip install --no-cache-dir -e .
 
 WORKDIR /srv
 COPY gpu-service/requirements.txt ./requirements.txt
-RUN pip install -r requirements.txt
+RUN python -m pip install --no-cache-dir -r requirements.txt
 COPY gpu-service/app ./app
 COPY gpu-service/runpod_handler.py ./runpod_handler.py
 

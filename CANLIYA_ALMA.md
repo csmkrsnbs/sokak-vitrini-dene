@@ -39,8 +39,9 @@ RunPod GitHub builder cache aşamasında takılırsa doğrudan GitHub deposundan
 3. `ghcr.io/csmkrsnbs/sokak-vitrini-dene-vton:latest` paketini GitHub Packages ayarından public yapın.
 4. RunPod'da **Import from Docker Registry / Container Image** ile yeni Queue endpoint oluşturun.
 5. Container image alanına GHCR adresini yazın.
-6. Active workers `0`, Max workers `1`, GPU count `1`, execution timeout `600` saniye kullanın.
-7. Endpoint ID ve API key'i Vercel ortam değişkenlerine girin.
+6. **Cached model** alanına `fashn-ai/fashn-vton-1.5` yazın.
+7. Active workers `0`, Max workers `1`, GPU count `1`, execution timeout `600` saniye kullanın.
+8. Endpoint ID ve API key'i Vercel ortam değişkenlerine girin.
 
 ```env
 VTON_PROVIDER="runpod"
