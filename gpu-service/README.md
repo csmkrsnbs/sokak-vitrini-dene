@@ -28,16 +28,19 @@ RunPod Queue endpoint için ayrı Dockerfile hazırdır:
 gpu-service/Dockerfile.runpod
 ```
 
-GitHub üzerinden endpoint oluştururken:
+Önerilen yöntem, bu Dockerfile'ı GitHub Actions ile build edip GHCR'ye göndermek ve RunPod'da registry imajından endpoint oluşturmaktır:
 
 ```text
-Dockerfile Path: gpu-service/Dockerfile.runpod
-Endpoint Type: Queue
-Minimum Worker: 0
-Maximum Worker: 1
+ghcr.io/csmkrsnbs/sokak-vitrini-dene-vton:latest
 ```
 
-Bu Dockerfile depo kökünü build context olarak kullanır ve doğrudan `runpod_handler.py` dosyasını başlatır.
+Workflow:
+
+```text
+.github/workflows/publish-vton-worker.yml
+```
+
+Bu Dockerfile depo kökünü build context olarak kullanır ve doğrudan `runpod_handler.py` dosyasını başlatır. Ayrıntılı kurulum kökteki `GHCR_RUNPOD_KURULUM.md` dosyasındadır.
 
 Web `.env`:
 

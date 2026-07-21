@@ -26,14 +26,21 @@ Servis kontrolü:
 curl https://GPU-ADRESI/health
 ```
 
-### RunPod Serverless Queue
+### RunPod Serverless Queue — GHCR yöntemi
 
-1. RunPod panelinde **Serverless → New Endpoint → Import Git Repository** yolunu açın.
-2. GitHub deposunu ve `main` branch'ini seçin.
-3. Dockerfile Path alanına `gpu-service/Dockerfile.runpod` yazın.
-4. Endpoint Type olarak `Queue` seçin.
-5. Minimum Worker değerini `0`, Maximum Worker değerini `1` yapın.
-6. Endpoint oluşturulduktan sonra Endpoint ID ve API key'i Vercel ortam değişkenlerine girin.
+RunPod GitHub builder cache aşamasında takılırsa doğrudan GitHub deposundan build kullanmayın. Projedeki workflow Docker imajını GitHub Container Registry'ye yayınlar:
+
+```text
+.github/workflows/publish-vton-worker.yml
+```
+
+1. Projeyi `main` branch'ine push edin.
+2. GitHub → Actions → **VTON Worker Image** çalışmasının tamamlanmasını bekleyin.
+3. `ghcr.io/csmkrsnbs/sokak-vitrini-dene-vton:latest` paketini GitHub Packages ayarından public yapın.
+4. RunPod'da **Import from Docker Registry / Container Image** ile yeni Queue endpoint oluşturun.
+5. Container image alanına GHCR adresini yazın.
+6. Active workers `0`, Max workers `1`, GPU count `1`, execution timeout `600` saniye kullanın.
+7. Endpoint ID ve API key'i Vercel ortam değişkenlerine girin.
 
 ```env
 VTON_PROVIDER="runpod"
@@ -41,7 +48,9 @@ RUNPOD_ENDPOINT_ID="..."
 RUNPOD_API_KEY="..."
 ```
 
-Web uygulaması Queue endpoint'in `/runsync` çağrısını kullanır. Minimum worker `0` olduğunda boşta GPU çalışmaz; ilk istek soğuk başlatma bekleyebilir.
+Ayrıntılı ekran sırası: `GHCR_RUNPOD_KURULUM.md`
+
+Web uygulaması Queue endpoint'in `/runsync` çağrısını kullanır. Active worker `0` olduğunda boşta GPU çalışmaz; ilk istek soğuk başlatma bekleyebilir.
 
 ## 3. Domain
 

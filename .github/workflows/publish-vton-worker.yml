@@ -1,0 +1,84 @@
+name: VTON Worker Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "gpu-service/**"
+      - ".github/workflows/publish-vton-worker.yml"
+
+concurrency:
+  group: vton-worker-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    name: Build and publish RunPod worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Free runner disk space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
+          sudo docker system prune --all --force || true
+          df -h
+
+      - name: Resolve image name
+        id: image
+        shell: bash
+        run: |
+          IMAGE_NAME="ghcr.io/${GITHUB_REPOSITORY,,}-vton"
+          echo "name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "Container image: ${IMAGE_NAME}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./gpu-service/Dockerfile.runpod
+          platforms: linux/amd64
+          push: true
+          pull: true
+          provenance: false
+          sbom: false
+          tags: |
+            ${{ steps.image.outputs.name }}:latest
+            ${{ steps.image.outputs.name }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.title=Sokak Vitrini Prova VTON Worker
+
+      - name: Write deployment summary
+        shell: bash
+        run: |
+          {
+            echo "## VTON worker image published"
+            echo
+            echo '```text'
+            echo "${{ steps.image.outputs.name }}:latest"
+            echo '```'
+            echo
+            echo "RunPod Serverless oluştururken **Import from Docker Registry** seçin."
+          } >> "$GITHUB_STEP_SUMMARY"

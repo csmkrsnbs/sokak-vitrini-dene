@@ -32,7 +32,7 @@ VTON_REQUEST_TIMEOUT_MS="180000"
 VTON_MAX_UPLOAD_MB="12"
 ```
 
-RunPod Serverless Queue kullanılırsa `gpu-service/Dockerfile.runpod` dosyasını seçin:
+RunPod Serverless Queue için önerilen dağıtım GitHub Actions → GHCR → RunPod akışıdır:
 
 ```env
 VTON_PROVIDER="runpod"
@@ -40,11 +40,13 @@ RUNPOD_ENDPOINT_ID="..."
 RUNPOD_API_KEY="..."
 ```
 
+Kurulum: `GHCR_RUNPOD_KURULUM.md`
+
 ## GPU servisi
 
-`gpu-service/` klasöründeki Docker projesi, FASHN VTON v1.5 modelini self-hosted olarak çalıştırır. Direct FastAPI ve RunPod Serverless handler birlikte gelir.
+`gpu-service/` klasöründeki Docker projesi, FASHN VTON v1.5 modelini self-hosted olarak çalıştırır. Direct FastAPI ve RunPod Serverless handler birlikte gelir. GitHub Actions workflow'u worker imajını GHCR'ye otomatik yayınlar.
 
-Ayrıntı: `gpu-service/README.md`
+Ayrıntı: `gpu-service/README.md` ve `GHCR_RUNPOD_KURULUM.md`
 
 ## Gerçek 360° ürün hazırlığı
 
