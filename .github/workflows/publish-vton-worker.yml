@@ -64,7 +64,10 @@ jobs:
           sbom: false
           tags: |
             ${{ steps.image.outputs.name }}:latest
+            ${{ steps.image.outputs.name }}:v6-light
             ${{ steps.image.outputs.name }}:${{ github.sha }}
+          cache-from: type=gha,scope=vton-worker-v6
+          cache-to: type=gha,mode=max,scope=vton-worker-v6
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
@@ -77,8 +80,9 @@ jobs:
             echo "## VTON worker image published"
             echo
             echo '```text'
-            echo "${{ steps.image.outputs.name }}:latest"
+            echo "${{ steps.image.outputs.name }}:${{ github.sha }}"
+            echo "${{ steps.image.outputs.name }}:v6-light"
             echo '```'
             echo
-            echo "RunPod Serverless oluştururken **Import from Docker Registry** seçin."
+            echo "RunPod endpoint'inde sabit **commit SHA** etiketini kullanın; `latest` kullanmayın."
           } >> "$GITHUB_STEP_SUMMARY"

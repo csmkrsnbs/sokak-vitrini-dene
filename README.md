@@ -75,3 +75,7 @@ Projede S/M/L/XL için nötr demo manken SVG'leri bulunur. Ticari kullanımda ge
 ```bash
 npm run check
 ```
+
+## RunPod v6-light Worker
+
+Uzun süre `Initializing` durumunda kalan eski image yerine hafif Queue worker kullanılır. Yeni Dockerfile RunPod PyTorch tabanını kullanır, web sunucusu bağımlılıklarını Queue imajından çıkarır ve `health` / `warmup` teşhis işlerini destekler. Kurulum sırası: `RUNPOD_V6_HAFIF_WORKER.md`.

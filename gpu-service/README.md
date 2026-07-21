@@ -1,59 +1,53 @@
 # SV Prova GPU Servisi
 
-Bu klasör FASHN VTON v1.5 modelini kendi GPU sunucunuzda çalıştırır. Web uygulaması görselleri bu servise yollar; servis bellekte işler ve sonucu JSON/base64 olarak geri döndürür.
+Bu klasör FASHN VTON v1.5 modelini self-hosted GPU üzerinde çalıştırır.
 
-## Direct FastAPI
+## RunPod Queue — v6-light
 
-```bash
-docker build -t sv-prova-gpu .
-docker run --gpus all -p 8000:8000 \
-  -e VTON_SHARED_SECRET="uzun-rastgele-deger" \
-  -e VTON_FIDELITY_THRESHOLD="0.30" \
-  sv-prova-gpu
-```
-
-Web `.env`:
-
-```env
-VTON_PROVIDER="direct"
-VTON_ENDPOINT_URL="https://gpu-servis-adresi"
-VTON_SHARED_SECRET="uzun-rastgele-deger"
-```
-
-## RunPod Serverless
-
-RunPod Queue endpoint için ayrı Dockerfile hazırdır:
+RunPod sürümü:
 
 ```text
 gpu-service/Dockerfile.runpod
+gpu-service/requirements.runpod.txt
+gpu-service/runpod_handler.py
 ```
 
-Önerilen yöntem, bu Dockerfile'ı GitHub Actions ile build edip GHCR'ye göndermek ve RunPod'da registry imajından endpoint oluşturmaktır:
+Özellikler:
 
-```text
-ghcr.io/csmkrsnbs/sokak-vitrini-dene-vton:latest
+- RunPod PyTorch tabanı
+- Queue handler dışında web sunucusu bağımlılığı yok
+- Ana model RunPod Cached Model üzerinden yüklenir
+- Health ve warmup teşhis işleri bulunur
+- İki parçalı ürün akışı desteklenir
+- Düşük sadakatli sonuç engellenebilir
+
+### Health
+
+```json
+{"input":{"action":"health"}}
 ```
 
-Workflow:
+### Warmup
 
-```text
-.github/workflows/publish-vton-worker.yml
+```json
+{"input":{"action":"warmup"}}
 ```
 
-Bu Dockerfile depo kökünü build context olarak kullanır ve doğrudan `runpod_handler.py` dosyasını başlatır. Ayrıntılı kurulum kökteki `GHCR_RUNPOD_KURULUM.md` dosyasındadır.
+### Try-on
 
-Web `.env`:
-
-```env
-VTON_PROVIDER="runpod"
-RUNPOD_ENDPOINT_ID="..."
-RUNPOD_API_KEY="..."
+```json
+{
+  "input": {
+    "person_image_base64": "...",
+    "garment_image_base64": "...",
+    "category": "tops",
+    "garment_photo_type": "flat-lay"
+  }
+}
 ```
 
-## Notlar
+RunPod ayarları kökteki `RUNPOD_V6_HAFIF_WORKER.md` dosyasındadır.
 
-- RunPod imajına 1.94 GB ana model ağırlığı gömülmez. Endpoint ayarındaki **Cached model** alanına `fashn-ai/fashn-vton-1.5` yazılmalıdır.
-- DWPose dosyaları worker ilk açıldığında çalışma klasörüne indirilir; sonraki FlashBoot açılışlarında yeniden kullanılabilir.
-- Tek worker kullanın; model GPU belleğinde bir kez yüklenir.
-- `VTON_RETURN_REJECTED_IMAGE=false` olduğunda düşük sadakatli sonuç kullanıcıya gönderilmez.
-- Sadakat skoru renk dağılımı ve görsel yapı üzerinden yapılan otomatik bir ön kontroldür; insan kalite kontrolünün yerine geçmez.
+## Direct FastAPI
+
+Direct GPU sunucusu için mevcut `gpu-service/Dockerfile`, `requirements.txt` ve `app/main.py` korunmuştur. Bu yapı RunPod Queue imajına dahil edilmez.

@@ -67,3 +67,7 @@ prova.sokakvitrini.com → Vercel CNAME
 - Manken modu için şeffaf PNG hazırlayın.
 - GLB yalnız sert formlu ürünlerde kullanın.
 - AI sonucunu gerçek ürün ölçüsü veya beden garantisi olarak sunmayın.
+
+## RunPod v6-light Worker
+
+Uzun süre `Initializing` durumunda kalan eski image yerine hafif Queue worker kullanılır. Yeni Dockerfile RunPod PyTorch tabanını kullanır, web sunucusu bağımlılıklarını Queue imajından çıkarır ve `health` / `warmup` teşhis işlerini destekler. Kurulum sırası: `RUNPOD_V6_HAFIF_WORKER.md`.
