@@ -79,3 +79,10 @@ npm run check
 ## RunPod v6-light Worker
 
 Uzun süre `Initializing` durumunda kalan eski image yerine hafif Queue worker kullanılır. Yeni Dockerfile RunPod PyTorch tabanını kullanır, web sunucusu bağımlılıklarını Queue imajından çıkarır ve `health` / `warmup` teşhis işlerini destekler. Kurulum sırası: `RUNPOD_V6_HAFIF_WORKER.md`.
+
+## v7 — RunPod Flash dağıtımı
+
+Özel Docker/GHCR worker yolu bırakıldı. `runpod/pytorch` tabanının sıkıştırılmış
+boyutu çok büyük olduğu için worker initialization aşamasında takılabiliyordu.
+Yeni dağıtım `flash-app/` ve `.github/workflows/deploy-vton-flash.yml` üzerinden
+RunPod Flash kullanır. Kurulum: `RUNPOD_FLASH_KURULUM.md`.

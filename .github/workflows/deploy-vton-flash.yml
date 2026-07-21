@@ -1,0 +1,70 @@
+name: Deploy VTON with RunPod Flash
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-vton-flash-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Flash VTON endpoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: flash-app
+    env:
+      RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: flash-app/requirements.txt
+
+      - name: Verify RunPod secret
+        shell: bash
+        run: |
+          if [ -z "${RUNPOD_API_KEY:-}" ]; then
+            echo "RUNPOD_API_KEY GitHub Actions secret is missing." >&2
+            exit 1
+          fi
+
+      - name: Install RunPod Flash
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+
+      - name: Deploy production endpoint
+        shell: bash
+        run: |
+          set -o pipefail
+          flash deploy --app sokak-vitrini-prova --env production --python-version 3.12 2>&1 | tee deploy.log
+
+      - name: Show deployed environment
+        if: always()
+        shell: bash
+        run: |
+          flash env get production --app sokak-vitrini-prova 2>&1 | tee environment.log || true
+
+      - name: Write summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## RunPod Flash VTON deployment"
+            echo
+            echo "Endpoint ID and URL are printed in the deploy logs above."
+            echo
+            echo '```text'
+            tail -n 80 deploy.log 2>/dev/null || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
