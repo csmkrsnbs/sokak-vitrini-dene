@@ -84,3 +84,8 @@ npm run check
 V8, GitHub Actions logunda görülen `numpy` keşif hatasını ve RunPod Flash
 1.18.0 ile uyumsuz `python_version` dekoratör parametresini düzeltir. Workflow,
 deploy başlamadan önce SDK imzasını ve tüm Flash modüllerini doğrular.
+
+
+## v9 runtime dependency cache
+
+RunPod Flash 1.5 GB arşiv sınırını aşan ağır ML paketleri ilk warmup sırasında kalıcı Network Volume içine kurulur. Ayrıntılar `FLASH_V9_RUNTIME_KURULUM.md` dosyasındadır.

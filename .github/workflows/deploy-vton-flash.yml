@@ -43,10 +43,40 @@ jobs:
       - name: Install RunPod Flash
         run: python -m pip install --upgrade pip && pip install -r requirements.txt
 
+      - name: Validate Flash application
+        shell: bash
+        run: |
+          python - <<'PY'
+          import inspect
+          from runpod_flash import Endpoint
+          import vton_engine
+          import vton_worker
+
+          signature = inspect.signature(Endpoint)
+          print("RunPod Flash Endpoint signature:", signature)
+          print("Flash modules loaded successfully")
+          PY
+
+      - name: Build and verify Flash archive
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -rf .flash
+          flash build --python-version 3.12 2>&1 | tee build.log
+          python - <<'PY'
+          from pathlib import Path
+          artifact = Path(".flash/artifact.tar.gz")
+          size_mb = artifact.stat().st_size / 1024 / 1024
+          print(f"Flash artifact: {size_mb:.1f} MB")
+          if size_mb >= 1500:
+              raise SystemExit("Flash artifact still exceeds RunPod 1500 MB limit")
+          PY
+
       - name: Deploy production endpoint
         shell: bash
         run: |
           set -o pipefail
+          rm -rf .flash
           flash deploy --app sokak-vitrini-prova --env production --python-version 3.12 2>&1 | tee deploy.log
 
       - name: Show deployed environment

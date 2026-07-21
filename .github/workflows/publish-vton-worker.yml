@@ -2,12 +2,6 @@ name: VTON Worker Image
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "gpu-service/**"
-      - ".github/workflows/publish-vton-worker.yml"
 
 concurrency:
   group: vton-worker-${{ github.ref }}

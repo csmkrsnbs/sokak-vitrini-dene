@@ -12,18 +12,16 @@ MODEL_VOLUME = NetworkVolume(
     gpu=GpuGroup.ANY,
     workers=(0, 1),
     idle_timeout=600,
-    execution_timeout_ms=600000,
+    execution_timeout_ms=1200000,
     flashboot=True,
     datacenter=DataCenter.EU_RO_1,
     volume=MODEL_VOLUME,
     min_cuda_version="12.1",
     accelerate_downloads=True,
-    system_dependencies=["libgl1", "libglib2.0-0"],
+    system_dependencies=["git", "libgl1", "libglib2.0-0"],
     dependencies=[
         "numpy>=1.26,<2",
         "pillow>=10.4,<12",
-        "fashn-vton @ git+https://github.com/fashn-AI/fashn-vton-1.5.git@38aafe2185df40a3e8a5442e950c422c3d9dcb5a",
-        "onnxruntime-gpu>=1.20.0,<2",
         "huggingface_hub>=0.34,<2",
     ],
     env={
@@ -33,7 +31,7 @@ MODEL_VOLUME = NetworkVolume(
         "VTON_GUIDANCE_SCALE": "1.5",
         "VTON_SEGMENTATION_FREE": "true",
         "VTON_FIDELITY_THRESHOLD": "0.30",
-        "SV_VTON_WORKER_VERSION": "v8-flash-fix",
+        "SV_VTON_WORKER_VERSION": "v9-flash-runtime",
     },
 )
 def vton_worker(
@@ -52,16 +50,19 @@ def vton_worker(
     import os
     import torch
 
-    version = os.getenv("SV_VTON_WORKER_VERSION", "v8-flash-fix")
+    version = os.getenv("SV_VTON_WORKER_VERSION", "v9-flash-runtime")
     normalized_action = (action or "try-on").strip().lower()
 
     if normalized_action == "health":
+        from vton_engine import runtime_dependency_status
+
         return {
             "ok": True,
             "worker_version": version,
             "cuda_available": torch.cuda.is_available(),
             "gpu_name": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
             "volume_mounted": os.path.isdir("/runpod-volume"),
+            "runtime_dependencies": runtime_dependency_status(),
         }
 
     from vton_engine import decode_base64_image, get_pipeline, run_try_on

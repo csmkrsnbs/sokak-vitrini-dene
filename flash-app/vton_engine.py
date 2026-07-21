@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import base64
 import io
+import importlib
+import importlib.util
 import os
+import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -32,6 +36,113 @@ _PIPELINE = None
 _PIPELINE_LOCK = Lock()
 _INFERENCE_LOCK = Lock()
 _WEIGHTS_LOCK = Lock()
+_RUNTIME_DEPS_LOCK = Lock()
+
+
+RUNTIME_PACKAGES_DIR = Path(os.getenv("VTON_RUNTIME_PACKAGES_DIR", "/runpod-volume/python-packages"))
+RUNTIME_MARKER = RUNTIME_PACKAGES_DIR / ".sv-vton-runtime-v1"
+RUNTIME_MODULES = (
+    "fashn_vton",
+    "fashn_human_parser",
+    "transformers",
+    "cv2",
+    "onnxruntime",
+    "safetensors",
+    "einops",
+)
+
+
+def _activate_runtime_packages() -> None:
+    path = str(RUNTIME_PACKAGES_DIR)
+    if RUNTIME_PACKAGES_DIR.is_dir() and path not in sys.path:
+        sys.path.insert(0, path)
+    importlib.invalidate_caches()
+
+
+def _module_available(module_name: str) -> bool:
+    try:
+        return importlib.util.find_spec(module_name) is not None
+    except (ImportError, ValueError):
+        return False
+
+
+def runtime_dependency_status() -> dict[str, object]:
+    _activate_runtime_packages()
+    modules = {name: _module_available(name) for name in RUNTIME_MODULES}
+    return {
+        "ready": all(modules.values()),
+        "marker_present": RUNTIME_MARKER.is_file(),
+        "path": str(RUNTIME_PACKAGES_DIR),
+        "modules": modules,
+    }
+
+
+def _pip_install(packages: list[str], *, no_deps: bool = False) -> None:
+    command = [
+        sys.executable,
+        "-m",
+        "pip",
+        "install",
+        "--disable-pip-version-check",
+        "--no-cache-dir",
+        "--upgrade",
+        "--target",
+        str(RUNTIME_PACKAGES_DIR),
+    ]
+    if no_deps:
+        command.append("--no-deps")
+    command.extend(packages)
+    print(f"[runtime] installing {len(packages)} package group", flush=True)
+    subprocess.run(command, check=True)
+
+
+def ensure_runtime_dependencies() -> dict[str, object]:
+    _activate_runtime_packages()
+    status = runtime_dependency_status()
+    if status["ready"]:
+        return status
+
+    with _RUNTIME_DEPS_LOCK:
+        _activate_runtime_packages()
+        status = runtime_dependency_status()
+        if status["ready"]:
+            return status
+
+        RUNTIME_PACKAGES_DIR.mkdir(parents=True, exist_ok=True)
+
+        # Büyük ML bağımlılıkları Flash'ın 1.5 GB deployment arşivine eklenmez.
+        # İlk warmup çağrısında kalıcı RunPod volume'a yalnızca bir kez kurulur.
+        _pip_install(
+            [
+                "transformers>=4.30,<5",
+                "opencv-python-headless>=4.8,<5",
+                "safetensors>=0.3,<1",
+                "tqdm>=4.65,<5",
+                "einops>=0.6,<1",
+                "onnxruntime-gpu>=1.20,<2",
+                "scipy>=1.13,<2",
+                "huggingface_hub>=0.34,<2",
+                "pillow>=10.4,<12",
+                "numpy>=1.26,<2",
+            ]
+        )
+        _pip_install(
+            [
+                "fashn-human-parser==0.1.1",
+                "fashn-vton @ git+https://github.com/fashn-AI/fashn-vton-1.5.git@38aafe2185df40a3e8a5442e950c422c3d9dcb5a",
+            ],
+            no_deps=True,
+        )
+
+        _activate_runtime_packages()
+        status = runtime_dependency_status()
+        if not status["ready"]:
+            missing = [name for name, available in status["modules"].items() if not available]
+            raise RuntimeError(f"Runtime bağımlılıkları kurulamadı: {', '.join(missing)}")
+
+        RUNTIME_MARKER.write_text("v1\n", encoding="utf-8")
+        print(f"[runtime] dependencies ready at {RUNTIME_PACKAGES_DIR}", flush=True)
+        return runtime_dependency_status()
 
 
 @dataclass
@@ -126,6 +237,8 @@ def get_pipeline():
 
     with _PIPELINE_LOCK:
         if _PIPELINE is None:
+            ensure_runtime_dependencies()
+
             import torch
             from fashn_vton import TryOnPipeline
 
