@@ -1,238 +1,147 @@
-import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowDown,
-  Camera,
-  Check,
-  Gem,
-  Images,
-  ScanLine,
-  Shirt,
-  Sparkles,
-  UserRoundCheck,
-} from "lucide-react";
+import { ArrowDown, Check, ShieldCheck, Sparkles } from "lucide-react";
 
-import { TryOnStudio } from "@/components/try-on-studio";
-
-const categories = [
-  {
-    icon: UserRoundCheck,
-    title: "Dijital profil",
-    text: "Fotoğrafını tarayıcında bir kez kaydet; yeni ürünlerde tekrar kullan.",
-  },
-  {
-    icon: Shirt,
-    title: "Giyim & iç giyim",
-    text: "Günlük giyimden bikini, mayo ve yetişkin iç giyime kadar kendinde dene.",
-  },
-  {
-    icon: Gem,
-    title: "Takı & aksesuar",
-    text: "Takı, saat, gözlük, şapka, ayakkabı ve çantayı kendi görünümünde incele.",
-  },
-  {
-    icon: Images,
-    title: "İşletme stüdyosu",
-    text: "Yalnız ürün fotoğrafından katalog ve sosyal medya için model görseli üret.",
-  },
-];
-
-const steps = [
-  {
-    number: "01",
-    icon: Camera,
-    title: "Ürünü ekle",
-    text: "Vitrindeki ya da işletmendeki ürünü net bir açıdan yükle.",
-  },
-  {
-    number: "02",
-    icon: ScanLine,
-    title: "Modu seç",
-    text: "Dijital profilinde dene veya ürün için model görseli oluştur.",
-  },
-  {
-    number: "03",
-    icon: Sparkles,
-    title: "Sonucu kullan",
-    text: "Önizlemeyi karşılaştır, favorile, indir veya paylaş.",
-  },
-];
+import { ProvaStudio } from "@/components/prova-studio";
 
 export default function HomePage() {
   return (
     <main>
       <header className="site-header">
         <div className="container header-inner">
-          <Link className="brand" href="#top" aria-label="Sokak Vitrini ana sayfa">
-            <span className="brand-mark" aria-hidden="true">
-              SV
-            </span>
+          <Link className="brand" href="#top" aria-label="Sokak Vitrini Prova">
+            <span className="brand-mark">SV</span>
             <span className="brand-copy">
               <strong>SOKAK VİTRİNİ</strong>
-              <small>DENE</small>
+              <small>PROVA</small>
             </span>
           </Link>
-
           <nav className="desktop-nav" aria-label="Ana menü">
-            <Link href="#nasil-calisir">Nasıl çalışır?</Link>
-            <Link href="#gecmis">Geçmişim</Link>
+            <Link href="#deneyim">Deneyim</Link>
+            <Link href="#gerceklik">Ürün Gerçekliği</Link>
+            <Link href="#gizlilik">Gizlilik</Link>
           </nav>
-
-          <Link className="button button-small button-gold" href="#dene">
-            Hemen dene
+          <Link className="button button-small button-gold" href="#studio">
+            Prova alanını aç
           </Link>
         </div>
       </header>
 
       <section className="hero" id="top">
-        <div className="hero-glow hero-glow-one" />
-        <div className="hero-glow hero-glow-two" />
+        <div className="hero-orbit hero-orbit-one" />
+        <div className="hero-orbit hero-orbit-two" />
         <div className="container hero-grid">
           <div className="hero-copy">
             <div className="eyebrow">
-              <Sparkles size={15} strokeWidth={1.8} />
-              Kişisel deneme ve işletme görsel stüdyosu
+              <Sparkles size={15} /> Gerçek ürün + kontrollü dijital prova
             </div>
             <h1>
-              Sokakta gör.
-              <span>Kendinde dene.</span>
+              Ürünü değiştirmeden
+              <span>deneyimi büyüt.</span>
             </h1>
             <p>
-              Beğendiğin giyim ve aksesuar ürününü kendi dijital profilinde gör.
-              İşletmensen tek ürün fotoğrafından model üzerinde katalog görseli oluştur.
+              360° gerçek çekim, beden bazlı hazır manken, kendi GPU sunucunda çalışan sanal prova
+              ve 3D ürünler için WebAR tek bir premium vitrinde birleşir.
             </p>
             <div className="hero-actions">
-              <Link className="button button-gold" href="#dene">
-                <Camera size={19} />
-                Ürünü şimdi dene
+              <Link className="button button-gold" href="#studio">
+                Prova stüdyosuna gir
               </Link>
-              <Link className="text-link" href="#nasil-calisir">
-                Nasıl çalışır?
-                <ArrowDown size={17} />
+              <Link className="text-link" href="#deneyim">
+                Sistem nasıl çalışıyor? <ArrowDown size={17} />
               </Link>
             </div>
-            <div className="trust-row" aria-label="Öne çıkan özellikler">
-              <span>
-                <Check size={15} /> Dijital profil tarayıcında kalır
-              </span>
-              <span>
-                <Check size={15} /> Kişisel ve işletme modu
-              </span>
+            <div className="trust-row">
+              <span><Check size={15} /> Harici görsel üretim API&apos;si zorunlu değil</span>
+              <span><Check size={15} /> Fotoğraflar kalıcı olarak saklanmaz</span>
             </div>
           </div>
 
-          <div className="hero-visual" aria-label="Sokak Vitrini Dene konsepti">
-            <div className="poster-frame">
-              <Image
-                src="/concept-poster.png"
-                alt="Vitrindeki kolyeyi fotoğraflayıp üzerinde deneyen kullanıcı"
-                width={1003}
-                height={1568}
-                priority
-                sizes="(max-width: 900px) 90vw, 460px"
-              />
-              <div className="poster-shine" />
+          <div className="hero-stage" aria-label="Sokak Vitrini Prova deneyim kartları">
+            <div className="hero-device">
+              <div className="device-topline"><span /><strong>SV PROVA</strong><span /></div>
+              <div className="device-scene">
+                <div className="scene-halo" />
+                <div className="scene-mannequin">
+                  <span className="head" />
+                  <span className="torso" />
+                  <span className="waist" />
+                  <span className="legs" />
+                </div>
+                <div className="scene-garment"><span>GERÇEK ÜRÜN</span></div>
+              </div>
+              <div className="device-tabs">
+                <span className="active">360°</span><span>Manken</span><span>Kendinde</span><span>AR</span>
+              </div>
             </div>
-            <div className="floating-card floating-card-top">
-              <span className="floating-icon">
-                <Gem size={18} />
-              </span>
-              <span>
-                <small>Ürün tanındı</small>
-                <strong>Altın kolye</strong>
-              </span>
-              <Check size={18} className="floating-check" />
+            <div className="float-proof proof-one">
+              <small>ÜRÜN SADAKATİ</small><strong>Yüksek</strong><span>%88</span>
             </div>
-            <div className="floating-card floating-card-bottom">
-              <Sparkles size={18} className="gold-icon" />
-              <span>
-                <small>Önizleme</small>
-                <strong>Hazır</strong>
-              </span>
+            <div className="float-proof proof-two">
+              <ShieldCheck size={19} /><span><small>GİZLİ PROVA</small><strong>Cihaz + özel GPU</strong></span>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="category-strip" aria-label="Platform özellikleri">
-        <div className="container category-strip-grid">
-          {categories.map(({ icon: Icon, title, text }) => (
-            <article className="category-intro" key={title}>
-              <span className="category-intro-icon">
-                <Icon size={24} strokeWidth={1.6} />
-              </span>
-              <div>
-                <h2>{title}</h2>
-                <p>{text}</p>
-              </div>
+      <section className="experience-strip" id="deneyim">
+        <div className="container experience-grid">
+          {[
+            ["01", "Gerçek 360°", "24–36 gerçek ürün karesiyle kumaş, dikiş ve arka görünüm."],
+            ["02", "Gizli manken", "S, M, L ve XL bedenlerde hızlı, fotoğraf yüklemeden önizleme."],
+            ["03", "Kişisel prova", "Kendi GPU sunucunda FASHN VTON v1.5 ile kontrollü üretim."],
+            ["04", "WebAR", "GLB modeli olan sert formlu ürünleri gerçek ölçekte ortamda görme."],
+          ].map(([number, title, text]) => (
+            <article className="experience-card" key={number}>
+              <span>{number}</span><h2>{title}</h2><p>{text}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <TryOnStudio />
+      <ProvaStudio />
 
-      <section className="how-section" id="nasil-calisir">
-        <div className="container">
-          <div className="section-heading centered">
-            <span className="section-kicker">Üç basit adım</span>
-            <h2>Üründen gerçek bir önizlemeye</h2>
+      <section className="reality-section" id="gerceklik">
+        <div className="container reality-grid">
+          <div>
+            <span className="section-kicker">Ürün Gerçeklik Kartı</span>
+            <h2>Simülasyon ile gerçek çekim birbirine karışmaz.</h2>
             <p>
-              Tek panelden kişisel sanal deneme yap veya işletmen için ürün görseli üret.
+              Kullanıcıya hangi görüntünün gerçek stüdyo çekimi, hangisinin dijital prova olduğu
+              açıkça gösterilir. Düşük sadakatli sonuçlar satış ekranına çıkarılmaz.
             </p>
           </div>
-
-          <div className="steps-grid">
-            {steps.map(({ number, icon: Icon, title, text }) => (
-              <article className="step-card" key={number}>
-                <span className="step-number">{number}</span>
-                <span className="step-icon">
-                  <Icon size={28} strokeWidth={1.5} />
-                </span>
-                <h3>{title}</h3>
-                <p>{text}</p>
-              </article>
-            ))}
+          <div className="reality-card">
+            <div className="reality-row"><span>GERÇEK ÜRÜN</span><strong>360° stüdyo çekimi</strong></div>
+            <div className="reality-row"><span>DİJİTAL PROVA</span><strong>Yaklaşık görünüm</strong></div>
+            <div className="score-bars">
+              <label>Renk <i style={{ width: "91%" }} /></label>
+              <label>Desen <i style={{ width: "86%" }} /></label>
+              <label>Kesim <i style={{ width: "74%" }} /></label>
+            </div>
+            <div className="reality-verdict">Yayınlanabilir ürün sadakati</div>
           </div>
         </div>
       </section>
 
-      <section className="privacy-banner">
-        <div className="container privacy-banner-inner">
+      <section className="privacy-section" id="gizlilik">
+        <div className="container privacy-inner">
+          <div className="privacy-icon"><ShieldCheck size={30} /></div>
           <div>
-            <span className="section-kicker">Sana özel</span>
-            <h2>Dijital profilin cihazında kalır.</h2>
+            <span className="section-kicker">Gizlilik odaklı</span>
+            <h2>Kullanıcı fotoğrafı ürün değildir.</h2>
             <p>
-              Kaydettiğin dijital profil, bu tarayıcının yerel veritabanında tutulur.
-              Ürün ve kişi görselleri yalnızca seçtiğin önizlemeyi oluşturmak için işlenir;
-              sonuçlarını geçmişten silebilirsin.
+              Web katmanı fotoğrafları veritabanına yazmaz. GPU servisi görselleri bellekte işler,
+              sonucu döndürür ve geçici veriyi siler. Özel koleksiyonlarda hazır manken seçeneği öne çıkar.
             </p>
-          </div>
-          <div className="privacy-seal" aria-hidden="true">
-            <span>SV</span>
-            <small>ÖZEL DENEYİM</small>
           </div>
         </div>
       </section>
 
       <footer className="site-footer">
         <div className="container footer-inner">
-          <Link className="brand" href="#top">
-            <span className="brand-mark">SV</span>
-            <span className="brand-copy">
-              <strong>SOKAK VİTRİNİ</strong>
-              <small>DENE</small>
-            </span>
-          </Link>
-          <p>Vitrinde gördüğünü, kendinde gör.</p>
-          <div className="footer-links">
-            <Link href="/gizlilik">Gizlilik</Link>
-            <Link href="/kullanim-kosullari">Kullanım Koşulları</Link>
-          </div>
-        </div>
-        <div className="container footer-bottom">
-          <span>© {new Date().getFullYear()} Sokak Vitrini</span>
-          <span>Vitrinde gördüğünü, kendinde gör.</span>
+          <span>© 2026 Sokak Vitrini</span>
+          <div><Link href="/gizlilik">Gizlilik</Link><Link href="/kullanim-kosullari">Kullanım Koşulları</Link></div>
+          <span>SV Signature</span>
         </div>
       </footer>
     </main>

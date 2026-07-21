@@ -1,14 +1,6 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  return [
-    { url: baseUrl, changeFrequency: "weekly", priority: 1 },
-    { url: `${baseUrl}/gizlilik`, changeFrequency: "yearly", priority: 0.2 },
-    {
-      url: `${baseUrl}/kullanim-kosullari`,
-      changeFrequency: "yearly",
-      priority: 0.2,
-    },
-  ];
+  const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  return ["", "/gizlilik", "/kullanim-kosullari"].map((path) => ({ url: `${base}${path}`, lastModified: new Date() }));
 }
