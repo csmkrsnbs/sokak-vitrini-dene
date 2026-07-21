@@ -31,7 +31,7 @@ MODEL_VOLUME = NetworkVolume(
         "VTON_GUIDANCE_SCALE": "1.5",
         "VTON_SEGMENTATION_FREE": "true",
         "VTON_FIDELITY_THRESHOLD": "0.30",
-        "SV_VTON_WORKER_VERSION": "v10-matplotlib",
+        "SV_VTON_WORKER_VERSION": "v11-ort-cuda12",
     },
 )
 def vton_worker(
@@ -50,7 +50,7 @@ def vton_worker(
     import os
     import torch
 
-    version = os.getenv("SV_VTON_WORKER_VERSION", "v10-matplotlib")
+    version = os.getenv("SV_VTON_WORKER_VERSION", "v11-ort-cuda12")
     normalized_action = (action or "try-on").strip().lower()
 
     if normalized_action == "health":
