@@ -3,7 +3,10 @@
   "version": "2.0.0",
   "private": true,
   "description": "Sokak Vitrini Prova - gerçek ürün 360, hazır manken, self-hosted VTON ve WebAR deneyimi.",
-  "engines": { "node": ">=20.9.0" },
+  "engines": {
+    "node": "22.x",
+    "npm": "10.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -28,5 +31,6 @@
     "eslint": "^9.17.0",
     "eslint-config-next": "16.2.10",
     "typescript": "^5.7.2"
-  }
+  },
+  "packageManager": "npm@10.9.2"
 }

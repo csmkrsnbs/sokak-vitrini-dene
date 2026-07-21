@@ -3,5 +3,6 @@
     "app/api/try-on/route.ts": {
       "maxDuration": 300
     }
-  }
+  },
+  "installCommand": "npm ci --no-audit --no-fund"
 }

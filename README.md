@@ -14,7 +14,7 @@ Her AI sonucu **Ürün Gerçeklik Kartı** ile gösterilir. Renk/yapı ön kontr
 ## Web kurulumu
 
 ```bash
-npm install
+npm ci
 cp .env.example .env.local
 npm run dev
 ```
