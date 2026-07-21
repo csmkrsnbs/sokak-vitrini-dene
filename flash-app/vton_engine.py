@@ -9,8 +9,21 @@ from pathlib import Path
 from threading import Lock
 from typing import Literal
 
-import numpy as np
-from PIL import Image, ImageOps
+try:
+    import numpy as np
+    from PIL import Image, ImageOps
+except ModuleNotFoundError:
+    # RunPod Flash discovers every Python module in the project locally before
+    # it installs the endpoint's remote dependencies. The workflow installs
+    # these packages too, but this guard keeps discovery deterministic.
+    np = None  # type: ignore[assignment]
+    Image = None  # type: ignore[assignment]
+    ImageOps = None  # type: ignore[assignment]
+
+
+def _require_image_dependencies() -> None:
+    if np is None or Image is None or ImageOps is None:
+        raise RuntimeError("NumPy/Pillow bağımlılıkları worker ortamında yüklenemedi.")
 
 Category = Literal["tops", "bottoms", "one-pieces", "two-piece"]
 PhotoType = Literal["auto", "flat-lay", "model"]
@@ -132,6 +145,7 @@ def get_pipeline():
 
 
 def normalize_image(image: Image.Image) -> Image.Image:
+    _require_image_dependencies()
     image = ImageOps.exif_transpose(image).convert("RGB")
     max_side = int(os.getenv("VTON_MAX_INPUT_SIDE", "1800"))
     if max(image.size) > max_side:
@@ -156,6 +170,7 @@ def encode_image(image: Image.Image) -> tuple[str, str]:
 
 
 def _foreground_pixels(image: Image.Image) -> np.ndarray:
+    _require_image_dependencies()
     arr = np.asarray(image.resize((192, 192), Image.Resampling.LANCZOS), dtype=np.float32) / 255.0
     flat = arr.reshape(-1, 3)
     brightness = flat.mean(axis=1)
@@ -176,6 +191,7 @@ def _result_crop(image: Image.Image, category: Category) -> Image.Image:
 
 
 def _color_histogram(image: Image.Image) -> np.ndarray:
+    _require_image_dependencies()
     pixels = _foreground_pixels(image)
     histograms = []
     for channel in range(3):
@@ -187,6 +203,7 @@ def _color_histogram(image: Image.Image) -> np.ndarray:
 
 
 def _edge_density(image: Image.Image) -> float:
+    _require_image_dependencies()
     gray = np.asarray(image.resize((192, 192), Image.Resampling.LANCZOS).convert("L"), dtype=np.float32) / 255.0
     return float((np.abs(np.diff(gray, axis=1)).mean() + np.abs(np.diff(gray, axis=0)).mean()) / 2.0)
 

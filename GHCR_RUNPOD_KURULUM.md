@@ -1,3 +1,6 @@
+> [!WARNING]
+> ARŞİV: Bu yöntem aktif v8 dağıtımında kullanılmıyor. RunPod için `RUNPOD_FLASH_KURULUM.md` dosyasını izleyin.
+
 # GitHub Container Registry → RunPod Kurulumu
 
 Bu yöntem RunPod'un GitHub builder aşamasını kullanmaz. Docker imajı GitHub Actions tarafından oluşturulur, GitHub Container Registry'ye gönderilir ve RunPod imajı doğrudan registry'den çeker.

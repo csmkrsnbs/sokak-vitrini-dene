@@ -21,34 +21,37 @@ npm run dev
 
 Tarayıcı: `http://localhost:3000`
 
-## Ortam değişkenleri
+## RunPod Flash kurulumu
+
+Aktif dağıtım yolu özel Docker/GHCR imajı değil, RunPod Flash'tır.
+
+GitHub Actions secret:
+
+```text
+RUNPOD_API_KEY=<gizli anahtar>
+```
+
+Çalıştırılacak workflow:
+
+```text
+Actions → Deploy VTON with RunPod Flash → Run workflow
+```
+
+Workflow başarılı olduktan sonra üretilen yeni endpoint ID, Vercel'e eklenir:
 
 ```env
 NEXT_PUBLIC_APP_URL="https://prova.sokakvitrini.com"
-VTON_PROVIDER="direct"
-VTON_ENDPOINT_URL="https://gpu-servis-adresi"
-VTON_SHARED_SECRET="uzun-rastgele-deger"
-VTON_REQUEST_TIMEOUT_MS="180000"
-VTON_MAX_UPLOAD_MB="12"
-```
-
-RunPod Serverless Queue için önerilen dağıtım GitHub Actions → GHCR → RunPod akışıdır:
-
-```env
 VTON_PROVIDER="runpod"
 RUNPOD_ENDPOINT_ID="..."
 RUNPOD_API_KEY="..."
+VTON_REQUEST_TIMEOUT_MS="600000"
+VTON_MAX_UPLOAD_MB="12"
 ```
 
-RunPod endpoint ayarında **Cached model** olarak `fashn-ai/fashn-vton-1.5` kullanılmalıdır.
+Ayrıntılı sıra: `RUNPOD_FLASH_KURULUM.md`.
 
-Kurulum: `GHCR_RUNPOD_KURULUM.md`
-
-## GPU servisi
-
-`gpu-service/` klasöründeki Docker projesi, FASHN VTON v1.5 modelini self-hosted olarak çalıştırır. Direct FastAPI ve RunPod Serverless handler birlikte gelir. GitHub Actions workflow'u worker imajını GHCR'ye otomatik yayınlar.
-
-Ayrıntı: `gpu-service/README.md` ve `GHCR_RUNPOD_KURULUM.md`
+`gpu-service/` ve GHCR belgeleri yalnız eski/alternatif direct GPU yöntemi için
+korunmuştur. Yeni RunPod endpoint'i için kullanılmamalıdır.
 
 ## Gerçek 360° ürün hazırlığı
 
@@ -66,7 +69,7 @@ Projede S/M/L/XL için nötr demo manken SVG'leri bulunur. Ticari kullanımda ge
 
 - Kullanıcı fotoğrafları web veritabanına yazılmaz.
 - GPU servisinde görseller bellekte işlenir.
-- `VTON_SHARED_SECRET` zorunlu tutulmalıdır.
+- RunPod API anahtarı yalnız Vercel sunucu ortamında tutulmalı; tarayıcıya gönderilmemelidir.
 - HTTPS kullanılmalıdır.
 - Özel Vitrin yalnız yetişkin kullanıcılar içindir.
 
@@ -76,13 +79,8 @@ Projede S/M/L/XL için nötr demo manken SVG'leri bulunur. Ticari kullanımda ge
 npm run check
 ```
 
-## RunPod v6-light Worker
+## V8 — doğrulanmış Flash dağıtımı
 
-Uzun süre `Initializing` durumunda kalan eski image yerine hafif Queue worker kullanılır. Yeni Dockerfile RunPod PyTorch tabanını kullanır, web sunucusu bağımlılıklarını Queue imajından çıkarır ve `health` / `warmup` teşhis işlerini destekler. Kurulum sırası: `RUNPOD_V6_HAFIF_WORKER.md`.
-
-## v7 — RunPod Flash dağıtımı
-
-Özel Docker/GHCR worker yolu bırakıldı. `runpod/pytorch` tabanının sıkıştırılmış
-boyutu çok büyük olduğu için worker initialization aşamasında takılabiliyordu.
-Yeni dağıtım `flash-app/` ve `.github/workflows/deploy-vton-flash.yml` üzerinden
-RunPod Flash kullanır. Kurulum: `RUNPOD_FLASH_KURULUM.md`.
+V8, GitHub Actions logunda görülen `numpy` keşif hatasını ve RunPod Flash
+1.18.0 ile uyumsuz `python_version` dekoratör parametresini düzeltir. Workflow,
+deploy başlamadan önce SDK imzasını ve tüm Flash modüllerini doğrular.

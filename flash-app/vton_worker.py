@@ -16,14 +16,14 @@ MODEL_VOLUME = NetworkVolume(
     flashboot=True,
     datacenter=DataCenter.EU_RO_1,
     volume=MODEL_VOLUME,
-    python_version="3.12",
     min_cuda_version="12.1",
     accelerate_downloads=True,
     system_dependencies=["libgl1", "libglib2.0-0"],
     dependencies=[
+        "numpy>=1.26,<2",
+        "pillow>=10.4,<12",
         "fashn-vton @ git+https://github.com/fashn-AI/fashn-vton-1.5.git@38aafe2185df40a3e8a5442e950c422c3d9dcb5a",
         "onnxruntime-gpu>=1.20.0,<2",
-        "pillow>=10.4,<12",
         "huggingface_hub>=0.34,<2",
     ],
     env={
@@ -33,7 +33,7 @@ MODEL_VOLUME = NetworkVolume(
         "VTON_GUIDANCE_SCALE": "1.5",
         "VTON_SEGMENTATION_FREE": "true",
         "VTON_FIDELITY_THRESHOLD": "0.30",
-        "SV_VTON_WORKER_VERSION": "v7-flash",
+        "SV_VTON_WORKER_VERSION": "v8-flash-fix",
     },
 )
 def vton_worker(
@@ -52,7 +52,7 @@ def vton_worker(
     import os
     import torch
 
-    version = os.getenv("SV_VTON_WORKER_VERSION", "v7-flash")
+    version = os.getenv("SV_VTON_WORKER_VERSION", "v8-flash-fix")
     normalized_action = (action or "try-on").strip().lower()
 
     if normalized_action == "health":

@@ -1,56 +1,40 @@
-# RunPod Flash ile kesin kurulum
+# RunPod Flash V8 Kurulumu
 
-Önce eski Serverless endpoint'teki bekleyen işleri iptal edin ve endpoint'i silin.
-Bu sürüm özel GHCR Docker imajını kullanmaz.
+Bu sürüm, RunPod Flash `1.18.0` ile doğrulanmış parametreleri kullanır.
 
-## 1. GitHub Secret
+## Düzeltilen iki hata
 
-Repository → Settings → Secrets and variables → Actions → New repository secret
+- `Endpoint.__init__() got an unexpected keyword argument 'python_version'`:
+  `python_version` dekoratörden kaldırıldı. Python 3.12, workflow içindeki
+  `flash deploy --python-version 3.12` seçeneğiyle sabitlenir.
+- `ModuleNotFoundError: No module named 'numpy'`:
+  NumPy ve Pillow hem GitHub Actions keşif ortamına hem de uzak worker
+  bağımlılıklarına eklendi.
 
-```text
-Name: RUNPOD_API_KEY
-Value: RunPod API anahtarınız
-```
+## GitHub
 
-## 2. Workflow
-
-GitHub → Actions → Deploy VTON with RunPod Flash → Run workflow
-
-Flash, RunPod'un hazır GPU worker imajını kullanır. Bu nedenle 10 GB özel Docker
-imajı çekilmez. Endpoint ve 20 GB kalıcı model volume otomatik oluşturulur.
-
-## 3. Endpoint ID
-
-Workflow logunun sonunda queue endpoint URL'si görünür:
+`Settings → Secrets and variables → Actions` altında:
 
 ```text
-https://api.runpod.ai/v2/ENDPOINT_ID
+RUNPOD_API_KEY=<gizli RunPod API anahtarı>
 ```
 
-Vercel ortam değişkenini değiştirin:
+Sonra:
+
+```text
+Actions → Deploy VTON with RunPod Flash → Run workflow
+```
+
+Workflow önce uygulama modüllerini ve SDK imzasını doğrular; doğrulama geçmeden
+deploy başlamaz. Başarılı çalışmanın özetinde endpoint bilgisi yer alır.
+
+## Vercel
 
 ```env
-VTON_PROVIDER="runpod"
-RUNPOD_ENDPOINT_ID="YENI_ENDPOINT_ID"
-RUNPOD_API_KEY="mevcut_runpod_api_key"
-VTON_REQUEST_TIMEOUT_MS="600000"
+VTON_PROVIDER=runpod
+RUNPOD_ENDPOINT_ID=<yeni endpoint id>
+RUNPOD_API_KEY=<gizli RunPod API anahtarı>
+VTON_REQUEST_TIMEOUT_MS=600000
 ```
 
-Vercel'i yeniden deploy edin.
-
-## 4. Test sırası
-
-Önce health:
-
-```json
-{"input":{"action":"health"}}
-```
-
-Sonra warmup:
-
-```json
-{"input":{"action":"warmup"}}
-```
-
-Warmup ilk seferde model dosyalarını 20 GB kalıcı volume'a indirir. Sonraki
-başlatmalarda aynı dosyalar kullanılır.
+Vercel ortam değişkenlerini kaydettikten sonra production redeploy yapılır.

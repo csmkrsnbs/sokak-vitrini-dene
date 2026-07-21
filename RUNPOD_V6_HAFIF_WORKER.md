@@ -1,3 +1,6 @@
+> [!WARNING]
+> ARŞİV: Bu yöntem aktif v8 dağıtımında kullanılmıyor. RunPod için `RUNPOD_FLASH_KURULUM.md` dosyasını izleyin.
+
 # RunPod v6 Hafif Worker Kurulumu
 
 Bu sürüm, uzun süre `Initializing` durumunda kalan eski worker imajını değiştirir.

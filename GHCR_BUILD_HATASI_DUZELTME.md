@@ -1,3 +1,6 @@
+> [!WARNING]
+> ARŞİV: Bu yöntem aktif v8 dağıtımında kullanılmıyor. RunPod için `RUNPOD_FLASH_KURULUM.md` dosyasını izleyin.
+
 # GHCR Build Hatası Düzeltmesi
 
 Önceki Dockerfile, yaklaşık 1.94 GB ana model ağırlığını GitHub Actions Docker build'i sırasında indiriyordu. Bu indirme adımı başarısız olduğunda tüm `RUN` zinciri `exit code: 1` ile kapanıyordu.
