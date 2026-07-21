@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 
 import { getDb } from "@/lib/db";
 import { couponCodes } from "@/lib/db/schema";
-import type { AccessState, PreviewCategory } from "@/lib/types";
+import type { AccessState, PreviewCategory, PreviewMode, ProductKind } from "@/lib/types";
 import { dailyGenerationLimit } from "@/lib/server/usage-limits";
 import { getCouponId } from "@/lib/server/coupons";
 
@@ -15,7 +15,9 @@ type PreviewReservationInput = {
   id: string;
   sessionId: string;
   clientKey: string;
+  mode: PreviewMode;
   category: PreviewCategory;
+  productKind: ProductKind;
   note: string | null;
   model: string;
   couponId: string | null;
@@ -60,13 +62,15 @@ async function reserveCouponPreview(input: PreviewReservationInput, couponId: st
       RETURNING id
     )
     INSERT INTO preview_requests (
-      id, session_id, client_key, category, note, status, model, credit_source, coupon_id
+      id, session_id, client_key, mode, category, product_kind, note, status, model, credit_source, coupon_id
     )
     SELECT
       ${input.id}::uuid,
       ${input.sessionId},
       ${input.clientKey},
+      ${input.mode},
       ${input.category},
+      ${input.productKind},
       ${input.note},
       'processing',
       ${input.model},

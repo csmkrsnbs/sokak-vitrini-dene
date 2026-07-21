@@ -26,7 +26,7 @@ import {
   cancelProductPreviewJob,
   getProductPreviewJob,
   ImageGenerationError,
-} from "@/lib/server/runpod-image";
+} from "@/lib/server/ai-image";
 import type { PreviewProviderStatus } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -57,7 +57,7 @@ function reservationFor(row: {
 
 function terminalMessage(errorCode: string | null) {
   if (errorCode === "AI_TIMEOUT") {
-    return "GPU sırası zamanında tamamlanamadı. Kullanım hakkınız iade edildi.";
+    return "Görsel servisi işlemi zamanında tamamlayamadı. Kullanım hakkınız iade edildi.";
   }
   if (errorCode === "UNSAFE_CONTENT") {
     return "Fotoğraflar içerik kurallarımıza uygun bulunmadı. İşlem durduruldu, sonuç kaydedilmedi ve kullanım hakkınız iade edildi.";
@@ -65,16 +65,10 @@ function terminalMessage(errorCode: string | null) {
   if (errorCode === "MODERATION_UNAVAILABLE") {
     return "Güvenlik kontrolü şu anda tamamlanamadı. İşlem durduruldu, sonuç kaydedilmedi ve kullanım hakkınız iade edildi.";
   }
-  if (errorCode === "AI_GPU_MEMORY") {
-    return "Görsel üretim sunucusunun GPU belleği yetersiz kaldı. Kullanım hakkınız iade edildi; yönetici GPU ayarını kontrol etmelidir.";
-  }
   if (errorCode === "AI_GENERATION_FAILED") {
     return "Görsel üretim motoru işlemi tamamlayamadı. Kullanım hakkınız iade edildi; lütfen yeniden deneyin.";
   }
-  if (errorCode === "AI_MODEL_LOAD_FAILED") {
-    return "Görsel üretim modeli worker üzerinde yüklenemedi. Kullanım hakkınız iade edildi; yönetici RunPod loglarını ve volume bağlantısını kontrol etmelidir.";
-  }
-  if (errorCode === "VTON_INPUT_INVALID") {
+  if (errorCode === "VTON_INPUT_INVALID" || errorCode === "AI_INPUT_INVALID") {
     return "Giyim motoru kişi pozunu veya ürünü yeterince net algılayamadı. Önden çekilmiş yetişkin fotoğrafı ve ürünün tamamını gösteren net bir fotoğrafla yeniden deneyin. Kullanım hakkınız iade edildi.";
   }
   return "Görsel hazırlanamadı. Kullanım hakkınız iade edildi.";
@@ -188,11 +182,11 @@ export async function GET(
       return failProcessing(
         "TIMED_OUT",
         "AI_TIMEOUT",
-        "GPU sırası zamanında tamamlanamadı. Kullanım hakkınız iade edildi.",
+        "Görsel servisi işlemi zamanında tamamlayamadı. Kullanım hakkınız iade edildi.",
       );
     }
 
-    const job = await getProductPreviewJob(row.providerJobId, row.category);
+    const job = await getProductPreviewJob(row.providerJobId, row.category, row.mode);
     if (job.state === "completed") {
       const [completed] = await db
         .update(previewRequests)

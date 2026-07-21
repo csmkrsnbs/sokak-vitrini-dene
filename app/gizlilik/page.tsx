@@ -9,92 +9,75 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalShell kicker="Son güncelleme: 18 Temmuz 2026" title="Gizlilik">
+    <LegalShell kicker="Son güncelleme: 21 Temmuz 2026" title="Gizlilik">
       <p>
-        Sokak Vitrini Dene, ürünleri üzerinizde veya yaşam alanınızda görmenizi sağlayan
-        yapay zekâ destekli bir önizleme hizmetidir. Bu açıklama, uygulama içinde işlenen
-        verilerin kapsamını anlatır.
+        Sokak Vitrini Dene; giyim ve giyilebilir ürünleri kendi fotoğrafınızda
+        önizlemenizi, ayrıca ürün fotoğrafından işletme kullanımına yönelik model görseli
+        oluşturmanızı sağlayan yapay zekâ destekli bir hizmettir.
       </p>
 
       <h2>İşlenen veriler</h2>
+      <ul>
+        <li>Yüklediğiniz ürün ve kişi fotoğrafları.</li>
+        <li>Seçtiğiniz kategori, ürün türü, çalışma modu ve yerleşim notu.</li>
+        <li>Oluşturulan sonuç görseli ve işlemin teknik durum bilgileri.</li>
+        <li>Anonim oturum, kupon, kullanım ve kötüye kullanım önleme kayıtları.</li>
+      </ul>
+
+      <h2>Dijital profil</h2>
       <p>
-        Önizleme oluşturduğunuzda ürün fotoğrafı, hedef kişi veya mekân fotoğrafı, seçilen
-        ürün türü ve isteğe bağlı yerleşim notu işlenir. Kötüye kullanımı sınırlamak için
-        IP adresinizin tek yönlü ve geri döndürülemez bir özeti ile tarayıcınıza ait anonim
-        oturum kimliği kullanılabilir. Ham IP adresi uygulama veritabanında saklanmaz;
-        yalnızca tuzlanmış bağlantı özeti tutulabilir.
+        “Dijital profilimi kaydet” seçeneğiyle kaydettiğiniz kişi fotoğrafı sunucudaki
+        kullanıcı hesabına yüklenmez. Fotoğraf, kullandığınız tarayıcının IndexedDB adlı
+        yerel veri alanında saklanır. Tarayıcı verilerini temizlediğinizde veya farklı
+        cihaz kullandığınızda bu profile erişemeyebilirsiniz.
       </p>
 
-      <h2>Kupon verileri</h2>
+      <h2>Yapay zekâ işlemi</h2>
       <p>
-        Bir kupon etkinleştirildiğinde kuponun açık metni yerine tek yönlü güvenli özeti,
-        toplam ve kalan önizleme hakkı, etkinleştirme zamanı, kampanya etiketi, son
-        kullanım tarihi ve kuponun bağlandığı anonim oturum kimliği saklanır. Bunun
-        dışında kullanıcıdan finansal bilgi istenmez ve işlenmez.
+        Önizleme başlatıldığında gerekli ürün ve kişi görselleri, görsel üretimini
+        gerçekleştiren FASHN API’ye sunucu üzerinden aktarılır. API anahtarı tarayıcıya
+        gönderilmez. Uygulama, sonuçları doğrudan veritabanına kaydedebilmek ve dış görsel
+        bağlantısına bağımlı kalmamak için mümkün olduğunda base64 çıktı kullanır.
       </p>
 
-      <h2>Fotoğrafların kullanımı</h2>
+      <h2>Saklama ve silme</h2>
       <p>
-        Yüklediğiniz ürün ve hedef fotoğrafları yalnızca talep ettiğiniz önizlemeyi
-        oluşturmak amacıyla kategoriye göre yapay zekâ hizmet sağlayıcısına iletilir.
-        Fotoğraflar kategoriye göre kendi RunPod Serverless FLUX veya VTON worker’ımıza
-        Base64 veri olarak gönderilir. Bu iki kaynak fotoğraf Sokak Vitrini Dene
-        veritabanında kalıcı olarak saklanmaz. Girdiler RunPod işinin işlenmesi ve iş
-        yaşam süresi boyunca geçici olarak bulunabilir; sonuç üçüncü taraf CDN adresi
-        yerine Base64 olarak alınır. Oluşturulan sonuç görseli, size geçmişte
-        gösterilebilmesi için Sokak Vitrini Dene veritabanında sınırlı süreyle saklanır.
+        Tamamlanan sonuç görselleri varsayılan olarak 30 gün saklanır; bu süre
+        <code>IMAGE_RETENTION_DAYS</code> ayarıyla değiştirilebilir. Sonucunuzu geçmiş
+        bölümünden daha önce silebilirsiniz. Süresi dolan sonuçlar zamanlanmış temizlik
+        işlemiyle kaldırılır. Başarısız işlem kayıtları, güvenlik ve kupon iadesini
+        doğrulamak için sınırlı teknik bilgi içerebilir.
       </p>
 
-      <h2>İçerik güvenliği denetimi</h2>
+      <h2>Kupon ve kullanım kayıtları</h2>
       <p>
-        Giyim worker’ındaki yerel güvenlik denetimi yetişkinlere ait iç çamaşırı, mayo ve
-        kostüm katalog görüntülerini kabul ederken açık çıplaklığı ve cinsel eylemi
-        engellemeyi amaçlar; denetim tamamen kapatılmaz. Diğer kategorilerde de kaynak ve
-        sonuç görselleri RunPod GPU worker’ındaki güvenlik sınıflandırmasından geçirilir.
-        Sınıflandırma puanları uygulama veritabanında saklanmaz.
-        Reddedilen denemede yalnızca genel güvenlik hata kodu, anonim oturum veya
-        tuzlanmış bağlantı özeti ve işlem zamanı; tekrar eden kötüye kullanımı sınırlamak
-        için normal önizleme saklama süresi boyunca tutulabilir. Otomatik denetim hata
-        yapabilir ve tek başına içeriğin hukuka uygun olduğuna dair garanti oluşturmaz.
-      </p>
-
-      <h2>Saklama süresi ve silme</h2>
-      <p>
-        Sonuç görselleri varsayılan olarak 30 gün sonra otomatik olarak silinir. Uygulama
-        yöneticisi bu süreyi daha kısa belirleyebilir. Geçmiş bölümündeki silme düğmesiyle
-        kendi sonuç görselinizi daha önce de kalıcı olarak silebilirsiniz. Kupon ve hak
-        hareketleri; kötüye kullanımı önlemek ve erişim avantajını işletmek için sonuç
-        görselinden daha uzun süre saklanabilir.
-      </p>
-
-      <h2>Erişim</h2>
-      <p>
-        Sonuçlar anonim tarayıcı oturumuna bağlanır ve herkese açık bir galeride
-        yayınlanmaz. Tarayıcı çerezlerini silmeniz, aynı tarayıcıdaki geçmiş erişiminizi
-        kaybetmenize neden olabilir.
+        Kupon kodu doğrudan saklanmaz; doğrulama için özet değer kullanılır. Etkin kupon,
+        anonim tarayıcı oturumuna bağlanabilir. Kullanım hakkı, günlük kapasite, güvenlik
+        denemeleri ve hatalı işlemlerdeki iade hareketleri hizmetin çalışması ve kötüye
+        kullanımın önlenmesi amacıyla tutulur.
       </p>
 
       <h2>Çerezler</h2>
       <p>
-        Anonim oturum, etkin kupon ve yönetici oturumu için güvenli, HttpOnly çerezler
-        kullanılır. Kupon çerezi ve anonim oturum çerezi birlikte, kalan önizleme
-        haklarının yalnızca kuponu ilk etkinleştiren tarayıcıda kullanılabilmesini sağlar.
+        Anonim oturum, etkin kupon ve yönetici oturumu için güvenli HttpOnly çerezler
+        kullanılır. Tarayıcı çerezlerini silmek kupona ve geçmiş sonuçlara erişiminizi
+        kaybettirebilir.
       </p>
 
-      <h2>Üçüncü taraf hizmet</h2>
+      <h2>Fotoğraftaki kişiler ve yaş sınırı</h2>
       <p>
-        Tüm önizlemeler kategoriye göre iki ayrı self-host RunPod Serverless endpoint’i
-        üzerinden gerçekleştirilir. Model ağırlıkları ilk kurulumda Hugging Face’den
-        indirilebilir; kullanıcı fotoğrafları model indirme hizmetine gönderilmez.
-        RunPod’ın güvenlik ve veri işleme koşulları geçerlidir. API anahtarı kullanıcıya
-        veya tarayıcıya gönderilmez.
+        Başka bir kişiye ait fotoğrafı yalnızca açık izniyle yükleyebilirsiniz. İç giyim,
+        bikini, mayo, korse, body ve fantezi giyim kategorileri yalnızca açıkça yetişkin
+        kişilerin, çıplaklık ve cinsel eylem içermeyen moda veya katalog görsellerinde
+        kullanılabilir. 18 yaş altındaki kişilere ait fotoğraflar kabul edilmez.
       </p>
 
-      <h2>Fotoğraftaki kişiler</h2>
+      <h2>Hizmet sağlayıcıları</h2>
       <p>
-        Başka bir kişiye ait fotoğrafı yalnızca o kişinin açık izniyle yüklemelisiniz.
-        Bu hizmette 18 yaş altındaki kişilere ait fotoğraflar, ebeveyn veya yasal temsilci
-        izni bulunsa dahi kabul edilmez.
+        Veritabanı, barındırma ve yapay zekâ hizmeti için farklı teknik sağlayıcılar
+        kullanılabilir. Bu sağlayıcılar yalnızca hizmeti sunmak için gerekli veriyi işler.
+        Canlı ortamı kuran işletme, kendi alan adı, veri sorumlusu bilgileri ve hizmet
+        sağlayıcı sözleşmelerini ayrıca güncel tutmalıdır.
       </p>
     </LegalShell>
   );

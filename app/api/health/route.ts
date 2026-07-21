@@ -11,16 +11,14 @@ import { noStoreHeaders } from "@/lib/server/api";
 import {
   getImageModelName,
   isImageGenerationConfigured,
-} from "@/lib/server/runpod-image";
+} from "@/lib/server/ai-image";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   const databaseConfigured = Boolean(process.env.DATABASE_URL?.trim());
-  const fluxConfigured = isImageGenerationConfigured("jewelry");
-  const clothingConfigured = isImageGenerationConfigured("clothing");
-  const aiConfigured = fluxConfigured && clothingConfigured;
+  const aiConfigured = isImageGenerationConfigured();
   const couponConfigured = Boolean(
     (process.env.COUPON_SIGNING_SECRET?.trim().length ?? 0) >= 32 &&
       (process.env.ADMIN_ACCESS_KEY?.trim().length ?? 0) >= 32,
@@ -41,6 +39,8 @@ export async function GET() {
         db
           .select({
             id: previewRequests.id,
+            mode: previewRequests.mode,
+            productKind: previewRequests.productKind,
             providerJobId: previewRequests.providerJobId,
           })
           .from(previewRequests)
@@ -69,6 +69,7 @@ export async function GET() {
     aiConfigured &&
     couponConfigured &&
     securityConfigured;
+
   return NextResponse.json(
     {
       status: ready ? "ready" : "not_ready",
@@ -77,14 +78,13 @@ export async function GET() {
         databaseReachable,
         schemaReady,
         aiConfigured,
-        fluxConfigured,
-        clothingConfigured,
         couponConfigured,
         securityConfigured,
-        aiProvider: "runpod-self-hosted",
+        aiProvider: "fashn-api",
         aiModels: {
-          productPlacement: getImageModelName("jewelry"),
-          clothingTryOn: getImageModelName("clothing"),
+          clothingTryOn: getImageModelName("clothing", "personal"),
+          wearableTryOn: getImageModelName("jewelry", "personal"),
+          businessStudio: getImageModelName("clothing", "studio"),
         },
       },
     },

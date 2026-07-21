@@ -12,6 +12,8 @@ import {
 
 import type {
   PreviewCategory,
+  PreviewMode,
+  ProductKind,
   PreviewProviderStatus,
   PreviewStatus,
 } from "@/lib/types";
@@ -22,7 +24,9 @@ export const previewRequests = pgTable(
     id: uuid("id").primaryKey(),
     sessionId: varchar("session_id", { length: 64 }).notNull(),
     clientKey: varchar("client_key", { length: 64 }).notNull(),
+    mode: varchar("mode", { length: 24 }).$type<PreviewMode>().notNull().default("personal"),
     category: varchar("category", { length: 24 }).$type<PreviewCategory>().notNull(),
+    productKind: varchar("product_kind", { length: 32 }).$type<ProductKind>().notNull().default("accessory"),
     note: varchar("note", { length: 300 }),
     status: varchar("status", { length: 24 })
       .$type<PreviewStatus>()

@@ -3,37 +3,37 @@ import Link from "next/link";
 import {
   ArrowDown,
   Camera,
-  CarFront,
   Check,
   Gem,
+  Images,
   ScanLine,
   Shirt,
-  Sofa,
   Sparkles,
+  UserRoundCheck,
 } from "lucide-react";
 
 import { TryOnStudio } from "@/components/try-on-studio";
 
 const categories = [
   {
-    icon: Gem,
-    title: "Takı",
-    text: "Kolyeyi, bileziği veya saati doğal ölçüsüyle üzerinde gör.",
+    icon: UserRoundCheck,
+    title: "Dijital profil",
+    text: "Fotoğrafını tarayıcında bir kez kaydet; yeni ürünlerde tekrar kullan.",
   },
   {
     icon: Shirt,
-    title: "Giyim",
-    text: "Gömleği, ceketi veya elbiseyi kendi fotoğrafında dene.",
+    title: "Giyim & iç giyim",
+    text: "Günlük giyimden bikini, mayo ve yetişkin iç giyime kadar kendinde dene.",
   },
   {
-    icon: Sofa,
-    title: "Mobilya",
-    text: "Beğendiğin ürünü evindeki gerçek boşluğa yerleştir.",
+    icon: Gem,
+    title: "Takı & aksesuar",
+    text: "Takı, saat, gözlük, şapka, ayakkabı ve çantayı kendi görünümünde incele.",
   },
   {
-    icon: CarFront,
-    title: "Otomobil",
-    text: "Aracı evinin önünde, garajında veya seçtiğin sokakta gör.",
+    icon: Images,
+    title: "İşletme stüdyosu",
+    text: "Yalnız ürün fotoğrafından katalog ve sosyal medya için model görseli üret.",
   },
 ];
 
@@ -41,20 +41,20 @@ const steps = [
   {
     number: "01",
     icon: Camera,
-    title: "Vitrinde çek",
-    text: "Beğendiğin ürünü net bir açıdan fotoğrafla.",
+    title: "Ürünü ekle",
+    text: "Vitrindeki ya da işletmendeki ürünü net bir açıdan yükle.",
   },
   {
     number: "02",
     icon: ScanLine,
-    title: "Yerini göster",
-    text: "Kendi fotoğrafını veya ürünü görmek istediğin mekânı ekle.",
+    title: "Modu seç",
+    text: "Dijital profilinde dene veya ürün için model görseli oluştur.",
   },
   {
     number: "03",
     icon: Sparkles,
-    title: "Hayatında gör",
-    text: "Yapay zekâ ürünü ışık, açı ve perspektife uyarlasın.",
+    title: "Sonucu kullan",
+    text: "Önizlemeyi karşılaştır, favorile, indir veya paylaş.",
   },
 ];
 
@@ -91,20 +91,20 @@ export default function HomePage() {
           <div className="hero-copy">
             <div className="eyebrow">
               <Sparkles size={15} strokeWidth={1.8} />
-              Yapay zekâ destekli vitrin deneyimi
+              Kişisel deneme ve işletme görsel stüdyosu
             </div>
             <h1>
               Sokakta gör.
               <span>Kendinde dene.</span>
             </h1>
             <p>
-              Vitrinde beğendiğin takıyı, kıyafeti, mobilyayı veya otomobili
-              fotoğrafla. Satın almadan önce kendi üzerinde ya da yaşam alanında gör.
+              Beğendiğin giyim ve aksesuar ürününü kendi dijital profilinde gör.
+              İşletmensen tek ürün fotoğrafından model üzerinde katalog görseli oluştur.
             </p>
             <div className="hero-actions">
               <Link className="button button-gold" href="#dene">
                 <Camera size={19} />
-                Fotoğrafla ve dene
+                Ürünü şimdi dene
               </Link>
               <Link className="text-link" href="#nasil-calisir">
                 Nasıl çalışır?
@@ -113,10 +113,10 @@ export default function HomePage() {
             </div>
             <div className="trust-row" aria-label="Öne çıkan özellikler">
               <span>
-                <Check size={15} /> İki fotoğraf yeter
+                <Check size={15} /> Dijital profil tarayıcında kalır
               </span>
               <span>
-                <Check size={15} /> Sonuçlar sana özel
+                <Check size={15} /> Kişisel ve işletme modu
               </span>
             </div>
           </div>
@@ -154,7 +154,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="category-strip" aria-label="Desteklenen ürün türleri">
+      <section className="category-strip" aria-label="Platform özellikleri">
         <div className="container category-strip-grid">
           {categories.map(({ icon: Icon, title, text }) => (
             <article className="category-intro" key={title}>
@@ -176,8 +176,10 @@ export default function HomePage() {
         <div className="container">
           <div className="section-heading centered">
             <span className="section-kicker">Üç basit adım</span>
-            <h2>Vitrinden hayatına</h2>
-            <p>Ürünü tekrar hayal etmene gerek yok. Gör, çek ve kendi dünyanda dene.</p>
+            <h2>Üründen gerçek bir önizlemeye</h2>
+            <p>
+              Tek panelden kişisel sanal deneme yap veya işletmen için ürün görseli üret.
+            </p>
           </div>
 
           <div className="steps-grid">
@@ -199,11 +201,11 @@ export default function HomePage() {
         <div className="container privacy-banner-inner">
           <div>
             <span className="section-kicker">Sana özel</span>
-            <h2>Fotoğrafların vitrine çıkmaz.</h2>
+            <h2>Dijital profilin cihazında kalır.</h2>
             <p>
-              Ürün ve hedef fotoğrafları yalnızca önizlemeyi oluşturmak için işlenir;
-              uygulamada kalıcı olarak saklanmaz. Oluşturduğun sonuçlara sadece bu
-              tarayıcıdan erişebilirsin.
+              Kaydettiğin dijital profil, bu tarayıcının yerel veritabanında tutulur.
+              Ürün ve kişi görselleri yalnızca seçtiğin önizlemeyi oluşturmak için işlenir;
+              sonuçlarını geçmişten silebilirsin.
             </p>
           </div>
           <div className="privacy-seal" aria-hidden="true">
@@ -222,7 +224,7 @@ export default function HomePage() {
               <small>DENE</small>
             </span>
           </Link>
-          <p>Vitrinde gördüğünü, hayatında gör.</p>
+          <p>Vitrinde gördüğünü, kendinde gör.</p>
           <div className="footer-links">
             <Link href="/gizlilik">Gizlilik</Link>
             <Link href="/kullanim-kosullari">Kullanım Koşulları</Link>
@@ -230,7 +232,7 @@ export default function HomePage() {
         </div>
         <div className="container footer-bottom">
           <span>© {new Date().getFullYear()} Sokak Vitrini</span>
-          <span>Vitrinde gördüğünü, hayatında gör.</span>
+          <span>Vitrinde gördüğünü, kendinde gör.</span>
         </div>
       </footer>
     </main>

@@ -2,6 +2,8 @@ import type {
   ClothingType,
   GarmentPhotoType,
   PreviewCategory,
+  PreviewMode,
+  ProductKind,
 } from "@/lib/types";
 
 type CategoryConfig = {
@@ -15,79 +17,89 @@ type CategoryConfig = {
   targetHint: string;
   notePlaceholder: string;
   noteSuggestions: readonly string[];
-  outputSize: "1024x1536" | "1536x1024";
 };
 
 export const CATEGORY_CONFIG: Record<PreviewCategory, CategoryConfig> = {
-  jewelry: {
-    label: "Takı",
-    shortLabel: "Takı",
-    title: "Takıyı üzerinde gör",
-    description: "Vitrindeki kolye, bilezik, küpe veya saati doğal ölçü ve ışıkla dene.",
-    productLabel: "Takının fotoğrafı",
-    productHint: "Ürünü mümkün olduğunca yakından ve net çek.",
-    targetLabel: "Senin veya arkadaşının fotoğrafı",
-    targetHint: "Boyun, bilek ya da ilgili bölge görünür olsun.",
-    notePlaceholder: "Örn. Kolyeyi boynuma doğal ölçüde yerleştir",
-    noteSuggestions: [
-      "Kolyeyi boynuma doğal ölçüsünde, mevcut açı ve ışığı değiştirmeden yerleştir.",
-      "Bileziği görünen bileğime gerçek ürün ölçüsünde tak.",
-      "Küpeleri iki kulağıma simetrik ve doğal biçimde yerleştir.",
-    ],
-    outputSize: "1024x1536",
-  },
   clothing: {
     label: "Giyim",
     shortLabel: "Giyim",
-    title: "Kıyafeti üzerinde gör",
+    title: "Kıyafeti kendinde dene",
     description:
-      "Gömlek, ceket, elbise, iç çamaşırı veya fantezi kostümü yetişkin fotoğrafında dene.",
-    productLabel: "Kıyafetin fotoğrafı",
-    productHint:
-      "Ürünü başka biri üzerinde değil; sade fonda, askıda veya düz serilmiş ve tamamı görünür biçimde çek.",
-    targetLabel: "Senin veya arkadaşının fotoğrafı",
-    targetHint: "Önden çekilmiş, vücudu net gösteren bir fotoğraf seç.",
-    notePlaceholder: "Örn. Gömleği üzerime normal kesim olarak giydir",
+      "Günlük giyimden bikini, mayo, iç giyim ve yetişkin fantezi giyime kadar ürünü kendi fotoğrafında gör.",
+    productLabel: "Ürünün fotoğrafı",
+    productHint: "Ürünün tamamı net görünsün; sade fon veya model üzerindeki ürün kullanılabilir.",
+    targetLabel: "Dijital profil veya kişi fotoğrafı",
+    targetHint: "18 yaşından büyük kişiyi önden ve ürüne uygun kadrajda göster.",
+    notePlaceholder: "Örn. Ceketi açık kullan, gömleği pantolonun içine sok",
     noteSuggestions: [
-      "Gömleği üzerime normal kalıpta, mevcut pozumu koruyarak giydir.",
-      "Ceketi üzerime doğal oturacak şekilde açık kullan.",
-      "Elbiseyi vücut oranlarımı ve duruşumu değiştirmeden giydir.",
+      "Mevcut pozu ve vücut oranlarını koru.",
+      "Ürünü doğal kalıpta ve gerçekçi kumaş kıvrımlarıyla uygula.",
+      "Yüzü, saçı ve arka planı değiştirme.",
     ],
-    outputSize: "1024x1536",
   },
-  furniture: {
-    label: "Mobilya",
-    shortLabel: "Mobilya",
-    title: "Mobilyayı evinde gör",
-    description: "Koltuğu, masayı veya dekorasyon ürününü odandaki gerçek yerine yerleştir.",
-    productLabel: "Mobilyanın fotoğrafı",
-    productHint: "Ürünü önden veya hafif çapraz açıyla çek.",
-    targetLabel: "Odanın fotoğrafı",
-    targetHint: "Yerleştirmek istediğin boş alan kadrajda görünsün.",
-    notePlaceholder: "Örn. Koltuğu pencerenin karşısındaki boş duvara yerleştir",
+  jewelry: {
+    label: "Takı & Saat",
+    shortLabel: "Takı",
+    title: "Takıyı kendinde gör",
+    description: "Kolye, küpe, bileklik ve saati doğru ölçü ve ışıkla dene.",
+    productLabel: "Takı veya saatin fotoğrafı",
+    productHint: "Ürünü yakın, net ve mümkünse sade fonda çek.",
+    targetLabel: "Dijital profil veya kişi fotoğrafı",
+    targetHint: "Boyun, kulak, bilek veya ilgili bölge net görünsün.",
+    notePlaceholder: "Örn. Kolyeyi doğal ölçüde boynuma yerleştir",
     noteSuggestions: [
-      "Koltuğu boş duvarın önüne, zemine tam basacak şekilde yerleştir.",
-      "Masayı odanın ortasındaki boş alana perspektife uygun yerleştir.",
-      "Ürünü pencerenin karşısındaki boş alana gerçek ölçüsünde yerleştir.",
+      "Ürünün taş, metal ve renk ayrıntılarını koru.",
+      "Takıyı doğal ölçüsünde ve doğru temas gölgesiyle yerleştir.",
+      "Yüzü ve cilt dokusunu değiştirme.",
     ],
-    outputSize: "1536x1024",
   },
-  car: {
-    label: "Otomobil",
-    shortLabel: "Otomobil",
-    title: "Aracı kendi mekânında gör",
-    description: "Beğendiğin otomobili evinin önünde, garajında veya seçtiğin sokakta gör.",
-    productLabel: "Otomobilin fotoğrafı",
-    productHint: "Aracın tamamını gösteren temiz bir açı seç.",
-    targetLabel: "Mekânın fotoğrafı",
-    targetHint: "Aracın duracağı alan geniş ve net görünsün.",
-    notePlaceholder: "Örn. Aracı garaj kapısının önüne aynı açıyla yerleştir",
+  shoes: {
+    label: "Ayakkabı",
+    shortLabel: "Ayakkabı",
+    title: "Ayakkabıyı kombininde gör",
+    description: "Ayakkabı veya botu mevcut duruşuna ve kıyafetine uygula.",
+    productLabel: "Ayakkabının fotoğrafı",
+    productHint: "Çifti veya tek ürünü yan profiliyle net göster.",
+    targetLabel: "Dijital profil veya kişi fotoğrafı",
+    targetHint: "Ayaklar ve zemin kadrajda görünür olsun.",
+    notePlaceholder: "Örn. Ayakkabıyı mevcut kombinime doğal biçimde uygula",
     noteSuggestions: [
-      "Aracı garaj kapısının önüne, zemine ve kamera açısına uygun yerleştir.",
-      "Aracı yol kenarındaki boş alana gerçek ölçüsünde park et.",
-      "Aracı evin önüne, yönünü değiştirmeden doğal gölgeyle yerleştir.",
+      "Ayak pozunu ve zemini koru.",
+      "Taban temasını ve gölgeyi gerçekçi yap.",
+      "Ürünün renk ve materyalini değiştirme.",
     ],
-    outputSize: "1536x1024",
+  },
+  bag: {
+    label: "Çanta",
+    shortLabel: "Çanta",
+    title: "Çantayı üzerinde gör",
+    description: "Omuz, el veya bel çantasını mevcut pozuna doğal biçimde ekle.",
+    productLabel: "Çantanın fotoğrafı",
+    productHint: "Sapları ve ürün formunu eksiksiz göster.",
+    targetLabel: "Dijital profil veya kişi fotoğrafı",
+    targetHint: "Üst gövde ve kollar görünür olsun.",
+    notePlaceholder: "Örn. Çantayı sağ omzuma doğal biçimde tak",
+    noteSuggestions: [
+      "Çantayı vücut ölçüsüne uygun ölçekle.",
+      "Sap temasını ve kumaş üstündeki gölgeyi koru.",
+      "Mevcut pozu ve arka planı değiştirme.",
+    ],
+  },
+  accessory: {
+    label: "Gözlük & Şapka",
+    shortLabel: "Aksesuar",
+    title: "Aksesuarı kendinde gör",
+    description: "Gözlük, şapka ve diğer giyilebilir aksesuarları dene.",
+    productLabel: "Aksesuarın fotoğrafı",
+    productHint: "Ürünü önden veya hafif çapraz açıyla net göster.",
+    targetLabel: "Dijital profil veya kişi fotoğrafı",
+    targetHint: "Yüz ve baş bölgesi net, ışık dengeli olsun.",
+    notePlaceholder: "Örn. Gözlüğü yüz açıma uygun biçimde yerleştir",
+    noteSuggestions: [
+      "Yüz hatlarını ve kimliği koru.",
+      "Ürünü doğru perspektif ve doğal temasla uygula.",
+      "Cam yansımasını mevcut ışığa uyarla.",
+    ],
   },
 };
 
@@ -103,29 +115,23 @@ export const CLOTHING_TYPE_CONFIG: Record<ClothingType, ClothingTypeConfig> = {
   tops: {
     label: "Üst giyim",
     shortLabel: "Gömlek · Ceket · Sütyen",
-    description:
-      "Gömlek, tişört, bluz, ceket, sütyen veya korseyi üst gövdeye uygular.",
+    description: "Tişört, gömlek, bluz, ceket, sütyen ve korse için.",
     productHint: "Üst ürünün tamamı, askıları ve kolları görünür olsun.",
-    targetHint:
-      "Yalnızca 18 yaşından büyük, önden çekilmiş ve üst gövdesi net görünen bir fotoğraf seç.",
+    targetHint: "18+ kişinin üst gövdesi önden ve net görünsün.",
   },
   bottoms: {
     label: "Alt giyim",
     shortLabel: "Pantolon · Etek · Alt iç giyim",
-    description:
-      "Pantolon, etek, şort veya alt iç giyim ürününü bel ve bacak bölgesine uygular.",
-    productHint: "Alt ürünün tamamı ve bel kesimi görünür olsun.",
-    targetHint:
-      "Yalnızca 18 yaşından büyük, belden ayaklara kadar görünen önden çekilmiş bir fotoğraf seç.",
+    description: "Pantolon, etek, şort ve alt iç giyim için.",
+    productHint: "Bel kesimi ve ürünün tamamı görünür olsun.",
+    targetHint: "18+ kişinin belden ayaklara kadar olan bölgesi net görünsün.",
   },
   "one-pieces": {
     label: "Tek parça",
-    shortLabel: "Elbise · Tulum · Body",
-    description:
-      "Elbise, tulum, body veya tek parça kostümü tam vücut kıyafeti olarak uygular.",
-    productHint: "Tek parça ürünün omuzdan etek ucuna kadar tamamı görünsün.",
-    targetHint:
-      "Yalnızca 18 yaşından büyük, baştan ayağa görünen ve önden çekilmiş bir fotoğraf seç.",
+    shortLabel: "Elbise · Mayo · Body",
+    description: "Elbise, tulum, mayo, bikini seti, body ve yetişkin kostümü için.",
+    productHint: "Ürünün omuzdan alt uca kadar tamamı görünür olsun.",
+    targetHint: "18+ kişi baştan ayağa, önden ve net görünsün.",
   },
 };
 
@@ -134,19 +140,82 @@ type GarmentPhotoTypeConfig = {
   description: string;
 };
 
-export const GARMENT_PHOTO_TYPE_CONFIG: Record<
-  GarmentPhotoType,
-  GarmentPhotoTypeConfig
-> = {
+export const GARMENT_PHOTO_TYPE_CONFIG: Record<GarmentPhotoType, GarmentPhotoTypeConfig> = {
+  auto: {
+    label: "Otomatik",
+    description: "Sistem ürün fotoğrafı türünü otomatik algılar.",
+  },
   "flat-lay": {
     label: "Tek başına / askıda",
-    description:
-      "Ürün sade fonda, askıda veya düz serilmiş halde ve tamamı görünür olmalı.",
+    description: "Ürün sade fonda, askıda veya düz serilmiş halde.",
+  },
+  model: {
+    label: "Model üzerinde",
+    description: "Ürün başka bir yetişkin model üzerinde çekilmiş halde.",
+  },
+};
+
+type ProductKindConfig = {
+  label: string;
+  category: PreviewCategory;
+  clothingType: ClothingType;
+  studioPrompt: string;
+};
+
+export const PRODUCT_KIND_CONFIG: Record<ProductKind, ProductKindConfig> = {
+  tshirt: { label: "Tişört", category: "clothing", clothingType: "tops", studioPrompt: "premium t-shirt e-commerce fashion photo" },
+  shirt: { label: "Gömlek", category: "clothing", clothingType: "tops", studioPrompt: "premium shirt e-commerce fashion photo" },
+  blouse: { label: "Bluz", category: "clothing", clothingType: "tops", studioPrompt: "premium blouse e-commerce fashion photo" },
+  jacket: { label: "Ceket", category: "clothing", clothingType: "tops", studioPrompt: "premium jacket e-commerce fashion photo" },
+  dress: { label: "Elbise", category: "clothing", clothingType: "one-pieces", studioPrompt: "premium dress e-commerce fashion photo" },
+  pants: { label: "Pantolon", category: "clothing", clothingType: "bottoms", studioPrompt: "premium trousers e-commerce fashion photo" },
+  skirt: { label: "Etek", category: "clothing", clothingType: "bottoms", studioPrompt: "premium skirt e-commerce fashion photo" },
+  bikini: { label: "Bikini", category: "clothing", clothingType: "one-pieces", studioPrompt: "tasteful adult swimwear e-commerce photo, non-explicit" },
+  swimsuit: { label: "Mayo", category: "clothing", clothingType: "one-pieces", studioPrompt: "tasteful adult swimsuit e-commerce photo, non-explicit" },
+  bra: { label: "Sütyen", category: "clothing", clothingType: "tops", studioPrompt: "tasteful adult lingerie e-commerce photo, non-explicit" },
+  underwear: { label: "İç giyim", category: "clothing", clothingType: "bottoms", studioPrompt: "tasteful adult underwear e-commerce photo, non-explicit" },
+  corset: { label: "Korse", category: "clothing", clothingType: "tops", studioPrompt: "tasteful adult corset fashion photo, non-explicit" },
+  bodysuit: { label: "Body", category: "clothing", clothingType: "one-pieces", studioPrompt: "tasteful adult bodysuit fashion photo, non-explicit" },
+  fantasy: { label: "Fantezi giyim", category: "clothing", clothingType: "one-pieces", studioPrompt: "tasteful adult costume fashion photo, fully covered, non-explicit" },
+  necklace: { label: "Kolye", category: "jewelry", clothingType: "tops", studioPrompt: "premium necklace jewelry campaign photo" },
+  earrings: { label: "Küpe", category: "jewelry", clothingType: "tops", studioPrompt: "premium earrings jewelry campaign photo" },
+  bracelet: { label: "Bileklik", category: "jewelry", clothingType: "tops", studioPrompt: "premium bracelet jewelry campaign photo" },
+  watch: { label: "Saat", category: "jewelry", clothingType: "tops", studioPrompt: "premium wristwatch fashion campaign photo" },
+  shoes: { label: "Ayakkabı", category: "shoes", clothingType: "bottoms", studioPrompt: "premium shoes e-commerce fashion photo" },
+  bag: { label: "Çanta", category: "bag", clothingType: "tops", studioPrompt: "premium handbag e-commerce fashion photo" },
+  glasses: { label: "Gözlük", category: "accessory", clothingType: "tops", studioPrompt: "premium eyewear campaign photo" },
+  hat: { label: "Şapka", category: "accessory", clothingType: "tops", studioPrompt: "premium hat fashion campaign photo" },
+  accessory: { label: "Diğer aksesuar", category: "accessory", clothingType: "tops", studioPrompt: "premium wearable accessory campaign photo" },
+};
+
+export const PRODUCT_KINDS_BY_CATEGORY = Object.fromEntries(
+  (Object.keys(CATEGORY_CONFIG) as PreviewCategory[]).map((category) => [
+    category,
+    (Object.keys(PRODUCT_KIND_CONFIG) as ProductKind[]).filter(
+      (kind) => PRODUCT_KIND_CONFIG[kind].category === category,
+    ),
+  ]),
+) as Record<PreviewCategory, ProductKind[]>;
+
+export const PREVIEW_MODE_CONFIG: Record<PreviewMode, { label: string; title: string; description: string }> = {
+  personal: {
+    label: "Kendimde dene",
+    title: "Dijital profilinde dene",
+    description: "Fotoğrafını bir kez kaydet; farklı ürünleri tekrar yüklemeden kendinde gör.",
+  },
+  studio: {
+    label: "İşletme stüdyosu",
+    title: "Üründen model görseli üret",
+    description: "Yalnız ürün fotoğrafıyla katalog ve sosyal medya için model görseli oluştur.",
   },
 };
 
 export function isPreviewCategory(value: unknown): value is PreviewCategory {
   return typeof value === "string" && value in CATEGORY_CONFIG;
+}
+
+export function isPreviewMode(value: unknown): value is PreviewMode {
+  return value === "personal" || value === "studio";
 }
 
 export function isClothingType(value: unknown): value is ClothingType {
@@ -155,4 +224,8 @@ export function isClothingType(value: unknown): value is ClothingType {
 
 export function isGarmentPhotoType(value: unknown): value is GarmentPhotoType {
   return typeof value === "string" && value in GARMENT_PHOTO_TYPE_CONFIG;
+}
+
+export function isProductKind(value: unknown): value is ProductKind {
+  return typeof value === "string" && value in PRODUCT_KIND_CONFIG;
 }

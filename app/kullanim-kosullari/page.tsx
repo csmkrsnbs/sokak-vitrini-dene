@@ -9,109 +9,96 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalShell kicker="Son güncelleme: 18 Temmuz 2026" title="Kullanım Koşulları">
+    <LegalShell kicker="Son güncelleme: 21 Temmuz 2026" title="Kullanım Koşulları">
       <p>
         Sokak Vitrini Dene’yi kullanarak aşağıdaki koşulları kabul etmiş olursunuz.
-        Hizmet, fiziksel bir ürünü satın almadan önce fikir vermek amacıyla görsel
-        önizleme oluşturur.
+        Hizmet, ürünü satın almadan veya ticari içerikte kullanmadan önce fikir vermek
+        amacıyla yapay zekâ tabanlı görsel önizleme üretir.
       </p>
 
       <h2>Önizleme niteliği</h2>
       <p>
-        Oluşturulan görseller yapay zekâ tahminidir. Gerçek ürünün ölçüsü, rengi,
-        malzemesi, kesimi, duruşu veya mekâna uyumu önizlemeden farklı olabilir. Satın
-        alma kararından önce ürünü ve satıcı bilgilerini doğrulamak kullanıcının
-        sorumluluğundadır.
+        Oluşturulan görseller tahminidir. Gerçek ürünün ölçüsü, rengi, malzemesi, kesimi,
+        bedeni, duruşu ve vücutla teması sonuçtan farklı olabilir. Özellikle iç giyim ve
+        beden uyumu gerektiren ürünlerde sonuç tıbbi, ergonomik veya doğru beden tavsiyesi
+        değildir. Satın alma kararından önce gerçek ürün bilgisini doğrulamak kullanıcıya
+        aittir.
       </p>
 
       <h2>İzinli kullanım</h2>
-      <p>Uygulamaya yalnızca kullanma hakkına sahip olduğunuz fotoğrafları yükleyin.</p>
       <ul>
-        <li>Başka bir kişinin fotoğrafını açık izni olmadan yüklemeyin.</li>
-        <li>Yasa dışı, yanıltıcı, taciz edici veya mahremiyeti ihlal eden içerik kullanmayın.</li>
-        <li>Bir kişiyi küçük düşürmek, taklit etmek veya zarar vermek amacıyla görsel üretmeyin.</li>
-        <li>Hizmet sınırlarını aşmaya veya güvenlik önlemlerini devre dışı bırakmaya çalışmayın.</li>
+        <li>Yalnızca kullanma hakkına sahip olduğunuz fotoğraf ve ürün görsellerini yükleyin.</li>
+        <li>Başka bir kişinin fotoğrafını açık izni olmadan kullanmayın.</li>
+        <li>Bir kişiyi aldatmak, taklit etmek, küçük düşürmek veya itibarını zedelemek amacıyla görsel üretmeyin.</li>
+        <li>Üretilen görseli gerçek çekim, ürün garantisi veya kesin beden sonucu gibi sunmayın.</li>
+        <li>Güvenlik, kupon, günlük kapasite veya erişim kontrollerini aşmaya çalışmayın.</li>
       </ul>
+
+      <h2>Yetişkin moda kategorileri</h2>
+      <p>
+        Bikini, mayo, sütyen, alt iç giyim, korse, body ve fantezi giyim kategorileri
+        bulunabilir. Bu kategoriler yalnızca 18 yaş ve üzeri kişilerin açık çıplaklık,
+        cinsel eylem veya pornografik bağlam içermeyen moda, katalog ve sanal deneme
+        görselleri için kullanılabilir. Kategori adı, yasak içeriğe izin verildiği anlamına
+        gelmez.
+      </p>
 
       <h2>Yasak içerik</h2>
-      <p>
-        Hizmet yalnızca takı, giyim, mobilya ve otomobil önizlemesi içindir. Aşağıdaki
-        içerikler kaynak fotoğraf, arka plan, yerleşim notu veya oluşturulacak sonuç
-        içinde kullanılamaz:
-      </p>
       <ul>
-        <li>
-          Açık çıplaklık, pornografi, cinsel eylem, mahrem görüntüler veya kişiyi
-          cinsel bir bağlamda izinsiz gösteren içerikler. Açık çıplaklık içermeyen,
-          yetişkinlere ait iç çamaşırı, mayo, korse, body ve fantezi giyim ürünlerinin
-          katalog ya da sanal deneme amaçlı kullanımı izinlidir.
-        </li>
-        <li>18 yaş altındaki veya yaşı açıkça yetişkin görünmeyen kişilerin fotoğrafları.</li>
-        <li>Şiddet, kan, yaralanma, istismar, kendine zarar verme, silah veya patlayıcı.</li>
-        <li>Nefret sembolleri, terör veya aşırılık propagandası ve hedef gösterme.</li>
-        <li>
-          Siyasi kişiler, seçim veya parti çalışmaları, miting, protesto, propaganda ve
-          siyasi semboller.
-        </li>
-        <li>
-          İzin dışı yüz değiştirme, kimliğe bürünme, itibar zedeleme veya yasa dışı bir
-          amaç taşıyan içerikler.
-        </li>
+        <li>Açık çıplaklık, pornografi, cinsel eylem, mahrem görüntü veya rıza dışı cinselleştirme.</li>
+        <li>18 yaş altındaki ya da açıkça yetişkin görünmeyen kişilerin fotoğrafları.</li>
+        <li>Şiddet, ağır yaralanma, istismar, kendine zarar verme, silah veya patlayıcı.</li>
+        <li>Nefret, terör, aşırılık propagandası, hedef gösterme veya taciz.</li>
+        <li>İzinsiz yüz değiştirme, kimliğe bürünme, dolandırıcılık veya yasa dışı kullanım.</li>
       </ul>
 
-      <h2>Otomatik güvenlik denetimi</h2>
+      <h2>Otomatik denetim ve reddedilen işlemler</h2>
       <p>
-        Giyim kategorisindeki kaynak fotoğraflar ve oluşturulan sonuç, self-host VTON
-        worker’ındaki izinli yetişkin moda içeriğini destekleyen güvenlik katmanıyla;
-        diğer kategoriler ise FLUX worker’ındaki güvenlik katmanıyla otomatik olarak
-        denetlenir. Güvenlik denetimi kapatılamaz. Denetim tamamlanamazsa işlem
-        güvenlik amacıyla durdurulur. Reddedilen işlemde görsel sonucu saklanmaz ve
-        kullanılan kupon hakkı iade edilir.
-        Otomatik sınıflandırma hata yapabilir; güvenli olduğu düşünülen bir içerik de
-        reddedilebilir. Güvenlik önlemlerini aşmaya çalışmak veya tekrar eden yasak içerik
-        denemeleri, tarayıcı, bağlantı ya da kupon için geçici erişim kısıtlamasına neden
-        olur.
+        Yapay zekâ sağlayıcısının güvenlik denetimleri ve uygulamadaki metin kontrolleri
+        uygulanır. Denetim hata yapabilir ve güvenli bir içerik de reddedilebilir.
+        Sağlayıcı işlemi güvenlik gerekçesiyle reddeder veya teknik olarak tamamlayamazsa
+        sonuç kaydedilmez; ayrılan kupon hakkı uygulamadaki iade mekanizmasıyla geri
+        yüklenir. Tekrarlayan yasak içerik denemeleri geçici erişim kısıtlamasına neden
+        olabilir.
       </p>
 
-      <h2>Ürün ve marka hakları</h2>
+      <h2>İşletme stüdyosu</h2>
+      <p>
+        İşletme stüdyosu, ürün fotoğrafından yeni bir yetişkin model ve katalog kompozisyonu
+        oluşturur. Çıktı gerçek bir müşteri, çalışan veya tanınmış kişinin çekimi olarak
+        sunulmamalıdır. Ticari yayından önce ürünün doğru göründüğünü, marka ve reklam
+        kurallarına uyduğunu kontrol etmek işletmenin sorumluluğundadır.
+      </p>
+
+      <h2>Ürün, marka ve telif hakları</h2>
       <p>
         Fotoğrafladığınız ürünler marka, tasarım veya telif hakkıyla korunabilir. Üretilen
-        önizlemeyi ticari amaçla kullanmadan önce gerekli izinleri almak sizin
-        sorumluluğunuzdadır.
-      </p>
-
-      <h2>Hizmet sınırları</h2>
-      <p>
-        Yoğunluk, bakım, kullanım sınırı, yapay zekâ sağlayıcısı veya teknik nedenlerle
-        önizleme geçici olarak kullanılamayabilir. Güvenli ve adil kullanım için oturum ve
-        cihaz bazlı kontroller uygulanabilir.
+        önizlemeyi ticari amaçla kullanmadan önce gerekli lisans ve izinleri almak size
+        aittir.
       </p>
 
       <h2>Kuponla erişim</h2>
       <p>
-        Uygulamada ücretsiz deneme hakkı bulunmaz. Önizleme yalnızca yönetici tarafından
-        kampanya, tanıtım veya iş birliği kapsamında oluşturulan geçerli bir kuponun
-        etkinleştirilmesiyle başlatılabilir. Kuponların nakit karşılığı yoktur ve uygulama
-        içinde satışa sunulmaz. Yeni kuponlar 1–3 önizleme hakkı ve 7–30 gün geçerlilik
-        süresiyle oluşturulur. Kupon ilk etkinleştirildiği anonim tarayıcı oturumuna
-        bağlanır ve başka bir tarayıcıda etkinleştirilemez. Tarayıcı verilerinin silinmesi
-        kupona ve geçmişe erişimi kaybettirebilir. Başarılı her önizleme bir hak kullanır;
-        tamamlanamayan işlemde ayrılan hak otomatik olarak geri verilir.
+        Bu sürümde önizleme yalnızca geçerli ve bakiyesi bulunan kuponla başlatılır.
+        Kupon ilk etkinleştirildiği anonim tarayıcı oturumuna bağlanabilir ve başka bir
+        tarayıcıda kullanılamayabilir. Tarayıcı verilerinin silinmesi kupon ve geçmiş
+        erişimini kaybettirebilir. Başarılı işlem bir hak tüketir; uygulama tarafından
+        başarısız olarak sonlandırılan işlemde ayrılan hak geri verilir.
       </p>
 
-      <h2>Adil kullanım ve günlük kapasite</h2>
+      <h2>Hizmet sınırları</h2>
       <p>
-        Kötüye kullanımı azaltmak için anonim oturum, bağlantı özeti, kupon ve günlük
-        genel üretim kapasitesi kontrolleri uygulanabilir. Günlük kapasite dolduğunda yeni
-        işlem başlatılmaz ve kullanıcının kupon hakkı düşürülmez. Kupon kodunu güvenli
-        saklamak kullanıcının sorumluluğundadır.
+        Yoğunluk, bakım, günlük kapasite, veritabanı, yapay zekâ sağlayıcısı veya ağ
+        sorunları nedeniyle hizmet geçici olarak kullanılamayabilir. Sonuç süresi ve
+        kalitesi ürün fotoğrafına, kişi fotoğrafına, seçilen kategoriye ve sağlayıcı
+        kapasitesine bağlıdır.
       </p>
 
       <h2>Silme ve erişim</h2>
       <p>
         Sonuçlarınızı geçmiş bölümünden silebilirsiniz. Anonim oturum çerezinin silinmesi
-        geçmişe erişimi kaldırabilir; bu durumda sonuçlar saklama süresi sonunda otomatik
-        olarak temizlenir.
+        geçmişe erişimi kaldırabilir. Yerel dijital profilinizi tarayıcı verilerini
+        temizleyerek veya uygulamadaki profil kaldırma işlemiyle silebilirsiniz.
       </p>
     </LegalShell>
   );

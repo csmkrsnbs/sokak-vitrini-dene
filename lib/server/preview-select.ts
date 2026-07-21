@@ -6,7 +6,9 @@ import type { PreviewListItem } from "@/lib/types";
 type PreviewRow = Pick<
   InferSelectModel<typeof previewRequests>,
   | "id"
+  | "mode"
   | "category"
+  | "productKind"
   | "note"
   | "status"
   | "providerStatus"
@@ -16,7 +18,9 @@ type PreviewRow = Pick<
 
 export const previewListSelection = {
   id: previewRequests.id,
+  mode: previewRequests.mode,
   category: previewRequests.category,
+  productKind: previewRequests.productKind,
   note: previewRequests.note,
   status: previewRequests.status,
   providerStatus: previewRequests.providerStatus,
@@ -27,7 +31,9 @@ export const previewListSelection = {
 export function serializePreview(row: PreviewRow): PreviewListItem {
   return {
     id: row.id,
+    mode: row.mode,
     category: row.category,
+    productKind: row.productKind,
     note: row.note,
     status: row.status,
     providerStatus: row.providerStatus,

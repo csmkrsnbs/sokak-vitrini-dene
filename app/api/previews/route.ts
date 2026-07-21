@@ -5,6 +5,9 @@ import {
   isClothingType,
   isGarmentPhotoType,
   isPreviewCategory,
+  isPreviewMode,
+  isProductKind,
+  PRODUCT_KIND_CONFIG,
 } from "@/lib/categories";
 import { getDb, MissingDatabaseConfigurationError } from "@/lib/db";
 import { previewRequests } from "@/lib/db/schema";
@@ -43,7 +46,7 @@ import {
   getImageModelName,
   ImageGenerationError,
   submitProductPreview,
-} from "@/lib/server/runpod-image";
+} from "@/lib/server/ai-image";
 import {
   previewListSelection,
   serializePreview,
@@ -52,6 +55,8 @@ import type {
   ClothingType,
   GarmentPhotoType,
   PreviewCategory,
+  PreviewMode,
+  ProductKind,
 } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -125,10 +130,20 @@ export async function POST(request: NextRequest) {
 
   try {
     const formData = await request.formData();
+    const modeValue = formData.get("mode");
     const categoryValue = formData.get("category");
+    const productKindValue = formData.get("productKind");
+    if (!isPreviewMode(modeValue)) {
+      return apiError("INVALID_MODE", "Geçerli bir önizleme modu seçin.", 400);
+    }
     if (!isPreviewCategory(categoryValue)) {
       return apiError("INVALID_CATEGORY", "Geçerli bir ürün türü seçin.", 400);
     }
+    if (!isProductKind(productKindValue) || PRODUCT_KIND_CONFIG[productKindValue].category !== categoryValue) {
+      return apiError("INVALID_PRODUCT_KIND", "Geçerli bir ürün alt türü seçin.", 400);
+    }
+    const mode: PreviewMode = modeValue;
+    const productKind: ProductKind = productKindValue;
     providerCategory = categoryValue;
 
     const clothingTypeValue = formData.get("clothingType");
@@ -172,14 +187,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [product, target] = await Promise.all([
-      validateImageFile(formData.get("product"), "Ürün fotoğrafı"),
-      validateImageFile(formData.get("target"), "Hedef fotoğraf"),
-    ]);
-    const note =
-      categoryValue === "clothing" ? null : normalizeNote(formData.get("note"));
-    if (categoryValue !== "clothing") validatePlacementNote(note);
-    const model = getImageModelName(categoryValue);
+    const product = await validateImageFile(formData.get("product"), "Ürün fotoğrafı");
+    const target =
+      mode === "personal"
+        ? await validateImageFile(formData.get("target"), "Dijital profil veya kişi fotoğrafı")
+        : null;
+    const note = normalizeNote(formData.get("note"));
+    validatePlacementNote(note);
+    const model = getImageModelName(categoryValue, mode);
     const db = getDb();
     const couponId = getCouponId(request);
     await assertContentSafetyAllowed({
@@ -193,14 +208,18 @@ export async function POST(request: NextRequest) {
       id: requestId,
       sessionId: session.id,
       clientKey,
+      mode,
       category: categoryValue,
+      productKind,
       note,
       model,
       couponId,
     });
 
     const submitted = await submitProductPreview({
+      mode,
       category: categoryValue,
+      productKind,
       product,
       target,
       note,

@@ -11,16 +11,17 @@ export const metadata: Metadata = {
     template: "%s | Sokak Vitrini Dene",
   },
   description:
-    "Vitrinde beğendiğin takı, kıyafet, mobilya veya otomobili yapay zekâyla anında üzerinde ya da yaşam alanında gör.",
+    "Giyim, iç giyim, takı, ayakkabı, çanta ve aksesuarları dijital profilinde dene; ürün fotoğrafından işletme için model görseli üret.",
   applicationName: "Sokak Vitrini Dene",
   category: "shopping",
   keywords: [
     "Sokak Vitrini",
     "yapay zekâ ile dene",
-    "sanal deneme",
-    "mobilya yerleştirme",
+    "sanal giyim deneme",
+    "dijital profil",
     "takı deneme",
-    "kıyafet deneme",
+    "üründen model görseli",
+    "işletme görsel stüdyosu",
   ],
   authors: [{ name: "Sokak Vitrini" }],
   creator: "Sokak Vitrini",
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     siteName: "Sokak Vitrini Dene",
     title: "Sokakta Gör. Kendinde Dene.",
     description:
-      "Vitrinde gördüğünü yapay zekâyla üzerinde veya yaşam alanında gör.",
+      "Ürünleri dijital profilinde dene veya tek ürün fotoğrafından model görseli oluştur.",
     images: [
       {
         url: "/concept-poster.png",
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Sokakta Gör. Kendinde Dene.",
     description:
-      "Vitrinde gördüğünü yapay zekâyla üzerinde veya yaşam alanında gör.",
+      "Ürünleri dijital profilinde dene veya tek ürün fotoğrafından model görseli oluştur.",
     images: ["/concept-poster.png"],
   },
   robots: {

@@ -2,7 +2,7 @@
   "name": "sokak-vitrini-dene",
   "version": "1.0.0",
   "private": true,
-  "description": "Sokak Vitrini - vitrinde gördüğünü yapay zekâ ile üzerinde veya yaşam alanında gör.",
+  "description": "Sokak Vitrini - giyim ve giyilebilir ürünleri dijital profilde deneme ve işletme model görseli üretme platformu.",
   "engines": {
     "node": ">=20.9.0"
   },

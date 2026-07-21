@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Sokak Vitrini Dene",
     short_name: "SV Dene",
-    description: "Vitrinde gördüğünü, hayatında gör.",
+    description: "Giyim ve aksesuarları dijital profilinde dene; ürün fotoğrafından model görseli üret.",
     start_url: "/",
     display: "standalone",
     background_color: "#090909",
