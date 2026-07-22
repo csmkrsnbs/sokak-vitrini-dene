@@ -840,11 +840,11 @@ export function TryOnStudio() {
       <section className="studio-section" id="dene">
         <div className="container">
           <div className="section-heading studio-section-heading">
-            <span className="section-kicker">Tek platform, iki gelir alanı</span>
-            <h2>Kendinde dene veya üründen satış görseli üret.</h2>
+            <span className="section-kicker">Kişisel deneme ve işletme stüdyosu</span>
+            <h2>Vitrinde gördüğün ürünü kendi görünümünde dene.</h2>
             <p>
-              Tüketici dijital profilinde ürün dener; işletme yalnız ürün fotoğrafıyla
-              katalog ve sosyal medya görseli oluşturur.
+              Kişisel modda ürünü dijital profilinde önizle; işletme modunda yalnız ürün
+              fotoğrafından katalog ve sosyal medya görseli oluştur.
             </p>
           </div>
 

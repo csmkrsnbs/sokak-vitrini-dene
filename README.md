@@ -7,6 +7,20 @@ Bu sürüm iki ayrı kullanım sunar:
 1. **Kendimde dene:** Kullanıcı ürün fotoğrafını, kendi fotoğrafı veya tarayıcıda kayıtlı dijital profiliyle birleştirir.
 2. **İşletme stüdyosu:** İşletme yalnız ürün fotoğrafı yükleyerek katalog ve sosyal medya için yetişkin model üzerinde ürün görseli oluşturur.
 
+
+## Yenilenen ana sayfa
+
+Bu sürümde ana sayfa, doğrudan kişisel denemeye yönlendiren yeni bir ürün deneyimi olarak tasarlandı:
+
+- Mobil ve masaüstü için yeni “Sokakta Gör. Kendinde Dene.” açılış alanı
+- Ürün → dijital profil → önizleme akışını anlatan görsel deneyim bölümü
+- Giyim, iç giyim, takı, ayakkabı ve çanta/aksesuar kategori vitrini
+- Üç adımda kullanım anlatımı
+- Kimlik, ten rengi, yüz, saç, vücut ve poz koruma bölümü
+- Butikler ve mağazalar için işletme stüdyosu çağrısı
+- Arama motorları için FAQPage yapılandırılmış verisi ve SSS bölümü
+- Mobilde sabit “Kendimde dene” butonu
+
 ## Kapsam
 
 - Giyim: tişört, gömlek, bluz, ceket, elbise, pantolon, etek
@@ -158,7 +172,7 @@ npm run check
 
 ```bash
 git add .
-git commit -m "feat: Sokak Vitrini Dene final FASHN sürümü"
+git commit -m "feat: yeni ana sayfa ve canlıya hazır Sokak Vitrini"
 git push
 ```
 
