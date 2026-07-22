@@ -41,7 +41,7 @@ _RUNTIME_DEPS_LOCK = Lock()
 
 
 RUNTIME_PACKAGES_DIR = Path(os.getenv("VTON_RUNTIME_PACKAGES_DIR", "/runpod-volume/python-packages-v13"))
-RUNTIME_MARKER = RUNTIME_PACKAGES_DIR / ".sv-vton-runtime-v13"
+RUNTIME_MARKER = RUNTIME_PACKAGES_DIR / ".sv-vton-runtime-v14"
 
 # These versions are intentionally pinned as a tested compatibility set.
 # Do not widen them without a clean warmup test: newer Transformers/SciPy/NumPy
@@ -63,6 +63,8 @@ PINNED_RUNTIME_SPECS = [
 RUNTIME_MODULES = (
     "fashn_vton",
     "fashn_human_parser",
+    "torch",
+    "torchvision",
     "transformers",
     "tokenizers",
     "cv2",
@@ -74,6 +76,89 @@ RUNTIME_MODULES = (
     "huggingface_hub",
     "tqdm",
 )
+
+
+TORCHVISION_BY_TORCH = {
+    "2.12.1": "0.27.1",
+    "2.12.0": "0.27.0",
+    "2.11.0": "0.26.0",
+    "2.10.0": "0.25.0",
+    "2.9.1": "0.24.1",
+    "2.9.0": "0.24.0",
+    "2.8.0": "0.23.0",
+    "2.7.1": "0.22.1",
+    "2.7.0": "0.22.0",
+    "2.6.0": "0.21.0",
+    "2.5.1": "0.20.1",
+    "2.5.0": "0.20.0",
+    "2.4.1": "0.19.1",
+    "2.4.0": "0.19.0",
+}
+
+
+def _base_version(value: str) -> str:
+    return value.split("+", 1)[0]
+
+
+def _expected_torchvision_version() -> tuple[str, str, str]:
+    import torch
+
+    torch_version = _base_version(str(torch.__version__))
+    torchvision_version = TORCHVISION_BY_TORCH.get(torch_version)
+    if torchvision_version is None:
+        major_minor = ".".join(torch_version.split(".")[:2])
+        compatible_minor = {
+            "2.12": "0.27.0",
+            "2.11": "0.26.0",
+            "2.10": "0.25.0",
+            "2.9": "0.24.0",
+            "2.8": "0.23.0",
+            "2.7": "0.22.0",
+            "2.6": "0.21.0",
+            "2.5": "0.20.0",
+            "2.4": "0.19.0",
+        }
+        torchvision_version = compatible_minor.get(major_minor)
+    if torchvision_version is None:
+        raise RuntimeError(
+            f"Desteklenmeyen Flash PyTorch sürümü: {torch_version}. "
+            "TorchVision eşlemesi güncellenmeli."
+        )
+
+    cuda_version = str(torch.version.cuda or "").strip()
+    if cuda_version:
+        cuda_parts = cuda_version.split(".")
+        wheel_channel = "cu" + "".join(cuda_parts[:2])
+    else:
+        wheel_channel = "cpu"
+    index_url = f"https://download.pytorch.org/whl/{wheel_channel}"
+    return torch_version, torchvision_version, index_url
+
+
+def _torchvision_compatible() -> bool:
+    _activate_runtime_packages()
+    try:
+        import torch
+        import torchvision
+        from torchvision.transforms.functional import to_pil_image
+
+        del to_pil_image
+        torch_version, expected, _ = _expected_torchvision_version()
+        actual = _base_version(str(getattr(torchvision, "__version__", "")))
+        compatible = actual == expected
+        if not compatible:
+            print(
+                f"[runtime] incompatible torchvision version={actual or 'unknown'} "
+                f"expected={expected} for torch={torch_version}",
+                flush=True,
+            )
+        return compatible
+    except Exception as exc:
+        print(
+            f"[runtime] torchvision import failed: {type(exc).__name__}: {exc}",
+            flush=True,
+        )
+        return False
 
 
 def _activate_runtime_packages() -> None:
@@ -163,6 +248,7 @@ def runtime_dependency_status() -> dict[str, object]:
 
     modules = {name: _module_available(name) for name in RUNTIME_MODULES}
     modules["numpy"] = bool(np is not None and str(getattr(np, "__version__", "")) == "1.26.4")
+    modules["torchvision"] = _torchvision_compatible()
     modules["transformers"] = _transformers_compatible()
     modules["tokenizers"] = _version_starts("tokenizers", "0.21.")
     modules["cv2"] = _version_starts("cv2", "4.10.")
@@ -171,6 +257,8 @@ def runtime_dependency_status() -> dict[str, object]:
 
     versions = {
         "numpy": str(getattr(np, "__version__", "")) if np is not None else None,
+        "torch": _safe_version("torch"),
+        "torchvision": _safe_version("torchvision"),
         "transformers": _safe_version("transformers"),
         "tokenizers": _safe_version("tokenizers"),
         "opencv": _safe_version("cv2"),
@@ -186,7 +274,12 @@ def runtime_dependency_status() -> dict[str, object]:
     }
 
 
-def _pip_install(packages: list[str], *, no_deps: bool = False) -> None:
+def _pip_install(
+    packages: list[str],
+    *,
+    no_deps: bool = False,
+    index_url: str | None = None,
+) -> None:
     command = [
         sys.executable,
         "-m",
@@ -200,6 +293,8 @@ def _pip_install(packages: list[str], *, no_deps: bool = False) -> None:
     ]
     if no_deps:
         command.append("--no-deps")
+    if index_url:
+        command.extend(["--index-url", index_url])
     command.extend(packages)
     print(f"[runtime] installing {len(packages)} package group", flush=True)
     subprocess.run(command, check=True)
@@ -211,7 +306,7 @@ def ensure_runtime_dependencies() -> dict[str, object]:
     if status["ready"]:
         if not RUNTIME_MARKER.is_file():
             RUNTIME_MARKER.parent.mkdir(parents=True, exist_ok=True)
-            RUNTIME_MARKER.write_text("v13\n", encoding="utf-8")
+            RUNTIME_MARKER.write_text("v14\n", encoding="utf-8")
         return runtime_dependency_status()
 
     with _RUNTIME_DEPS_LOCK:
@@ -220,7 +315,7 @@ def ensure_runtime_dependencies() -> dict[str, object]:
         if status["ready"]:
             if not RUNTIME_MARKER.is_file():
                 RUNTIME_MARKER.parent.mkdir(parents=True, exist_ok=True)
-                RUNTIME_MARKER.write_text("v13\n", encoding="utf-8")
+                RUNTIME_MARKER.write_text("v14\n", encoding="utf-8")
             return runtime_dependency_status()
 
         RUNTIME_PACKAGES_DIR.mkdir(parents=True, exist_ok=True)
@@ -257,6 +352,28 @@ def ensure_runtime_dependencies() -> dict[str, object]:
             _activate_runtime_packages()
 
         status = runtime_dependency_status()
+
+        if not status["modules"].get("torchvision", False):
+            torch_version, torchvision_version, index_url = _expected_torchvision_version()
+            print(
+                f"[runtime] installing torchvision={torchvision_version} "
+                f"for torch={torch_version} from {index_url}",
+                flush=True,
+            )
+            _pip_install(
+                [f"torchvision=={torchvision_version}"],
+                no_deps=True,
+                index_url=index_url,
+            )
+            _purge_modules(("torchvision",))
+            _activate_runtime_packages()
+            status = runtime_dependency_status()
+            if not status["modules"].get("torchvision", False):
+                raise RuntimeError(
+                    "TorchVision kuruldu ancak uyumluluk kontrolünden geçemedi: "
+                    f"versions={status.get('versions')}"
+                )
+
         missing = {
             name
             for name, available in status["modules"].items()
@@ -288,9 +405,9 @@ def ensure_runtime_dependencies() -> dict[str, object]:
                 f"{', '.join(missing)}; versions={status.get('versions')}"
             )
 
-        RUNTIME_MARKER.write_text("v13\n", encoding="utf-8")
+        RUNTIME_MARKER.write_text("v14\n", encoding="utf-8")
         print(
-            f"[runtime] pinned dependencies ready at {RUNTIME_PACKAGES_DIR}",
+            f"[runtime] pinned dependencies including torchvision ready at {RUNTIME_PACKAGES_DIR}",
             flush=True,
         )
         return runtime_dependency_status()

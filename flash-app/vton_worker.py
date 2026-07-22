@@ -32,7 +32,7 @@ MODEL_VOLUME = NetworkVolume(
         "VTON_GUIDANCE_SCALE": "1.5",
         "VTON_SEGMENTATION_FREE": "true",
         "VTON_FIDELITY_THRESHOLD": "0.30",
-        "SV_VTON_WORKER_VERSION": "v13-pinned-runtime",
+        "SV_VTON_WORKER_VERSION": "v14-torchvision-inplace",
     },
 )
 def vton_worker(
@@ -51,7 +51,7 @@ def vton_worker(
     import os
     import torch
 
-    version = os.getenv("SV_VTON_WORKER_VERSION", "v13-pinned-runtime")
+    version = os.getenv("SV_VTON_WORKER_VERSION", "v14-torchvision-inplace")
     normalized_action = (action or "try-on").strip().lower()
 
     if normalized_action == "health":
