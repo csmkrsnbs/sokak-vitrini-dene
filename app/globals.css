@@ -3386,3 +3386,89 @@ body.modal-open {
     justify-content: space-between;
   }
 }
+
+
+/* Kimlik, ten rengi ve vücut koruma katmanı */
+.identity-preservation-card {
+  display: grid;
+  gap: 13px;
+  margin: -8px 0 24px;
+  border: 1px solid rgba(72, 187, 120, 0.24);
+  border-radius: 16px;
+  padding: 15px;
+  background: linear-gradient(135deg, rgba(36, 137, 79, 0.11), rgba(255, 255, 255, 0.018));
+}
+.identity-preservation-heading {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 11px;
+}
+.identity-preservation-heading > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(72, 187, 120, 0.14);
+  color: #91e6b1;
+}
+.identity-preservation-heading strong { display: block; color: #dfe9e2; font-size: 11px; }
+.identity-preservation-heading p { margin: 4px 0 0; color: #7f8a82; font-size: 8px; line-height: 1.5; }
+.identity-preservation-heading em {
+  border: 1px solid rgba(72, 187, 120, 0.24);
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: #91e6b1;
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.identity-preservation-card ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 12px;
+  margin: 0;
+  padding: 0;
+  color: #959f98;
+  font-size: 8px;
+  list-style: none;
+}
+.identity-preservation-card li { display: flex; align-items: center; gap: 6px; }
+.identity-preservation-card li svg { flex: 0 0 auto; color: #72d799; }
+.note-rule-copy { margin: 8px 0 0; color: #746f68; font-size: 8px; line-height: 1.45; }
+.result-quality-card {
+  display: grid;
+  gap: 9px;
+  margin-top: 12px;
+  border: 1px solid rgba(72, 187, 120, 0.2);
+  border-radius: 13px;
+  padding: 11px;
+  background: rgba(36, 137, 79, 0.08);
+}
+.result-quality-card > div { display: flex; align-items: flex-start; gap: 8px; color: #8fe0ad; }
+.result-quality-card span { display: grid; gap: 3px; }
+.result-quality-card strong { color: #dce9e0; font-size: 9px; }
+.result-quality-card small { color: #7c8980; font-size: 7px; line-height: 1.45; }
+.result-quality-card button {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #caa8a3;
+  cursor: pointer;
+  font-size: 8px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (max-width: 640px) {
+  .identity-preservation-heading { grid-template-columns: 38px minmax(0, 1fr); }
+  .identity-preservation-heading em { grid-column: 2; justify-self: start; }
+  .identity-preservation-card ul { grid-template-columns: 1fr; }
+}

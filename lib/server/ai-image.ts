@@ -13,7 +13,7 @@ export { ImageGenerationError } from "@/lib/server/image-generation-error";
 
 const API_BASE = "https://api.fashn.ai/v1";
 const JOB_ID_PATTERN = /^[a-zA-Z0-9_-]{3,160}$/;
-const DEFAULT_CLOTHING_MODEL = "tryon-v1.6";
+const DEFAULT_CLOTHING_MODEL = "tryon-max";
 const DEFAULT_WEARABLE_MODEL = "tryon-max";
 const DEFAULT_STUDIO_MODEL = "product-to-model";
 
@@ -310,7 +310,7 @@ function safePrompt(productKind: ProductKind, note: string | null, studio: boole
     return [
       base,
       "adult fashion model, premium clean e-commerce photography, tasteful and non-explicit",
-      "preserve the exact product design, color, material, print and distinctive details",
+      "preserve the exact product design, color, material, print, logo and distinctive details",
       "no text, no watermark, no logo overlay, no collage",
       userNote,
     ]
@@ -319,10 +319,16 @@ function safePrompt(productKind: ProductKind, note: string | null, studio: boole
   }
 
   return [
-    "Preserve the person's identity, face, body proportions, pose and background.",
-    "Apply only the exact wearable product and preserve its color, material and distinctive details.",
-    "Tasteful adult fashion result, non-explicit, no body reshaping, no beauty filter.",
     userNote,
+    "MANDATORY: change only the wearable product and keep the person exactly the same.",
+    "Preserve the exact original skin tone, complexion, undertone and ethnicity on every visible skin area.",
+    "Preserve facial identity, age, expression, facial features, hair color, hairstyle and natural skin texture.",
+    "Preserve body shape, proportions, height, shoulders, chest, waist, hips, arms, hands, fingers, legs, pose and camera angle.",
+    "Preserve the original background, lighting and shadows. Do not retouch, beautify, relight, add makeup, whiten, darken, tan or recolor skin.",
+    "Do not reshape, slim, enlarge or reduce any body part.",
+    "Apply the exact supplied product and preserve its color, material, print, logo, fasteners, cut, length and distinctive details.",
+    "Remove only the old garment areas covered by the new product. Keep natural hair, hands and accessories correctly occluded.",
+    "Tasteful adult fashion result, non-explicit, no beauty filter, no identity change and no body modification.",
   ]
     .filter(Boolean)
     .join(" ");
@@ -366,14 +372,17 @@ export async function submitProductPreview(input: {
     }
     const targetImage = await fileToDataUrl(input.target);
 
-    if (input.category === "clothing") {
-      modelName = config.clothingModel;
+    modelName =
+      input.category === "clothing" ? config.clothingModel : config.wearableModel;
+
+    if (modelName === "tryon-v1.6") {
       inputs = {
         model_image: targetImage,
         garment_image: productImage,
         category: input.clothingType,
         garment_photo_type: input.garmentPhotoType,
         mode: config.clothingMode,
+        segmentation_free: true,
         moderation_level: "permissive",
         num_samples: 1,
         output_format: config.outputFormat,
@@ -381,7 +390,6 @@ export async function submitProductPreview(input: {
         seed: crypto.getRandomValues(new Uint32Array(1))[0],
       };
     } else {
-      modelName = config.wearableModel;
       inputs = {
         model_image: targetImage,
         product_image: productImage,

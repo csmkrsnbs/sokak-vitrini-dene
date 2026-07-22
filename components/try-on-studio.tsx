@@ -17,10 +17,12 @@ import {
   RefreshCw,
   Save,
   Share2,
+  ShieldCheck,
   Shirt,
   ShoppingBag,
   Sparkles,
   Trash2,
+  TriangleAlert,
   Upload,
   UserRound,
   WandSparkles,
@@ -431,7 +433,7 @@ export function TryOnStudio() {
       : loadingStage === "running"
         ? mode === "studio"
           ? "Ürün ayrıntıları korunarak katalog görseli oluşturuluyor."
-          : "Ürün, dijital profilindeki poz ve ışığa uyarlanıyor."
+          : "Ten rengi, kimlik, vücut oranı ve poz korunarak yalnızca ürün uygulanıyor."
         : "İşlem kaydı oluşturuluyor.";
   const loadingProgress =
     loadingStage === "submitting"
@@ -1021,6 +1023,25 @@ export function TryOnStudio() {
                   </div>
                 )}
 
+                {mode === "personal" && (
+                  <div className="identity-preservation-card" role="status" aria-label="Kimlik ve ten koruma kuralları">
+                    <div className="identity-preservation-heading">
+                      <span><ShieldCheck size={20} /></span>
+                      <div>
+                        <strong>Kimlik ve ten koruma aktif</strong>
+                        <p>Sistem kişiyi yeniden tasarlamaz; yalnızca seçilen ürünü uygular.</p>
+                      </div>
+                      <em>Sabit kural</em>
+                    </div>
+                    <ul>
+                      <li><Check size={14} /> Ten rengi ve cilt alt tonu korunur</li>
+                      <li><Check size={14} /> Yüz, saç ve yaş görünümü korunur</li>
+                      <li><Check size={14} /> Vücut oranı, poz ve eller korunur</li>
+                      <li><Check size={14} /> Arka plan ve temel ışık korunur</li>
+                    </ul>
+                  </div>
+                )}
+
                 <div className={`uploads-grid ${mode === "studio" ? "uploads-grid-studio" : ""}`}>
                   <UploadCard
                     id="product-photo"
@@ -1110,6 +1131,11 @@ export function TryOnStudio() {
                     maxLength={300}
                   />
                   <small>{note.length}/300</small>
+                  {mode === "personal" && (
+                    <p className="note-rule-copy">
+                      Ten, yüz, saç veya vücut değiştirme talimatları kabul edilmez.
+                    </p>
+                  )}
                 </div>
 
                 <label className="consent-row">
@@ -1184,7 +1210,7 @@ export function TryOnStudio() {
                     <div className="result-image-wrap">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={result.imageUrl} alt="Yapay zekâ ile oluşturulan ürün önizlemesi" />
-                      <span className="result-badge"><CheckCircle2 size={15} /> Önizleme hazır</span>
+                      <span className="result-badge"><ShieldCheck size={15} /> Kimlik korumalı önizleme</span>
                       <button
                         type="button"
                         className={`result-favorite ${favorites.has(result.id) ? "active" : ""}`}
@@ -1198,6 +1224,20 @@ export function TryOnStudio() {
                       <span>{PREVIEW_MODE_CONFIG[result.mode].label}</span>
                       <strong>{PRODUCT_KIND_CONFIG[result.productKind].label}</strong>
                     </div>
+                    {result.mode === "personal" && (
+                      <div className="result-quality-card">
+                        <div>
+                          <ShieldCheck size={18} />
+                          <span>
+                            <strong>Sonucu kullanmadan önce kontrol et</strong>
+                            <small>Ten rengi, yüz, saç ve vücut oranı giriş fotoğrafınla aynı olmalı.</small>
+                          </span>
+                        </div>
+                        <button type="button" onClick={() => void deleteResult(result)}>
+                          <TriangleAlert size={15} /> Kişi değiştiyse sonucu sil
+                        </button>
+                      </div>
+                    )}
                     <div className="result-actions">
                       <button type="button" className="button button-light" onClick={() => void downloadResult(result)}>
                         <Download size={17} /> İndir
@@ -1210,7 +1250,7 @@ export function TryOnStudio() {
                       </button>
                     </div>
                     <p className="result-disclaimer">
-                      Yapay zekâ önizlemesidir; gerçek ölçü, renk ve ürün uyumu farklılık gösterebilir.
+                      Yapay zekâ önizlemesidir. Kimlik veya ten tonu değişmiş görünüyorsa sonucu kullanma ve daha net bir fotoğrafla yeniden dene. Gerçek ölçü ve ürün uyumu farklılık gösterebilir.
                     </p>
                   </div>
                 ) : (
@@ -1228,6 +1268,7 @@ export function TryOnStudio() {
                         : "Dijital profilini bir kez kaydet; giyim ve aksesuarları tekrar fotoğraf yüklemeden dene."}
                     </p>
                     <ul>
+                      <li><Check size={15} /> Ten rengi, kimlik ve vücut korunur</li>
                       <li><Check size={15} /> Ürün ayrıntıları korunur</li>
                       <li><Check size={15} /> Sonuç yalnızca bu tarayıcıya görünür</li>
                       <li><Check size={15} /> Favori ve geçmiş yönetimi</li>

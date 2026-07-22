@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalShell kicker="Son güncelleme: 21 Temmuz 2026" title="Kullanım Koşulları">
+    <LegalShell kicker="Son güncelleme: 22 Temmuz 2026" title="Kullanım Koşulları">
       <p>
         Sokak Vitrini Dene’yi kullanarak aşağıdaki koşulları kabul etmiş olursunuz.
         Hizmet, ürünü satın almadan veya ticari içerikte kullanmadan önce fikir vermek
@@ -23,6 +23,14 @@ export default function TermsPage() {
         beden uyumu gerektiren ürünlerde sonuç tıbbi, ergonomik veya doğru beden tavsiyesi
         değildir. Satın alma kararından önce gerçek ürün bilgisini doğrulamak kullanıcıya
         aittir.
+      </p>
+
+      <h2>Kimlik ve ten koruma</h2>
+      <p>
+        Kişisel denemede amaç yalnızca seçilen ürünü uygulamaktır. Ten rengi, yüz, saç,
+        yaş görünümü, vücut oranı, poz veya arka plan değişmiş görünüyorsa çıktı hatalı
+        kabul edilmeli; indirilmemeli, paylaşılmamalı ve uygulamadaki silme seçeneğiyle
+        kaldırılmalıdır. Kullanıcı notları kişiyi değiştirmek için kullanılamaz.
       </p>
 
       <h2>İzinli kullanım</h2>

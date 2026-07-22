@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s | Sokak Vitrini Dene",
   },
   description:
-    "Giyim, iç giyim, takı, ayakkabı, çanta ve aksesuarları dijital profilinde dene; ürün fotoğrafından işletme için model görseli üret.",
+    "Giyim, iç giyim, takı, ayakkabı, çanta ve aksesuarları ten rengi ve kimlik koruma odaklı dijital profilinde dene.",
   applicationName: "Sokak Vitrini Dene",
   category: "shopping",
   keywords: [
@@ -22,6 +22,8 @@ export const metadata: Metadata = {
     "takı deneme",
     "üründen model görseli",
     "işletme görsel stüdyosu",
+    "ten rengi korumalı sanal deneme",
+    "kimlik korumalı sanal prova",
   ],
   authors: [{ name: "Sokak Vitrini" }],
   creator: "Sokak Vitrini",
@@ -34,7 +36,7 @@ export const metadata: Metadata = {
     siteName: "Sokak Vitrini Dene",
     title: "Sokakta Gör. Kendinde Dene.",
     description:
-      "Ürünleri dijital profilinde dene veya tek ürün fotoğrafından model görseli oluştur.",
+      "Ürünleri ten rengi, kimlik ve vücut oranı koruma odaklı dijital profilinde dene.",
     images: [
       {
         url: "/concept-poster.png",
@@ -48,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Sokakta Gör. Kendinde Dene.",
     description:
-      "Ürünleri dijital profilinde dene veya tek ürün fotoğrafından model görseli oluştur.",
+      "Ürünleri ten rengi, kimlik ve vücut oranı koruma odaklı dijital profilinde dene.",
     images: ["/concept-poster.png"],
   },
   robots: {

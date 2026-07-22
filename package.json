@@ -1,8 +1,8 @@
 {
   "name": "sokak-vitrini-dene",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Sokak Vitrini - giyim ve giyilebilir ürünleri dijital profilde deneme ve işletme model görseli üretme platformu.",
+  "description": "Sokak Vitrini - ten rengi, kimlik ve vücut oranı koruma odaklı dijital ürün deneme platformu.",
   "engines": {
     "node": ">=20.9.0"
   },

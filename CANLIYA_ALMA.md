@@ -25,7 +25,7 @@ Vercel → Project → Settings → Environment Variables bölümünde aşağıd
 ```env
 DATABASE_URL="..."
 FASHN_API_KEY="fa_..."
-FASHN_CLOTHING_MODEL="tryon-v1.6"
+FASHN_CLOTHING_MODEL="tryon-max"
 FASHN_WEARABLE_MODEL="tryon-max"
 FASHN_STUDIO_MODEL="product-to-model"
 FASHN_CLOTHING_MODE="balanced"
@@ -117,3 +117,9 @@ adresine gidin. `ADMIN_ACCESS_KEY` ile giriş yapın ve test için 1 haklık kup
 - Yönetici anahtarı ve kupon imza anahtarı birbirinden farklı olmalı.
 - Gizlilik ve Kullanım Koşulları sayfaları canlı işletmenin gerçek unvan ve iletişim bilgileriyle tamamlanmalı.
 - Yetişkin moda denemelerinde yalnız 18+ ve açık olmayan moda/katalog içeriği kabul edilmeli.
+
+## Kimlik koruma doğrulaması
+
+Canlı dağıtımdan sonra kişisel denemede şu kart görünmelidir: **Kimlik ve ten koruma aktif**. Sonuç ekranında **Kimlik korumalı önizleme** rozeti ve **Kişi değiştiyse sonucu sil** bağlantısı bulunmalıdır.
+
+Varsayılan maliyet ayarı `tryon-max` + `fast` + `1k`dır. Bu ayar bir görsel için en düşük Try-On Max kredi katmanını kullanır.

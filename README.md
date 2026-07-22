@@ -23,16 +23,19 @@ Bu sürüm iki ayrı kullanım sunar:
 - Süresi dolan sonuçlar için Vercel Cron temizliği
 - Neon PostgreSQL + Drizzle ORM
 - FASHN API sağlayıcı katmanı
+- Ten rengi, yüz, saç, vücut oranı, poz ve arka plan koruma talimatları
+- Kişiyi değiştirmeye yönelik kullanıcı notlarını sunucu tarafında engelleme
+- Sonuç ekranında kullanıcı kalite kontrolü ve hatalı sonucu silme
 
 ## Kullanılan yapay zekâ akışı
 
 | İşlem | Varsayılan model |
 |---|---|
-| Giyim ve yetişkin moda sanal denemesi | `tryon-v1.6` |
+| Giyim ve yetişkin moda sanal denemesi | `tryon-max` (`fast` + `1k`) |
 | Takı, ayakkabı, çanta ve aksesuar denemesi | `tryon-max` |
 | Ürün fotoğrafından işletme model görseli | `product-to-model` |
 
-Model adları ve kalite seçenekleri `.env` üzerinden değiştirilebilir. Uygulama RunPod worker, Docker veya sürekli çalışan GPU gerektirmez.
+Model adları ve kalite seçenekleri `.env` üzerinden değiştirilebilir. Kişisel denemelerde `tryon-max`, kimlik ve görünüm koruma talimatlarını desteklediği için varsayılan seçilmiştir. Uygulama RunPod worker, Docker veya sürekli çalışan GPU gerektirmez.
 
 ## Gereksinimler
 
@@ -158,3 +161,9 @@ git add .
 git commit -m "feat: Sokak Vitrini Dene final FASHN sürümü"
 git push
 ```
+
+## Kimlik ve ten koruma ilkesi
+
+Kişisel denemede sistem yalnızca ürünü değiştirmeyi hedefler. Sunucu, FASHN Try-On Max isteğine ten rengi, cilt alt tonu, etnik görünüm, yüz, saç, yaş görünümü, vücut oranı, poz, eller, arka plan ve ışığı koruyan zorunlu talimatları ekler. Kullanıcının bunları değiştirmesini isteyen serbest metin yönlendirmeleri reddedilir.
+
+Üretken yapay zekâ çıktıları yüzde yüz garanti edilemez. Sonuç ekranında giriş fotoğrafıyla karşılaştırma kontrolü bulunur; kişi veya ten tonu değişmiş görünüyorsa sonuç tek tuşla silinebilir. Ayrıntılı kurallar `KIMLIK_VE_TEN_KORUMA.md` dosyasındadır.

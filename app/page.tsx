@@ -8,17 +8,17 @@ import {
   Images,
   ScanLine,
   Shirt,
+  ShieldCheck,
   Sparkles,
-  UserRoundCheck,
 } from "lucide-react";
 
 import { TryOnStudio } from "@/components/try-on-studio";
 
 const categories = [
   {
-    icon: UserRoundCheck,
-    title: "Dijital profil",
-    text: "Fotoğrafını tarayıcında bir kez kaydet; yeni ürünlerde tekrar kullan.",
+    icon: ShieldCheck,
+    title: "Kimlik korumalı deneme",
+    text: "Ten rengi, yüz, saç, vücut oranı ve poz korunarak yalnızca ürün uygulanır.",
   },
   {
     icon: Shirt,
@@ -59,8 +59,27 @@ const steps = [
 ];
 
 export default function HomePage() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Sokak Vitrini Dene",
+    applicationCategory: "ShoppingApplication",
+    operatingSystem: "Web",
+    description: "Ten rengi ve kimlik koruma odaklı sanal giyim ve aksesuar deneme platformu.",
+    featureList: [
+      "Dijital profil",
+      "Kimlik ve ten koruma odaklı sanal deneme",
+      "Giyim, takı, ayakkabı, çanta ve aksesuar desteği",
+      "İşletme ürün görsel stüdyosu",
+    ],
+  };
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <header className="site-header">
         <div className="container header-inner">
           <Link className="brand" href="#top" aria-label="Sokak Vitrini ana sayfa">
@@ -98,8 +117,9 @@ export default function HomePage() {
               <span>Kendinde dene.</span>
             </h1>
             <p>
-              Beğendiğin giyim ve aksesuar ürününü kendi dijital profilinde gör.
-              İşletmensen tek ürün fotoğrafından model üzerinde katalog görseli oluştur.
+              Beğendiğin giyim ve aksesuar ürününü, ten rengin ve kişisel görünümün
+              korunarak kendi dijital profilinde gör. İşletmensen tek ürün fotoğrafından
+              model üzerinde katalog görseli oluştur.
             </p>
             <div className="hero-actions">
               <Link className="button button-gold" href="#dene">
@@ -116,7 +136,7 @@ export default function HomePage() {
                 <Check size={15} /> Dijital profil tarayıcında kalır
               </span>
               <span>
-                <Check size={15} /> Kişisel ve işletme modu
+                <Check size={15} /> Ten rengi ve kimlik koruma odaklı
               </span>
             </div>
           </div>
@@ -201,7 +221,7 @@ export default function HomePage() {
         <div className="container privacy-banner-inner">
           <div>
             <span className="section-kicker">Sana özel</span>
-            <h2>Dijital profilin cihazında kalır.</h2>
+            <h2>Dijital profilin cihazında, kimliğin sende kalır.</h2>
             <p>
               Kaydettiğin dijital profil, bu tarayıcının yerel veritabanında tutulur.
               Ürün ve kişi görselleri yalnızca seçtiğin önizlemeyi oluşturmak için işlenir;

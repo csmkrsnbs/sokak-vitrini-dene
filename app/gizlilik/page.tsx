@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalShell kicker="Son güncelleme: 21 Temmuz 2026" title="Gizlilik">
+    <LegalShell kicker="Son güncelleme: 22 Temmuz 2026" title="Gizlilik">
       <p>
         Sokak Vitrini Dene; giyim ve giyilebilir ürünleri kendi fotoğrafınızda
         önizlemenizi, ayrıca ürün fotoğrafından işletme kullanımına yönelik model görseli
@@ -38,6 +38,15 @@ export default function PrivacyPage() {
         gerçekleştiren FASHN API’ye sunucu üzerinden aktarılır. API anahtarı tarayıcıya
         gönderilmez. Uygulama, sonuçları doğrudan veritabanına kaydedebilmek ve dış görsel
         bağlantısına bağımlı kalmamak için mümkün olduğunda base64 çıktı kullanır.
+      </p>
+
+      <h2>Kimlik ve ten koruma</h2>
+      <p>
+        Kişisel deneme isteklerinde sistem yalnızca seçilen ürünü değiştirmeyi hedefleyen
+        koruma talimatları kullanır. Ten rengi, cilt alt tonu, yüz, saç, yaş görünümü,
+        vücut oranı, poz, eller, arka plan ve temel ışığı değiştirmeye yönelik kullanıcı
+        notları kabul edilmez. Üretken yapay zekâ çıktıları kesin değildir; kişi veya ten
+        tonu değişmiş görünüyorsa sonuç kullanılmamalı ve uygulamadan silinmelidir.
       </p>
 
       <h2>Saklama ve silme</h2>
