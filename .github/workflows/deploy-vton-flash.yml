@@ -1,4 +1,4 @@
-name: Deploy VTON Flash v12
+name: Deploy VTON Flash v13
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-vton-flash-v12-production
+  group: deploy-vton-flash-v13-production
   cancel-in-progress: false
 
 jobs:
@@ -77,20 +77,20 @@ jobs:
         run: |
           set -o pipefail
           rm -rf .flash
-          flash deploy --app sokak-vitrini-prova-v12 --env production --python-version 3.12 2>&1 | tee deploy.log
+          flash deploy --app sokak-vitrini-prova-v13 --env production --python-version 3.12 2>&1 | tee deploy.log
 
       - name: Show deployed environment
         if: always()
         shell: bash
         run: |
-          flash env get production --app sokak-vitrini-prova-v12 2>&1 | tee environment.log || true
+          flash env get production --app sokak-vitrini-prova-v13 2>&1 | tee environment.log || true
 
       - name: Write summary
         if: always()
         shell: bash
         run: |
           {
-            echo "## RunPod Flash VTON v12 deployment"
+            echo "## RunPod Flash VTON v13 deployment"
             echo
             echo "Endpoint ID and URL are printed in the deploy logs above."
             echo

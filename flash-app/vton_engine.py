@@ -40,12 +40,31 @@ _WEIGHTS_LOCK = Lock()
 _RUNTIME_DEPS_LOCK = Lock()
 
 
-RUNTIME_PACKAGES_DIR = Path(os.getenv("VTON_RUNTIME_PACKAGES_DIR", "/runpod-volume/python-packages-v12"))
-RUNTIME_MARKER = RUNTIME_PACKAGES_DIR / ".sv-vton-runtime-v12"
+RUNTIME_PACKAGES_DIR = Path(os.getenv("VTON_RUNTIME_PACKAGES_DIR", "/runpod-volume/python-packages-v13"))
+RUNTIME_MARKER = RUNTIME_PACKAGES_DIR / ".sv-vton-runtime-v13"
+
+# These versions are intentionally pinned as a tested compatibility set.
+# Do not widen them without a clean warmup test: newer Transformers/SciPy/NumPy
+# combinations can hide SegFormer behind a lazy-import failure.
+PINNED_RUNTIME_SPECS = [
+    "numpy==1.26.4",
+    "transformers==4.50.3",
+    "tokenizers>=0.21,<0.22",
+    "opencv-python-headless==4.10.0.84",
+    "safetensors==0.5.3",
+    "tqdm==4.67.1",
+    "einops==0.8.0",
+    "onnxruntime==1.20.1",
+    "scipy==1.12.0",
+    "huggingface_hub==0.30.2",
+    "matplotlib==3.9.2",
+]
+
 RUNTIME_MODULES = (
     "fashn_vton",
     "fashn_human_parser",
     "transformers",
+    "tokenizers",
     "cv2",
     "onnxruntime",
     "safetensors",
@@ -55,18 +74,6 @@ RUNTIME_MODULES = (
     "huggingface_hub",
     "tqdm",
 )
-
-RUNTIME_PACKAGE_SPECS = {
-    "transformers": "transformers>=4.30,<5",
-    "cv2": "opencv-python-headless>=4.8,<5",
-    "safetensors": "safetensors>=0.3,<1",
-    "tqdm": "tqdm>=4.65,<5",
-    "einops": "einops>=0.6,<1",
-    "onnxruntime": "onnxruntime==1.20.1",
-    "scipy": "scipy>=1.13,<2",
-    "huggingface_hub": "huggingface_hub>=0.34,<2",
-    "matplotlib": "matplotlib>=3.5,<4",
-}
 
 
 def _activate_runtime_packages() -> None:
@@ -83,6 +90,54 @@ def _module_available(module_name: str) -> bool:
         return False
 
 
+def _purge_modules(prefixes: tuple[str, ...]) -> None:
+    """Discard modules imported before the pinned target directory existed."""
+    for name in list(sys.modules):
+        if any(name == prefix or name.startswith(f"{prefix}.") for prefix in prefixes):
+            sys.modules.pop(name, None)
+    importlib.invalidate_caches()
+
+
+def _safe_version(module_name: str) -> str | None:
+    try:
+        module = importlib.import_module(module_name)
+        value = getattr(module, "__version__", None)
+        return str(value) if value is not None else None
+    except Exception:
+        return None
+
+
+def _transformers_compatible() -> bool:
+    _activate_runtime_packages()
+    try:
+        import transformers
+        from transformers import SegformerForSemanticSegmentation
+
+        del SegformerForSemanticSegmentation
+        version = str(getattr(transformers, "__version__", ""))
+        compatible = version == "4.50.3"
+        if not compatible:
+            print(f"[runtime] incompatible transformers version={version}", flush=True)
+        return compatible
+    except Exception as exc:
+        print(
+            f"[runtime] SegFormer import failed: {type(exc).__name__}: {exc}",
+            flush=True,
+        )
+        return False
+
+
+def _version_starts(module_name: str, prefix: str) -> bool:
+    version = _safe_version(module_name) or ""
+    compatible = version.startswith(prefix)
+    if not compatible:
+        print(
+            f"[runtime] incompatible {module_name} version={version or 'unknown'} expected={prefix}*",
+            flush=True,
+        )
+    return compatible
+
+
 def _onnxruntime_compatible() -> bool:
     """Use CPU ONNX Runtime for DWPose to avoid CUDA wheel ABI conflicts."""
     _activate_runtime_packages()
@@ -91,7 +146,7 @@ def _onnxruntime_compatible() -> bool:
 
         version = str(getattr(ort, "__version__", ""))
         providers = set(ort.get_available_providers())
-        compatible = version.startswith("1.20.") and "CPUExecutionProvider" in providers
+        compatible = version == "1.20.1" and "CPUExecutionProvider" in providers
         if not compatible:
             print(
                 f"[runtime] incompatible onnxruntime version={version} providers={sorted(providers)}",
@@ -103,39 +158,31 @@ def _onnxruntime_compatible() -> bool:
         return False
 
 
-def _remove_persisted_onnxruntime() -> None:
-    """Remove stale GPU/CPU ORT files from this isolated runtime directory."""
-    for name in list(sys.modules):
-        if name == "onnxruntime" or name.startswith("onnxruntime."):
-            sys.modules.pop(name, None)
-
-    if not RUNTIME_PACKAGES_DIR.exists():
-        return
-
-    patterns = (
-        "onnxruntime",
-        "onnxruntime-*.dist-info",
-        "onnxruntime_gpu-*.dist-info",
-        "onnxruntime_gpu-*.data",
-    )
-    for pattern in patterns:
-        for path in RUNTIME_PACKAGES_DIR.glob(pattern):
-            if path.is_dir():
-                shutil.rmtree(path, ignore_errors=True)
-            else:
-                path.unlink(missing_ok=True)
-    importlib.invalidate_caches()
-
-
 def runtime_dependency_status() -> dict[str, object]:
     _activate_runtime_packages()
+
     modules = {name: _module_available(name) for name in RUNTIME_MODULES}
+    modules["numpy"] = bool(np is not None and str(getattr(np, "__version__", "")) == "1.26.4")
+    modules["transformers"] = _transformers_compatible()
+    modules["tokenizers"] = _version_starts("tokenizers", "0.21.")
+    modules["cv2"] = _version_starts("cv2", "4.10.")
     modules["onnxruntime"] = _onnxruntime_compatible()
+    modules["scipy"] = _version_starts("scipy", "1.12.")
+
+    versions = {
+        "numpy": str(getattr(np, "__version__", "")) if np is not None else None,
+        "transformers": _safe_version("transformers"),
+        "tokenizers": _safe_version("tokenizers"),
+        "opencv": _safe_version("cv2"),
+        "onnxruntime": _safe_version("onnxruntime"),
+        "scipy": _safe_version("scipy"),
+    }
     return {
         "ready": all(modules.values()),
         "marker_present": RUNTIME_MARKER.is_file(),
         "path": str(RUNTIME_PACKAGES_DIR),
         "modules": modules,
+        "versions": versions,
     }
 
 
@@ -164,7 +211,7 @@ def ensure_runtime_dependencies() -> dict[str, object]:
     if status["ready"]:
         if not RUNTIME_MARKER.is_file():
             RUNTIME_MARKER.parent.mkdir(parents=True, exist_ok=True)
-            RUNTIME_MARKER.write_text("v12\n", encoding="utf-8")
+            RUNTIME_MARKER.write_text("v13\n", encoding="utf-8")
         return runtime_dependency_status()
 
     with _RUNTIME_DEPS_LOCK:
@@ -173,36 +220,42 @@ def ensure_runtime_dependencies() -> dict[str, object]:
         if status["ready"]:
             if not RUNTIME_MARKER.is_file():
                 RUNTIME_MARKER.parent.mkdir(parents=True, exist_ok=True)
-                RUNTIME_MARKER.write_text("v12\n", encoding="utf-8")
+                RUNTIME_MARKER.write_text("v13\n", encoding="utf-8")
             return runtime_dependency_status()
 
         RUNTIME_PACKAGES_DIR.mkdir(parents=True, exist_ok=True)
-        missing = {
-            name
-            for name, available in status["modules"].items()
-            if not available
+
+        support_names = {
+            "numpy",
+            "transformers",
+            "tokenizers",
+            "cv2",
+            "onnxruntime",
+            "safetensors",
+            "tqdm",
+            "einops",
+            "scipy",
+            "huggingface_hub",
+            "matplotlib",
         }
-
-        # DWPose için CPU ORT kullanıyoruz. Böylece CUDA 12/13 wheel uyumsuzluğu
-        # tamamen ortadan kalkar.
-        if "onnxruntime" in missing:
-            _remove_persisted_onnxruntime()
-            _pip_install(
-                [RUNTIME_PACKAGE_SPECS["onnxruntime"]],
-                no_deps=True,
+        if any(not status["modules"].get(name, False) for name in support_names):
+            _pip_install(PINNED_RUNTIME_SPECS)
+            _purge_modules(
+                (
+                    "transformers",
+                    "tokenizers",
+                    "cv2",
+                    "onnxruntime",
+                    "safetensors",
+                    "einops",
+                    "matplotlib",
+                    "scipy",
+                    "huggingface_hub",
+                    "tqdm",
+                )
             )
+            _activate_runtime_packages()
 
-        # Yalnız diğer eksik destek paketlerini kur. Böylece önceki warmup'ta
-        # volume'a kurulmuş büyük paketler her düzeltmede yeniden indirilmez.
-        support_specs = [
-            spec
-            for module, spec in RUNTIME_PACKAGE_SPECS.items()
-            if module in missing and module != "onnxruntime"
-        ]
-        if support_specs:
-            _pip_install(support_specs)
-
-        _activate_runtime_packages()
         status = runtime_dependency_status()
         missing = {
             name
@@ -220,6 +273,7 @@ def ensure_runtime_dependencies() -> dict[str, object]:
             )
         if model_packages:
             _pip_install(model_packages, no_deps=True)
+            _purge_modules(("fashn_human_parser", "fashn_vton"))
 
         _activate_runtime_packages()
         status = runtime_dependency_status()
@@ -230,12 +284,13 @@ def ensure_runtime_dependencies() -> dict[str, object]:
                 if not available
             ]
             raise RuntimeError(
-                f"Runtime bağımlılıkları kurulamadı: {', '.join(missing)}"
+                "Runtime uyumluluk kontrolü başarısız: "
+                f"{', '.join(missing)}; versions={status.get('versions')}"
             )
 
-        RUNTIME_MARKER.write_text("v12\n", encoding="utf-8")
+        RUNTIME_MARKER.write_text("v13\n", encoding="utf-8")
         print(
-            f"[runtime] dependencies ready at {RUNTIME_PACKAGES_DIR}",
+            f"[runtime] pinned dependencies ready at {RUNTIME_PACKAGES_DIR}",
             flush=True,
         )
         return runtime_dependency_status()
