@@ -89,9 +89,3 @@ deploy başlamadan önce SDK imzasını ve tüm Flash modüllerini doğrular.
 ## v9 runtime dependency cache
 
 RunPod Flash 1.5 GB arşiv sınırını aşan ağır ML paketleri ilk warmup sırasında kalıcı Network Volume içine kurulur. Ayrıntılar `FLASH_V9_RUNTIME_KURULUM.md` dosyasındadır.
-
-## v11 — ONNX Runtime düzeltmesi
-
-RunPod Flash CUDA 12 worker'ında `libcudart.so.13` hatasını önlemek için
-`onnxruntime-gpu==1.20.2` sabitlenmiş ve kalıcı volume'daki uyumsuz ORT kurulumu
-otomatik temizlenecek şekilde güncellenmiştir.

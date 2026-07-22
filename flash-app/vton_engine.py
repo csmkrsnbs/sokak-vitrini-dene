@@ -8,7 +8,6 @@ import os
 import subprocess
 import sys
 import time
-import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from threading import Lock
@@ -41,7 +40,7 @@ _RUNTIME_DEPS_LOCK = Lock()
 
 
 RUNTIME_PACKAGES_DIR = Path(os.getenv("VTON_RUNTIME_PACKAGES_DIR", "/runpod-volume/python-packages"))
-RUNTIME_MARKER = RUNTIME_PACKAGES_DIR / ".sv-vton-runtime-v3"
+RUNTIME_MARKER = RUNTIME_PACKAGES_DIR / ".sv-vton-runtime-v1"
 RUNTIME_MODULES = (
     "fashn_vton",
     "fashn_human_parser",
@@ -50,23 +49,7 @@ RUNTIME_MODULES = (
     "onnxruntime",
     "safetensors",
     "einops",
-    "matplotlib",
-    "scipy",
-    "huggingface_hub",
-    "tqdm",
 )
-
-RUNTIME_PACKAGE_SPECS = {
-    "transformers": "transformers>=4.30,<5",
-    "cv2": "opencv-python-headless>=4.8,<5",
-    "safetensors": "safetensors>=0.3,<1",
-    "tqdm": "tqdm>=4.65,<5",
-    "einops": "einops>=0.6,<1",
-    "onnxruntime": "onnxruntime-gpu==1.20.2",
-    "scipy": "scipy>=1.13,<2",
-    "huggingface_hub": "huggingface_hub>=0.34,<2",
-    "matplotlib": "matplotlib>=3.5,<4",
-}
 
 
 def _activate_runtime_packages() -> None:
@@ -83,54 +66,9 @@ def _module_available(module_name: str) -> bool:
         return False
 
 
-def _onnxruntime_compatible() -> bool:
-    """Validate the persisted ORT wheel against the worker's CUDA 12 runtime."""
-    _activate_runtime_packages()
-    try:
-        import onnxruntime as ort
-
-        version = str(getattr(ort, "__version__", ""))
-        providers = set(ort.get_available_providers())
-        compatible = version.startswith("1.20.") and "CUDAExecutionProvider" in providers
-        if not compatible:
-            print(
-                f"[runtime] incompatible onnxruntime version={version} providers={sorted(providers)}",
-                flush=True,
-            )
-        return compatible
-    except Exception as exc:
-        print(f"[runtime] onnxruntime import failed: {type(exc).__name__}: {exc}", flush=True)
-        return False
-
-
-def _remove_persisted_onnxruntime() -> None:
-    """Remove stale CUDA-13 ORT files from the persistent target directory."""
-    for name in list(sys.modules):
-        if name == "onnxruntime" or name.startswith("onnxruntime."):
-            sys.modules.pop(name, None)
-
-    if not RUNTIME_PACKAGES_DIR.exists():
-        return
-
-    patterns = (
-        "onnxruntime",
-        "onnxruntime-*.dist-info",
-        "onnxruntime_gpu-*.dist-info",
-        "onnxruntime_gpu-*.data",
-    )
-    for pattern in patterns:
-        for path in RUNTIME_PACKAGES_DIR.glob(pattern):
-            if path.is_dir():
-                shutil.rmtree(path, ignore_errors=True)
-            else:
-                path.unlink(missing_ok=True)
-    importlib.invalidate_caches()
-
-
 def runtime_dependency_status() -> dict[str, object]:
     _activate_runtime_packages()
     modules = {name: _module_available(name) for name in RUNTIME_MODULES}
-    modules["onnxruntime"] = _onnxruntime_compatible()
     return {
         "ready": all(modules.values()),
         "marker_present": RUNTIME_MARKER.is_file(),
@@ -162,82 +100,48 @@ def ensure_runtime_dependencies() -> dict[str, object]:
     _activate_runtime_packages()
     status = runtime_dependency_status()
     if status["ready"]:
-        if not RUNTIME_MARKER.is_file():
-            RUNTIME_MARKER.parent.mkdir(parents=True, exist_ok=True)
-            RUNTIME_MARKER.write_text("v3\n", encoding="utf-8")
-        return runtime_dependency_status()
+        return status
 
     with _RUNTIME_DEPS_LOCK:
         _activate_runtime_packages()
         status = runtime_dependency_status()
         if status["ready"]:
-            if not RUNTIME_MARKER.is_file():
-                RUNTIME_MARKER.parent.mkdir(parents=True, exist_ok=True)
-                RUNTIME_MARKER.write_text("v3\n", encoding="utf-8")
-            return runtime_dependency_status()
+            return status
 
         RUNTIME_PACKAGES_DIR.mkdir(parents=True, exist_ok=True)
-        missing = {
-            name
-            for name, available in status["modules"].items()
-            if not available
-        }
 
-        # CUDA 13 isteyen yeni ORT wheel'i kalıcı volume'da kalmış olabilir.
-        # Worker CUDA 12 kullandığı için ORT 1.20.2'yi temiz kuruyoruz.
-        if "onnxruntime" in missing:
-            _remove_persisted_onnxruntime()
-            _pip_install(
-                [RUNTIME_PACKAGE_SPECS["onnxruntime"]],
-                no_deps=True,
-            )
-
-        # Yalnız diğer eksik destek paketlerini kur. Böylece önceki warmup'ta
-        # volume'a kurulmuş büyük paketler her düzeltmede yeniden indirilmez.
-        support_specs = [
-            spec
-            for module, spec in RUNTIME_PACKAGE_SPECS.items()
-            if module in missing and module != "onnxruntime"
-        ]
-        if support_specs:
-            _pip_install(support_specs)
-
-        _activate_runtime_packages()
-        status = runtime_dependency_status()
-        missing = {
-            name
-            for name, available in status["modules"].items()
-            if not available
-        }
-
-        model_packages = []
-        if "fashn_human_parser" in missing:
-            model_packages.append("fashn-human-parser==0.1.1")
-        if "fashn_vton" in missing:
-            model_packages.append(
-                "fashn-vton @ git+https://github.com/fashn-AI/"
-                "fashn-vton-1.5.git@38aafe2185df40a3e8a5442e950c422c3d9dcb5a"
-            )
-        if model_packages:
-            _pip_install(model_packages, no_deps=True)
+        # Büyük ML bağımlılıkları Flash'ın 1.5 GB deployment arşivine eklenmez.
+        # İlk warmup çağrısında kalıcı RunPod volume'a yalnızca bir kez kurulur.
+        _pip_install(
+            [
+                "transformers>=4.30,<5",
+                "opencv-python-headless>=4.8,<5",
+                "safetensors>=0.3,<1",
+                "tqdm>=4.65,<5",
+                "einops>=0.6,<1",
+                "onnxruntime-gpu>=1.20,<2",
+                "scipy>=1.13,<2",
+                "huggingface_hub>=0.34,<2",
+                "pillow>=10.4,<12",
+                "numpy>=1.26,<2",
+            ]
+        )
+        _pip_install(
+            [
+                "fashn-human-parser==0.1.1",
+                "fashn-vton @ git+https://github.com/fashn-AI/fashn-vton-1.5.git@38aafe2185df40a3e8a5442e950c422c3d9dcb5a",
+            ],
+            no_deps=True,
+        )
 
         _activate_runtime_packages()
         status = runtime_dependency_status()
         if not status["ready"]:
-            missing = [
-                name
-                for name, available in status["modules"].items()
-                if not available
-            ]
-            raise RuntimeError(
-                f"Runtime bağımlılıkları kurulamadı: {', '.join(missing)}"
-            )
+            missing = [name for name, available in status["modules"].items() if not available]
+            raise RuntimeError(f"Runtime bağımlılıkları kurulamadı: {', '.join(missing)}")
 
-        RUNTIME_MARKER.write_text("v3\n", encoding="utf-8")
-        print(
-            f"[runtime] dependencies ready at {RUNTIME_PACKAGES_DIR}",
-            flush=True,
-        )
+        RUNTIME_MARKER.write_text("v1\n", encoding="utf-8")
+        print(f"[runtime] dependencies ready at {RUNTIME_PACKAGES_DIR}", flush=True)
         return runtime_dependency_status()
 
 
