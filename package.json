@@ -1,30 +1,43 @@
 {
-  "name": "sokak-vitrini-dijital-beden",
-  "version": "3.0.0",
+  "name": "sokak-vitrini-dene",
+  "version": "1.0.0",
   "private": true,
-  "description": "Ölçü tabanlı dijital vücut profili, beden uyum analizi ve kombin önizleme uygulaması.",
+  "description": "Sokak Vitrini - giyim ve giyilebilir ürünleri dijital profilde deneme ve işletme model görseli üretme platformu.",
   "engines": {
-    "node": "22.x",
-    "npm": "10.x"
+    "node": ">=20.9.0"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run build",
-    "vercel-build": "next build"
+    "check": "npm run lint && npm run typecheck && npm run build",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "vercel-build": "npm run db:migrate && next build"
   },
   "dependencies": {
+    "@neondatabase/serverless": "1.1.0",
+    "dotenv": "17.4.2",
+    "drizzle-orm": "0.45.2",
+    "lucide-react": "1.24.0",
     "next": "16.2.10",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "zod": "4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "@types/react": "^19.0.3",
-    "@types/react-dom": "^19.0.2",
-    "typescript": "^5.7.2"
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "drizzle-kit": "0.31.10",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.2.10",
+    "typescript": "6.0.3"
   },
-  "packageManager": "npm@10.9.2"
+  "overrides": {
+    "postcss": "8.5.19"
+  }
 }

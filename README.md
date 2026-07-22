@@ -1,50 +1,160 @@
-# Sokak Vitrini Dijital Beden — Final v3
+# Sokak Vitrini Dene
 
-GPU veya RunPod kullanmadan çalışan ölçü tabanlı dijital vücut profili, beden uyum analizi ve kombin önizleme uygulaması.
+“Sokakta Gör, Kendinde Dene” için canlıya hazır Next.js uygulaması.
 
-## Çalışma mantığı
+Bu sürüm iki ayrı kullanım sunar:
 
-1. İlk açılışta kullanıcı 11 vücut ölçüsünü girer.
-2. Sistem bu ölçülerden orantılı bir dijital beden profili oluşturur.
-3. Katalogdaki her ürünün gerçek beden ölçüleri kullanıcı profiliyle karşılaştırılır.
-4. Sistem en uygun bedeni, dar/uygun/bol bölgeleri ve uyum puanını gösterir.
-5. Üst, alt, dış giyim, takı, çanta ve ayakkabı aynı profil üzerinde kombinlenebilir.
-6. Kullanıcı gerçek ölçülere sahip kendi ürününü ve ürün görselini ekleyebilir.
+1. **Kendimde dene:** Kullanıcı ürün fotoğrafını, kendi fotoğrafı veya tarayıcıda kayıtlı dijital profiliyle birleştirir.
+2. **İşletme stüdyosu:** İşletme yalnız ürün fotoğrafı yükleyerek katalog ve sosyal medya için yetişkin model üzerinde ürün görseli oluşturur.
 
-## Maliyet
+## Kapsam
 
-- RunPod yok
-- GPU yok
-- Harici yapay zekâ API anahtarı yok
-- Boşta çalışan servis ücreti yok
+- Giyim: tişört, gömlek, bluz, ceket, elbise, pantolon, etek
+- Yetişkin moda: bikini, mayo, sütyen, alt iç giyim, korse, body, fantezi giyim
+- Takı: kolye, küpe, bileklik, saat
+- Ayakkabı
+- Çanta
+- Gözlük, şapka ve diğer giyilebilir aksesuarlar
+- Dijital profilin tarayıcı IndexedDB alanında yerel saklanması
+- Sonuç geçmişi, favoriler, indirme, paylaşma ve silme
+- Kuponla kullanım ve yönetici kupon ekranı
+- Günlük genel üretim limiti
+- Başarısız işlemde kupon hakkı iadesi
+- Süresi dolan sonuçlar için Vercel Cron temizliği
+- Neon PostgreSQL + Drizzle ORM
+- FASHN API sağlayıcı katmanı
 
-Tüm profil ve özel ürün verileri varsayılan olarak tarayıcıdaki `localStorage` alanında tutulur.
+## Kullanılan yapay zekâ akışı
 
-## Kurulum
+| İşlem | Varsayılan model |
+|---|---|
+| Giyim ve yetişkin moda sanal denemesi | `tryon-v1.6` |
+| Takı, ayakkabı, çanta ve aksesuar denemesi | `tryon-max` |
+| Ürün fotoğrafından işletme model görseli | `product-to-model` |
+
+Model adları ve kalite seçenekleri `.env` üzerinden değiştirilebilir. Uygulama RunPod worker, Docker veya sürekli çalışan GPU gerektirmez.
+
+## Gereksinimler
+
+- Node.js 20.9 veya üzeri
+- Neon PostgreSQL veritabanı
+- FASHN API anahtarı ve yeterli API kredisi
+- Vercel hesabı veya Node.js destekleyen eşdeğer barındırma
+
+## Yerel kurulum
 
 ```bash
 npm install
+cp .env.example .env.local
+```
+
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+`.env.local` içindeki değişkenleri gerçek değerlerle doldurun. Ardından:
+
+```bash
+npm run db:migrate
 npm run dev
 ```
 
-Tarayıcı: `http://localhost:3000`
+Uygulama varsayılan olarak:
 
-## Kontrol
+```text
+http://localhost:3000
+```
+
+adresinde açılır.
+
+## Zorunlu ortam değişkenleri
+
+```env
+DATABASE_URL="..."
+FASHN_API_KEY="fa_..."
+NEXT_PUBLIC_APP_URL="https://sokak-vitrini-dene-my7vp86oe-sokak-vitrini.vercel.app"
+RATE_LIMIT_SALT="en-az-32-karakter-rastgele-deger"
+CRON_SECRET="en-az-32-karakter-rastgele-deger"
+ADMIN_ACCESS_KEY="en-az-32-karakter-rastgele-deger"
+COUPON_SIGNING_SECRET="en-az-32-karakter-rastgele-deger"
+```
+
+Diğer model ve limit ayarları `.env.example` içinde hazırdır.
+
+## Veritabanı
+
+Yeni veritabanında:
+
+```bash
+npm run db:migrate
+```
+
+Şema değişikliğinden sonra yeni migration üretmek için:
+
+```bash
+npm run db:generate
+```
+
+Migration dosyaları `drizzle/` klasöründe tutulur. Vercel build komutu önce migration, sonra Next.js build çalıştırır:
+
+```text
+npm run vercel-build
+```
+
+## Kupon yönetimi
+
+Yönetici ekranı:
+
+```text
+/yonetim/kuponlar
+```
+
+Girişte `.env` içindeki `ADMIN_ACCESS_KEY` kullanılır. Yeni kuponlar panelden 1–3 hak ve 7–30 gün geçerlilikle oluşturulabilir. Kod yalnız oluşturulduğu anda gösterilir; veritabanında özet değeri tutulur.
+
+## Dijital profil ve favoriler
+
+Dijital profil fotoğrafı sunucu hesabına kaydedilmez; tarayıcının IndexedDB alanında tutulur. Favori işaretleri de aynı tarayıcıdaki localStorage alanında saklanır. Tarayıcı verileri temizlenirse bu yerel kayıtlar kaybolur.
+
+Önizleme sonuçları ise anonim oturuma bağlı biçimde veritabanında saklanır. Varsayılan saklama süresi 30 gündür.
+
+## Sağlık kontrolü
+
+Canlı kurulumdan sonra:
+
+```text
+/api/health
+```
+
+adresini açın. Tüm zorunlu servisler hazırsa `status: "ready"` döner. Bu uç nokta API anahtarlarını veya bağlantı şifrelerini göstermez.
+
+## Kontrol komutları
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
+
+Tüm kontrolleri tek komutta çalıştırmak için:
 
 ```bash
 npm run check
 ```
 
-Bu komut TypeScript ve production build kontrollerini çalıştırır.
+## Güvenlik notları
 
-## Vercel
+- Gerçek `.env` dosyalarını Git’e eklemeyin.
+- API anahtarını istemci tarafı değişkenine dönüştürmeyin.
+- Yetişkin moda kategorileri yalnız 18+ kişilerin açık çıplaklık ve cinsel eylem içermeyen moda/katalog görselleri içindir.
+- Başka bir kişiye ait fotoğrafı yalnız açık izinle kullanın.
+- Canlı yayından önce Gizlilik ve Kullanım Koşulları sayfalarındaki veri sorumlusu bilgilerini kendi gerçek bilgilerinizle tamamlayın.
 
-Projeyi GitHub'a gönderip Vercel'e bağlayın. İsteğe bağlı tek ortam değişkeni:
+## Git komutları
 
-```env
-NEXT_PUBLIC_APP_URL="https://alan-adresiniz.com"
+```bash
+git add .
+git commit -m "feat: Sokak Vitrini Dene final FASHN sürümü"
+git push
 ```
-
-## Önemli
-
-Beden analizi, gerçek ürün ölçü tablosunu temel alan bir karar desteğidir. Fiziksel prova garantisi değildir.
