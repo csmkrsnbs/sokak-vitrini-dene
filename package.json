@@ -1,8 +1,8 @@
 {
-  "name": "sokak-vitrini-prova",
-  "version": "2.0.0",
+  "name": "sokak-vitrini-dijital-beden",
+  "version": "3.0.0",
   "private": true,
-  "description": "Sokak Vitrini Prova - gerçek ürün 360, hazır manken, self-hosted VTON ve WebAR deneyimi.",
+  "description": "Ölçü tabanlı dijital vücut profili, beden uyum analizi ve kombin önizleme uygulaması.",
   "engines": {
     "node": "22.x",
     "npm": "10.x"
@@ -11,25 +11,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check": "npm run lint && npm run typecheck && npm run build",
+    "check": "npm run typecheck && npm run build",
     "vercel-build": "next build"
   },
   "dependencies": {
-    "@google/model-viewer": "^4.1.0",
-    "lucide-react": "^0.468.0",
     "next": "16.2.10",
     "react": "19.2.7",
-    "react-dom": "19.2.7",
-    "zod": "^4.4.3"
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.3",
     "@types/react-dom": "^19.0.2",
-    "eslint": "^9.17.0",
-    "eslint-config-next": "16.2.10",
     "typescript": "^5.7.2"
   },
   "packageManager": "npm@10.9.2"

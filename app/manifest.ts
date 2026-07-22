@@ -2,13 +2,13 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Sokak Vitrini Prova",
-    short_name: "SV Prova",
-    description: "Gerçek 360°, hazır manken, self-hosted sanal prova ve WebAR.",
+    name: "Sokak Vitrini Dijital Beden",
+    short_name: "SV Beden",
+    description: "Ölçü tabanlı dijital vücut profili, beden uyumu ve kombin önizlemesi.",
     start_url: "/",
     display: "standalone",
-    background_color: "#080705",
-    theme_color: "#080705",
+    background_color: "#f5f1e9",
+    theme_color: "#f5f1e9",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
   };
 }

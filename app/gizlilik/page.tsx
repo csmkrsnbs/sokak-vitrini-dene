@@ -1,5 +1,15 @@
 import Link from "next/link";
 
 export default function PrivacyPage() {
-  return <main className="legal-page"><article><Link href="/">← Ana sayfa</Link><h1>Gizlilik</h1><p>Yüklenen kişi ve ürün fotoğrafları yalnızca talep edilen önizleme için işlenir. Web uygulaması bu görselleri kalıcı veritabanına kaydetmez.</p><p>Self-hosted GPU servisinin geçici dosya veya log tutmaması gerekir. Üretim ortamında erişim anahtarı, HTTPS, kısa zaman aşımı ve otomatik bellek temizliği kullanılmalıdır.</p><p>Özel koleksiyonlar yalnız yetişkin kullanıcılar içindir. Açık çıplaklık içeren görseller işlenmemelidir.</p></article></main>;
+  return (
+    <main className="legal-page">
+      <article>
+        <Link href="/">← Ana sayfa</Link>
+        <h1>Gizlilik</h1>
+        <p>Vücut profili ölçüleri, özel ürünler ve kombin tercihleri varsayılan olarak kullanıcının kendi tarayıcısındaki yerel depolama alanında tutulur. Bu sürüm ölçüleri bir sunucuya, GPU servisine veya harici yapay zekâ sağlayıcısına göndermez.</p>
+        <p>Kullanıcı kendi ürün görselini eklediğinde görsel tarayıcı içinde saklanır. Ortak veya güvenilmeyen cihazlarda kullanım tamamlandıktan sonra tarayıcı verileri temizlenmelidir.</p>
+        <p>Ölçüler sağlık verisi veya tıbbi değerlendirme amacıyla kullanılmaz. Profil, yalnızca ürün ölçüsü karşılaştırması ve görsel ölçekleme için kullanılır.</p>
+      </article>
+    </main>
+  );
 }
