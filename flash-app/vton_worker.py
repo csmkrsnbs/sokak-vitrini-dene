@@ -8,10 +8,10 @@ MODEL_VOLUME = NetworkVolume(
 
 
 @Endpoint(
-    name="sv-vton-flash",
+    name="sv-vton-flash-v12",
     gpu=GpuGroup.ANY,
     workers=(0, 1),
-    idle_timeout=600,
+    idle_timeout=5,
     execution_timeout_ms=1200000,
     flashboot=True,
     datacenter=DataCenter.EU_RO_1,
@@ -27,11 +27,12 @@ MODEL_VOLUME = NetworkVolume(
     env={
         "HF_HOME": "/runpod-volume/huggingface-cache",
         "FASHN_WEIGHTS_DIR": "/runpod-volume/fashn-vton/weights",
+        "VTON_RUNTIME_PACKAGES_DIR": "/runpod-volume/python-packages-v12",
         "VTON_NUM_TIMESTEPS": "30",
         "VTON_GUIDANCE_SCALE": "1.5",
         "VTON_SEGMENTATION_FREE": "true",
         "VTON_FIDELITY_THRESHOLD": "0.30",
-        "SV_VTON_WORKER_VERSION": "v9-flash-runtime",
+        "SV_VTON_WORKER_VERSION": "v12-ort-cpu-clean",
     },
 )
 def vton_worker(
@@ -50,7 +51,7 @@ def vton_worker(
     import os
     import torch
 
-    version = os.getenv("SV_VTON_WORKER_VERSION", "v9-flash-runtime")
+    version = os.getenv("SV_VTON_WORKER_VERSION", "v12-ort-cpu-clean")
     normalized_action = (action or "try-on").strip().lower()
 
     if normalized_action == "health":
