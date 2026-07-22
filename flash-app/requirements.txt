@@ -1,3 +1,0 @@
-runpod-flash==1.18.0
-numpy>=1.26,<2
-pillow>=10.4,<12
