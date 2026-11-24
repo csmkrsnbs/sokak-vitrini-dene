@@ -7,14 +7,11 @@ import {
   Camera,
   Check,
   ChevronDown,
-  Gem,
-  Handbag,
   Images,
   LockKeyhole,
   ScanLine,
   ShieldCheck,
   Shirt,
-  ShoppingBag,
   Sparkles,
   UserRound,
   WandSparkles,
@@ -68,35 +65,41 @@ const steps = [
 
 const categories = [
   {
-    icon: Shirt,
-    title: "Giyim",
-    text: "Gömlek, bluz, ceket, elbise, pantolon ve etek.",
-    tag: "Üst · Alt · Tam vücut",
+    "title": "Giyim",
+    "kind": "shirt",
+    "image": "https://images.pexels.com/photos/7671167/pexels-photo-7671167.jpeg?auto=compress&cs=tinysrgb&w=650",
+    "text": "Klasik ve günlük giyim"
   },
   {
-    icon: Sparkles,
-    title: "İç giyim",
-    text: "Sütyen, korse, mayo, bikini ve yetişkin iç giyim.",
-    tag: "Kimlik korumalı",
+    "title": "İç giyim",
+    "kind": "bra",
+    "image": "https://images.pexels.com/photos/15751888/pexels-photo-15751888.jpeg?auto=compress&cs=tinysrgb&w=650",
+    "text": "Yetişkin iç giyim ve mayo"
   },
   {
-    icon: Gem,
-    title: "Takı",
-    text: "Kolye, küpe, yüzük, bileklik ve saat.",
-    tag: "Detay odaklı",
+    "title": "Takı",
+    "kind": "necklace",
+    "image": "https://images.pexels.com/photos/35933227/pexels-photo-35933227.jpeg?auto=compress&cs=tinysrgb&w=650",
+    "text": "Kolye, küpe ve bileklik"
   },
   {
-    icon: ShoppingBag,
-    title: "Ayakkabı",
-    text: "Günlük, klasik, spor ve özel tasarım ayakkabı.",
-    tag: "Doğal perspektif",
+    "title": "Ayakkabı",
+    "kind": "shoes",
+    "image": "https://images.pexels.com/photos/27256448/pexels-photo-27256448.jpeg?auto=compress&cs=tinysrgb&w=650",
+    "text": "Günlük ve klasik ayakkabı"
   },
   {
-    icon: Handbag,
-    title: "Çanta & aksesuar",
-    text: "Çanta, gözlük, şapka ve tamamlayıcı aksesuarlar.",
-    tag: "Kombin tamamlayıcı",
+    "title": "Çanta",
+    "kind": "bag",
+    "image": "https://images.pexels.com/photos/26954381/pexels-photo-26954381.jpeg?auto=compress&cs=tinysrgb&w=650",
+    "text": "Çanta ve el çantası"
   },
+  {
+    "title": "Aksesuar",
+    "kind": "glasses",
+    "image": "https://images.pexels.com/photos/3892369/pexels-photo-3892369.jpeg?auto=compress&cs=tinysrgb&w=650",
+    "text": "Gözlük, şapka ve aksesuar"
+  }
 ];
 
 const protectionRules = [
@@ -194,6 +197,7 @@ export default function HomePage() {
           </Link>
 
           <nav className="desktop-nav home-nav" aria-label="Ana menü">
+            <Link href="#kategoriler">Kategoriler</Link>
             <Link href="#deneyim">Deneyim</Link>
             <Link href="#nasil-calisir">Nasıl çalışır?</Link>
             <Link href="#guven">Güven</Link>
@@ -250,49 +254,16 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="home-hero-visual" aria-label="Sokak Vitrini deneyimi">
-            <div className="home-phone-shell">
-              <div className="home-phone-topbar" aria-hidden="true">
-                <span />
-                <strong>Sokak Vitrini</strong>
-                <i />
-              </div>
-              <div className="home-phone-poster">
-                <Image
-                  src="/concept-poster.png"
-                  alt="Sokakta görülen ürünleri kendi görünümünde deneme konsepti"
-                  fill
-                  priority
-                  sizes="(max-width: 900px) 86vw, 430px"
-                />
-              </div>
-              <div className="home-phone-action" aria-hidden="true">
-                <span>
-                  <Sparkles size={15} /> Önizleme hazır
-                </span>
-                <strong>Kendinde gör</strong>
-              </div>
+          <figure className="fashion-hero-visual">
+            <div className="fashion-hero-photo">
+              <Image src="https://images.pexels.com/photos/23531833/pexels-photo-23531833.jpeg?auto=compress&cs=tinysrgb&w=1400" alt="Açık bej ceketli zarif moda portresi" fill priority sizes="(max-width: 700px) 100vw, (max-width: 900px) 80vw, 55vw" />
             </div>
-
-            <div className="home-floating-card home-floating-security">
-              <span className="home-floating-icon">
-                <ShieldCheck size={19} />
-              </span>
-              <div>
-                <small>Koruma aktif</small>
-                <strong>Ten ve kimlik</strong>
-              </div>
-              <Check size={17} />
-            </div>
-
-            <div className="home-floating-card home-floating-category">
-              <Gem size={18} />
-              <div>
-                <small>Seçilen kategori</small>
-                <strong>Takı & aksesuar</strong>
-              </div>
-            </div>
-          </div>
+            <figcaption className="fashion-hero-caption">
+              <span>PEARL FASHION EDITION</span>
+              <strong>Tarzın, senin imzan.</strong>
+              <Link href="#dene" data-dene-mode="personal" aria-label="Dijital denemeye başla"><ArrowRight size={20} /></Link>
+            </figcaption>
+          </figure>
         </div>
       </section>
 
@@ -309,6 +280,30 @@ export default function HomePage() {
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="home-category-section fashion-category-section" id="kategoriler" aria-labelledby="kategori-baslik">
+        <div className="container">
+          <div className="fashion-category-heading">
+            <span className="section-kicker">Altı kategori, tek deneyim</span>
+            <h2 id="kategori-baslik">Tarzını kendinde keşfet.</h2>
+            <p>Bir kategori seç, ürün fotoğrafını yükle ve kendi görünümünde dene.</p>
+          </div>
+          <div className="home-category-grid fashion-category-grid">
+            {categories.map(({ title, kind, image, text }) => (
+              <Link className="fashion-category-card" href="#dene" data-dene-kind={kind} key={kind}>
+                <div className="fashion-category-photo">
+                  <Image src={image} alt={title + " moda ürünü"} fill sizes="(max-width: 700px) 46vw, (max-width: 1100px) 31vw, 16vw" />
+                </div>
+                <div className="fashion-category-label">
+                  <h3>{title}</h3>
+                  <ArrowRight size={17} aria-hidden="true" />
+                </div>
+                <p>{text}</p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -386,37 +381,6 @@ export default function HomePage() {
       </section>
 
       <TryOnStudio />
-
-      <section className="home-category-section" aria-labelledby="kategori-baslik">
-        <div className="container">
-          <div className="section-heading home-section-heading">
-            <div>
-              <span className="section-kicker">Tek panel, farklı kategoriler</span>
-              <h2 id="kategori-baslik">Tarzını oluşturan ürünleri kendinde dene.</h2>
-            </div>
-            <p>
-              Her kategori kendi yerleşim ve görünüm kurallarıyla işlenir. Ürün türünü
-              seç, fotoğrafları yükle ve önizlemeyi oluştur.
-            </p>
-          </div>
-
-          <div className="home-category-grid">
-            {categories.map(({ icon: Icon, title, text, tag }) => (
-              <Link className="home-category-card" href="#dene" data-dene-kind={({ "Giyim": "shirt", "İç giyim": "bra", "Takı": "necklace", "Ayakkabı": "shoes", "Çanta & aksesuar": "bag" } as Record<string, string>)[title]} key={title}>
-                <span className="home-category-icon">
-                  <Icon size={27} strokeWidth={1.5} />
-                </span>
-                <span className="home-category-tag">{tag}</span>
-                <h3>{title}</h3>
-                <p>{text}</p>
-                <span className="home-category-link">
-                  Denemeyi aç <ArrowRight size={15} />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <section className="home-how-section" id="nasil-calisir">
         <div className="container">

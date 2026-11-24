@@ -29,6 +29,45 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
+  images: {
+    remotePatterns: [
+  {
+    "protocol": "https",
+    "hostname": "images.pexels.com",
+    "pathname": "/photos/23531833/pexels-photo-23531833.jpeg"
+  },
+  {
+    "protocol": "https",
+    "hostname": "images.pexels.com",
+    "pathname": "/photos/7671167/pexels-photo-7671167.jpeg"
+  },
+  {
+    "protocol": "https",
+    "hostname": "images.pexels.com",
+    "pathname": "/photos/15751888/pexels-photo-15751888.jpeg"
+  },
+  {
+    "protocol": "https",
+    "hostname": "images.pexels.com",
+    "pathname": "/photos/35933227/pexels-photo-35933227.jpeg"
+  },
+  {
+    "protocol": "https",
+    "hostname": "images.pexels.com",
+    "pathname": "/photos/27256448/pexels-photo-27256448.jpeg"
+  },
+  {
+    "protocol": "https",
+    "hostname": "images.pexels.com",
+    "pathname": "/photos/26954381/pexels-photo-26954381.jpeg"
+  },
+  {
+    "protocol": "https",
+    "hostname": "images.pexels.com",
+    "pathname": "/photos/3892369/pexels-photo-3892369.jpeg"
+  }
+],
+  },
   reactStrictMode: true,
   headers: async () => [
     {

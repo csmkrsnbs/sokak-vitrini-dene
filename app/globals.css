@@ -5271,3 +5271,42 @@ html{color-scheme:light}body{background:#faf9f6;color:#292724}body::selection{ba
   .history-grid{grid-template-columns:minmax(0,1fr)}
   .vton-choice-grid,.vton-choice-grid-three{grid-template-columns:minmax(0,1fr)}
 }
+
+/* V3.1 Pearl Fashion Edition — editorial photography and six compact category cards. */
+.home-hero{background:#faf8f4}
+.home-hero-orb,.home-hero::before{display:none}
+.home-hero-grid{grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(24px,5vw,72px);min-height:0;padding-block:36px;align-items:center}
+.home-hero-copy h1{font-size:clamp(48px,6vw,88px);line-height:.99;letter-spacing:-.055em}
+.home-hero-copy>p{max-width:500px}
+.fashion-hero-visual{margin:0;position:relative;width:100%;min-width:0;overflow:hidden;background:#e8e0d4;border-radius:4px}
+.fashion-hero-photo{position:relative;aspect-ratio:1.12;min-width:0;background:#e8e0d4}
+.fashion-hero-photo img{object-fit:cover;object-position:center 38%}
+.fashion-hero-caption{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:center;gap:3px 14px;padding:17px 22px;background:#f3ede4;color:#292724}
+.fashion-hero-caption>span{font-size:9px;font-weight:750;letter-spacing:.16em;color:#765626}
+.fashion-hero-caption>strong{font-family:Georgia,serif;font-weight:400;font-size:clamp(20px,2.1vw,29px);line-height:1.15}
+.fashion-hero-caption>a{grid-column:2;grid-row:1/3;display:grid;place-items:center;width:44px;height:44px;border:1px solid #cbb99b;border-radius:50%;color:#765626;background:#fffdf9}
+.fashion-hero-caption>a:hover{background:#e9decb}
+.fashion-category-section{background:#fffdfb;padding-block:48px 52px;border-bottom:1px solid #e9e1d5}
+.fashion-category-heading{text-align:center;margin:0 auto 26px;max-width:680px}
+.fashion-category-heading h2{font:400 clamp(30px,4vw,50px)/1.12 Georgia,serif;letter-spacing:-.035em;margin:10px 0;color:#292724}
+.fashion-category-heading p{font-size:14px;color:#625d55;margin:0}
+.fashion-category-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(10px,1.6vw,22px)}
+.fashion-category-card{display:block;min-width:0;color:#292724;padding:0 0 8px}
+.fashion-category-photo{position:relative;overflow:hidden;aspect-ratio:3/4;border-radius:16px;background:#eee6db;border:1px solid #e6ddd0}
+.fashion-category-photo img{object-fit:cover;object-position:center;transition:transform .3s ease}
+.fashion-category-card:hover .fashion-category-photo img{transform:scale(1.035)}
+.fashion-category-label{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:12px}
+.fashion-category-label h3{font:400 clamp(17px,1.8vw,24px)/1.18 Georgia,serif;margin:0;overflow-wrap:break-word}
+.fashion-category-label svg{flex-shrink:0;color:#87652f}
+.fashion-category-card p{font-size:11px;line-height:1.5;color:#625d55;margin:6px 0 0}
+.studio-shell{border-radius:18px;background:#fff;border-color:#ded5c6}
+.studio-form{background:#fff}
+.result-panel{background:#f6f1e9}
+.upload-zone{background:#faf8f4;border-color:#c7b79b;min-height:220px}
+.result-image-wrap{border-radius:12px;background:#f6f1e9}
+.result-image-wrap img{object-fit:contain;max-height:80vh}
+@media(max-width:1100px){.fashion-category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}}
+@media(max-width:900px){.home-hero-grid{grid-template-columns:minmax(0,1fr);gap:24px}.fashion-hero-visual{max-width:650px;justify-self:center}.fashion-hero-photo{aspect-ratio:1.45}.home-hero-copy h1{font-size:clamp(44px,8vw,72px)}}
+@media(max-width:700px){.home-hero-grid{padding-block:24px 28px;gap:20px}.home-hero-copy h1{font-size:clamp(32px,10.5vw,64px)}.fashion-hero-visual{width:100%;border-radius:12px}.fashion-hero-photo{aspect-ratio:1.12}.fashion-hero-caption{padding:12px 14px}.fashion-category-section{padding-block:32px}.fashion-category-heading{margin-bottom:18px}.fashion-category-heading p{font-size:13px}.fashion-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 10px}.fashion-category-photo{border-radius:12px}.fashion-category-label{margin-top:8px}.fashion-category-label h3{font-size:21px}.fashion-category-card p{font-size:11px}.upload-zone{min-height:180px}}
+@media(max-width:360px){.home-hero-copy h1{font-size:clamp(29px,10.5vw,38px)}.fashion-category-label h3{font-size:18px}.fashion-category-label svg{width:14px}}
+@media(prefers-reduced-motion:reduce){.fashion-category-photo img{transition:none}}
