@@ -6,6 +6,7 @@ import {
   couponCodes,
   dailyGenerationEvents,
   previewRequests,
+  requestRateLimits,
 } from "@/lib/db/schema";
 import { noStoreHeaders } from "@/lib/server/api";
 import {
@@ -42,6 +43,7 @@ export async function GET() {
             mode: previewRequests.mode,
             productKind: previewRequests.productKind,
             providerJobId: previewRequests.providerJobId,
+            providerCredits: previewRequests.providerCredits,
           })
           .from(previewRequests)
           .limit(1),
@@ -56,6 +58,7 @@ export async function GET() {
           .select({ id: dailyGenerationEvents.previewId })
           .from(dailyGenerationEvents)
           .limit(1),
+        db.select({key:requestRateLimits.key}).from(requestRateLimits).limit(1),
       ]);
       schemaReady = true;
     } catch (error) {

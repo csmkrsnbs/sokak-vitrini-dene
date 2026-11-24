@@ -179,6 +179,7 @@ export async function GET(
 
     const submittedAt = row.providerSubmittedAt ?? row.createdAt;
     const job = await getProductPreviewJob(row.providerJobId, row.category, row.mode);
+    if (job.creditsUsed !== null) await db.update(previewRequests).set({providerCredits:job.creditsUsed}).where(and(eq(previewRequests.id,id),eq(previewRequests.sessionId,session.id),eq(previewRequests.status,"processing")));
     if (job.state !== "completed" && job.state !== "failed" && Date.now() - submittedAt.getTime() > getPreviewJobMaxAgeMs()) {
       await cancelProductPreviewJob(row.providerJobId, row.category);
       return failProcessing(
@@ -199,6 +200,7 @@ export async function GET(
           resultImageBase64: job.result.imageBase64,
           resultMime: job.result.mime,
           resultBytes: job.result.bytes,
+          providerCredits: job.creditsUsed ?? undefined,
           completedAt: new Date(),
           errorCode: null,
         })

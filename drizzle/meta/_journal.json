@@ -57,6 +57,13 @@
       "when": 1784630609947,
       "tag": "0007_noisy_timeslip",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795561700000,
+      "tag": "0008_pearl_safety",
+      "breakpoints": true
     }
   ]
 }

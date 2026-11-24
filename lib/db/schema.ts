@@ -40,6 +40,7 @@ export const previewRequests = pgTable(
     resultImageBase64: text("result_image_base64"),
     resultMime: varchar("result_mime", { length: 48 }),
     resultBytes: integer("result_bytes"),
+    providerCredits: integer("provider_credits"),
     errorCode: varchar("error_code", { length: 80 }),
     creditSource: varchar("credit_source", { length: 16 }),
     couponId: uuid("coupon_id"),
@@ -120,3 +121,9 @@ export const couponCodes = pgTable(
     index("coupon_codes_expires_idx").on(table.expiresAt),
   ],
 );
+
+export const requestRateLimits = pgTable("request_rate_limits", {
+  key: varchar("key", {length: 80}).primaryKey(),
+  hits: integer("hits").notNull().default(0),
+  expiresAt: timestamp("expires_at", {withTimezone:true}).notNull(),
+}, table=>[index("request_rate_limits_expires_idx").on(table.expiresAt)]);

@@ -1,3 +1,4 @@
+import { allowRequest } from "@/lib/server/request-rate-limit";
 import { and, eq, gt, isNull, or, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -34,6 +35,9 @@ export async function POST(request: NextRequest) {
   const session = getSession(request);
 
   try {
+    if (!(await allowRequest(request, "coupon", 15))) {
+      return apiError("RATE_LIMITED", "Çok fazla deneme yapıldı. 15 dakika sonra tekrar deneyin.", 429, {...noStoreHeaders(), "Retry-After":"900"});
+    }
     const parsed = redeemSchema.safeParse(await request.json());
     if (!parsed.success) {
       return apiError("INVALID_COUPON", "Geçerli bir kupon kodu girin.", 400, noStoreHeaders());

@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import {
   dailyGenerationEvents,
   networkRiskChecks,
+  requestRateLimits,
   previewRequests,
 } from "@/lib/db/schema";
 import {
@@ -68,11 +69,11 @@ export async function GET(request: NextRequest) {
         try {
           const job = await getProductPreviewJob(row.providerJobId, row.category, row.mode);
           if (job.state === "completed") {
-            const saved = await db.update(previewRequests).set({ status:"completed",providerStatus:"COMPLETED",providerCheckedAt:new Date(),model:job.result.model,resultImageBase64:job.result.imageBase64,resultMime:job.result.mime,resultBytes:job.result.bytes,completedAt:new Date(),errorCode:null }).where(condition).returning({id:previewRequests.id});
+            const saved = await db.update(previewRequests).set({ status:"completed",providerStatus:"COMPLETED",providerCheckedAt:new Date(),model:job.result.model,resultImageBase64:job.result.imageBase64,resultMime:job.result.mime,resultBytes:job.result.bytes,providerCredits:job.creditsUsed ?? undefined,completedAt:new Date(),errorCode:null }).where(condition).returning({id:previewRequests.id});
             completed += saved.length;
             return;
           }
-          await db.update(previewRequests).set({providerStatus:job.providerStatus,providerCheckedAt:new Date()}).where(condition);
+          await db.update(previewRequests).set({providerStatus:job.providerStatus,providerCheckedAt:new Date(),providerCredits:job.creditsUsed ?? undefined}).where(condition);
           if (job.state === "failed") failure = job.code;
           else if ((row.providerSubmittedAt ?? row.createdAt) >= staleCutoff) { deferred++; return; }
         } catch {
@@ -91,6 +92,7 @@ export async function GET(request: NextRequest) {
       deferred += results.filter(result=>result.status==="rejected").length;
     }
 
+    const rateLimitsDeleted = await db.delete(requestRateLimits).where(lt(requestRateLimits.expiresAt, new Date(now - 24 * 60 * 60 * 1000))).returning({key:requestRateLimits.key});
     const deleted = await db
       .delete(previewRequests)
       .where(lt(previewRequests.createdAt, cutoff))
@@ -117,6 +119,7 @@ export async function GET(request: NextRequest) {
         released,
         completed,
         deferred,
+        rateLimitsDeleted: rateLimitsDeleted.length,
         deleted: deleted.length,
         riskChecksDeleted: riskChecksDeleted.length,
         dailyCapacityDeleted: dailyCapacityDeleted.length,

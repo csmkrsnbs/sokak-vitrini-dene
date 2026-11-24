@@ -135,6 +135,8 @@ export async function POST(request: NextRequest) {
   };
 
   try {
+    const declaredLength = Number(request.headers.get("content-length"));
+    if (declaredLength > 4_200_000) return apiError("IMAGE_TOO_LARGE", "Fotoğraf yükleme toplam boyutu çok büyük.", 413, noStoreHeaders());
     const formData = await request.formData();
     const suppliedId = formData.get("requestId");
     if (typeof suppliedId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(suppliedId)) {
@@ -288,6 +290,7 @@ export async function POST(request: NextRequest) {
         resultImageBase64: submitted.result.imageBase64,
         resultMime: submitted.result.mime,
         resultBytes: submitted.result.bytes,
+        providerCredits: submitted.creditsUsed,
         completedAt: new Date(),
         errorCode: null,
       })

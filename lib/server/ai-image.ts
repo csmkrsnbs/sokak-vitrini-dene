@@ -37,6 +37,13 @@ type GenerationResult = {
   bytes: number;
 };
 
+function readProviderCredits(response: Response): number | null {
+  const raw = response.headers.get("x-fashn-credits-used");
+  if (raw === null || !/^\d+$/.test(raw.trim())) return null;
+  const value = Number(raw);
+  return Number.isSafeInteger(value) && value >= 0 && value <= 100_000 ? value : null;
+}
+
 function envEnum<T extends string>(
   value: string | undefined,
   allowed: readonly T[],
@@ -425,11 +432,12 @@ export async function submitProductPreview(input: {
       jobId: payload.id,
       providerStatus,
       result: parseOutput(payload, modelName),
+      creditsUsed: readProviderCredits(response),
     };
   }
   if (providerStatus === "FAILED") throw runtimeFailure(payload);
 
-  return { jobId: payload.id, providerStatus, result: undefined };
+  return { jobId: payload.id, providerStatus, result: undefined, creditsUsed: readProviderCredits(response) };
 }
 
 export async function getProductPreviewJob(
@@ -456,6 +464,7 @@ export async function getProductPreviewJob(
         state: "completed" as const,
         providerStatus,
         result: parseOutput(payload, getImageModelName(category, mode)),
+        creditsUsed: readProviderCredits(response),
       };
     } catch (error) {
       if (error instanceof ImageGenerationError) {
@@ -464,6 +473,7 @@ export async function getProductPreviewJob(
           providerStatus: "ERROR" as const,
           code: error.code,
           message: error.message,
+          creditsUsed: readProviderCredits(response),
         };
       }
       throw error;
@@ -477,6 +487,7 @@ export async function getProductPreviewJob(
       providerStatus,
       code: failure.code,
       message: failure.message,
+      creditsUsed: readProviderCredits(response),
     };
   }
 
@@ -486,6 +497,7 @@ export async function getProductPreviewJob(
         ? ("running" as const)
         : ("queued" as const),
     providerStatus,
+    creditsUsed: readProviderCredits(response),
   };
 }
 

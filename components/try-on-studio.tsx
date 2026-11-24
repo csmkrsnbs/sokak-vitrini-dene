@@ -819,7 +819,7 @@ export function TryOnStudio() {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `sokak-vitrini-${item.productKind}-${item.id.slice(0, 8)}.jpg`;
+      anchor.download = `sokak-vitrini-${item.productKind}-${item.id.slice(0, 8)}.${blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg"}`;
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
@@ -835,7 +835,7 @@ export function TryOnStudio() {
       const response = await fetch(item.imageUrl, { cache: "no-store" });
       if (!response.ok) throw new Error();
       const blob = await response.blob();
-      const file = new File([blob], "sokak-vitrini-dene.jpg", { type: blob.type });
+      const file = new File([blob], `sokak-vitrini-dene.${blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg"}`, { type: blob.type });
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           title: "Sokak Vitrini Dene",

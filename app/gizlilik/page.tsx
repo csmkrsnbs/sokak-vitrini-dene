@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalShell kicker="Son güncelleme: 21 Temmuz 2026" title="Gizlilik">
+    <LegalShell kicker="Son güncelleme: 25 Kasım 2026" title="Gizlilik">
       <p>
         Sokak Vitrini Dene; giyim ve giyilebilir ürünleri kendi fotoğrafınızda
         önizlemenizi, ayrıca ürün fotoğrafından işletme kullanımına yönelik model görseli
@@ -37,7 +37,11 @@ export default function PrivacyPage() {
         Önizleme başlatıldığında gerekli ürün ve kişi görselleri, görsel üretimini
         gerçekleştiren FASHN API’ye sunucu üzerinden aktarılır. API anahtarı tarayıcıya
         gönderilmez. Uygulama, sonuçları doğrudan veritabanına kaydedebilmek ve dış görsel
-        bağlantısına bağımlı kalmamak için mümkün olduğunda base64 çıktı kullanır.
+        bağlantısına bağımlı kalmamak için base64 çıktı kullanır. Sağlayıcının yayımladığı
+        veri saklama açıklamasına göre giriş görselleri geçici işleme için kullanılır;
+        base64 sonuçlar tamamlandıktan sonra 60 dakika boyunca alınabilir. İşlem durumu,
+        model ve teknik istek kayıtları sağlayıcıda ayrıca tutulabilir. Güncel ayrıntılar için
+        <a href="https://docs.fashn.ai/api-overview/data-retention-privacy" target="_blank" rel="noreferrer"> FASHN veri saklama açıklamasını</a> inceleyebilirsiniz.
       </p>
 
       <h2>Saklama ve silme</h2>
@@ -54,7 +58,8 @@ export default function PrivacyPage() {
         Kupon kodu doğrudan saklanmaz; doğrulama için özet değer kullanılır. Etkin kupon,
         anonim tarayıcı oturumuna bağlanabilir. Kullanım hakkı, günlük kapasite, güvenlik
         denemeleri ve hatalı işlemlerdeki iade hareketleri hizmetin çalışması ve kötüye
-        kullanımın önlenmesi amacıyla tutulur.
+        kullanımın önlenmesi amacıyla tutulur. Kupon ve yönetim girişlerinde kısa süreli
+        kötüye kullanım önleme sayaçları için tuzlanmış bağlantı özetleri kullanılır.
       </p>
 
       <h2>Çerezler</h2>

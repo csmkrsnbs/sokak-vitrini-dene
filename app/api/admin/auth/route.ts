@@ -1,3 +1,4 @@
+import { allowRequest } from "@/lib/server/request-rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -39,6 +40,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    if (!(await allowRequest(request, "admin", 5))) {
+      return apiError("RATE_LIMITED", "Çok fazla deneme yapıldı. 15 dakika sonra tekrar deneyin.", 429, {...noStoreHeaders(), "Retry-After":"900"});
+    }
     const parsed = loginSchema.safeParse(await request.json());
     if (!parsed.success || !verifyAdminAccessKey(parsed.data.accessKey)) {
       return apiError("INVALID_ADMIN_KEY", "Yönetim anahtarı geçersiz.", 401, noStoreHeaders());
