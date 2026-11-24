@@ -9,6 +9,7 @@ import {
   LogOut,
   RefreshCw,
   TicketCheck,
+  Trash2,
 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
@@ -195,6 +196,23 @@ export function CouponAdmin() {
       setMessage("Kupon kullanıma kapatıldı.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Kupon güncellenemedi.");
+    } finally {
+      setWorkingId(null);
+    }
+  };
+
+  const deleteCoupon = async (coupon: AdminCouponView) => {
+    if (coupon.status === "active" || workingId) return;
+    if (!window.confirm(`“${coupon.label}” kuponu kalıcı olarak silinsin mi? Üretilmiş görseller silinmez.`)) return;
+    setWorkingId(coupon.id);
+    setMessage(null);
+    try {
+      const response = await fetch(`/api/admin/coupons/${coupon.id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error(await responseError(response));
+      setCoupons(current => current.filter(item => item.id !== coupon.id));
+      setMessage("Kupon silindi.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Kupon silinemedi.");
     } finally {
       setWorkingId(null);
     }
@@ -395,7 +413,7 @@ export function CouponAdmin() {
                                   type="button"
                                   className="admin-reject"
                                   onClick={() => void revokeCoupon(coupon)}
-                                  disabled={workingId === coupon.id}
+                                  disabled={workingId !== null || loading}
                                 >
                                   {workingId === coupon.id ? (
                                     <LoaderCircle className="spin" size={15} />
@@ -406,7 +424,12 @@ export function CouponAdmin() {
                                 </button>
                               </div>
                             ) : (
-                              <span className="admin-reviewed">İşlem yok</span>
+                              <div className="admin-row-actions">
+                                <button type="button" className="admin-delete" disabled={workingId !== null || loading} onClick={() => void deleteCoupon(coupon)} aria-label={`${coupon.label} kuponunu sil`}>
+                                  {workingId === coupon.id ? <LoaderCircle className="spin" size={15} /> : <Trash2 size={15} />}
+                                  Sil
+                                </button>
+                              </div>
                             )}
                           </td>
                         </tr>
