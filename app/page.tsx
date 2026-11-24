@@ -88,7 +88,7 @@ export default function HomePage() {
         <div className="container header-inner">
           <Link className="brand" href="#top" aria-label="Sokak Vitrini Dene ana sayfa"><span className="brand-mark" aria-hidden="true">SV</span><span className="brand-copy"><strong>SOKAK VİTRİNİ</strong><small>DENE</small></span></Link>
           <nav className="desktop-nav home-nav" aria-label="Ana menü">
-            <Link href="#kategoriler">Kategoriler</Link><Link href="#dene" data-dene-mode="personal">Kendimde dene</Link><Link href="#dene" data-dene-mode="studio">İşletme stüdyosu</Link><Link href="#gecmis">Denemelerim</Link>
+            <Link href="#kategoriler">Kategoriler</Link><Link href="#dene" data-dene-mode="personal">Kendimde dene</Link><Link href="#dene" data-dene-mode="studio">İşletme stüdyosu</Link>
           </nav>
           <Link className="compact-history-link" href="#gecmis" aria-label="Denemelerim"><History size={19}/><span>Denemelerim</span></Link>
         </div>
@@ -106,9 +106,9 @@ export default function HomePage() {
             </div>
           </div>
           <figure className="compact-hero-flow" id="nasil-calisir">
-            <Image src="/pearl-tryon-flow.svg" alt="Açık bej ceket, beyaz üst giyen kişi ve aynı kişinin ceketi giymiş temsili görünümü" width={690} height={310} priority unoptimized className="compact-flow-image"/>
+            <Image src="/pearl-tryon-photo.webp" alt="Açık bej ceket, beyaz üst giyen kişi ve aynı kişinin ceketi giymiş temsili görünümü" width={480} height={270} priority unoptimized className="compact-flow-image"/>
             <div className="compact-flow-labels" aria-hidden="true"><span><b>01</b> Ürünü yükle</span><span><b>02</b> Fotoğrafını seç</span><span><b>03</b> Kendinde gör</span></div>
-            <figcaption>Temsili deneme akışı · Aynı kişi, yeni görünüm</figcaption>
+            <figcaption>Yapay zekâ ile hazırlanmış temsili deneme akışı</figcaption>
           </figure>
         </div>
       </section>
@@ -119,7 +119,7 @@ export default function HomePage() {
           <div className="home-category-grid fashion-category-grid">
             {categories.map(({title,kind,image})=>(
               <Link className="fashion-category-card" href="#dene" data-dene-kind={kind} key={kind}>
-                <div className="fashion-category-photo"><Image src={image} alt={title+" moda ürünü"} fill sizes="(max-width: 700px) 31vw, 16vw"/></div>
+                <div className="fashion-category-photo"><Image src={image} alt={title+" moda ürünü"} fill sizes="(max-width: 700px) 46vw, 16vw"/></div>
                 <div className="fashion-category-label"><h3>{title}</h3><ArrowRight size={15} aria-hidden="true"/></div>
               </Link>
             ))}

@@ -2,7 +2,6 @@
 
 import {
   BriefcaseBusiness,
-  Camera,
   Check,
   CheckCircle2,
   Download,
@@ -934,7 +933,7 @@ export function TryOnStudio() {
               })}
             </div>
 
-            <div className="studio-body">
+            <div className={`studio-body ${loading || result?.imageUrl ? "studio-body-expanded" : "studio-body-idle"}`}>
               <form className="studio-form" onSubmit={submit}>
                 <div className="studio-form-title">
                   <span className="studio-form-icon">
@@ -946,6 +945,108 @@ export function TryOnStudio() {
                   </div>
                 </div>
 
+                <div className={`uploads-grid ${mode === "studio" ? "uploads-grid-studio" : ""}`}>
+                  <UploadCard
+                    id="product-photo"
+                    step="1"
+                    label={config.productLabel}
+                    hint={category === "clothing" ? CLOTHING_TYPE_CONFIG[clothingType].productHint : config.productHint}
+                    image={product}
+                    onSelect={(file) => setSelectedImage(file, product, setProduct)}
+                    onRemove={() => removeSelectedImage(product, setProduct)}
+                    disabled={loading}
+                  />
+
+                  {mode === "personal" ? (
+                    <div>
+                      <UploadCard
+                        id="target-photo"
+                        step="2"
+                        label={config.targetLabel}
+                        hint={category === "clothing" ? CLOTHING_TYPE_CONFIG[clothingType].targetHint : config.targetHint}
+                        image={target}
+                        onSelect={(file) => setSelectedImage(file, target, setTarget)}
+                        onRemove={() => removeSelectedImage(target, setTarget)}
+                        disabled={loading}
+                      />
+                      {target && (
+                        <button
+                          type="button"
+                          className="save-profile-button"
+                          onClick={() => void saveDigitalProfile()}
+                          disabled={loading}
+                        >
+                          <Save size={15} /> Bu fotoğrafı dijital profilim olarak kaydet
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="studio-brief-card">
+                      <span className="upload-heading-number">2</span>
+                      <BriefcaseBusiness size={28} />
+                      <strong>İşletme görseli hazırlanacak</strong>
+                      <p>
+                        Sistem ürünü yetişkin bir model üzerinde, 4:5 katalog ve Instagram gönderi oranında oluşturur.
+                      </p>
+                      <ul>
+                        <li><Check size={14} /> Ürün rengi ve ayrıntıları korunur</li>
+                        <li><Check size={14} /> Temiz premium stüdyo görünümü</li>
+                        <li><Check size={14} /> Model fotoğrafı yüklemek gerekmez</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {mode === "personal" && (
+                  <div className="digital-profile-card">
+                    <div className="digital-profile-copy">
+                      <span className="digital-profile-icon">
+                        <UserRound size={21} />
+                      </span>
+                      <div>
+                        <strong>Dijital profilim</strong>
+                        <p>
+                          Fotoğraf cihazında saklanır; sunucuya yalnız deneme sırasında geçici olarak gönderilir.
+                        </p>
+                      </div>
+                    </div>
+
+                    {profileLoading ? (
+                      <span className="profile-loading"><LoaderCircle className="spin" size={16} /> Profil kontrol ediliyor</span>
+                    ) : savedProfile ? (
+                      <div className="saved-profile-row">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={savedProfile.previewUrl} alt="Kaydedilmiş dijital profil" />
+                        <div>
+                          <strong>Profil hazır</strong>
+                          <small>{formatDate(savedProfile.savedAt)}</small>
+                        </div>
+                        <button type="button" onClick={useDigitalProfile} disabled={loading}>
+                          <Check size={15} /> Kullan
+                        </button>
+                        <button
+                          type="button"
+                          className="profile-delete"
+                          onClick={() => void deleteDigitalProfile()}
+                          disabled={loading}
+                          aria-label="Dijital profili sil"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="profile-empty-copy">Henüz bu cihazda kayıtlı profil yok.</span>
+                    )}
+                  </div>
+                )}
+                {mode === "personal" && (
+                  <details className="compact-identity">
+                    <summary><ShieldCheck size={17}/><span>Kimlik, ten ve vücut koruma odaklı</span><span className="compact-disclosure-arrow" aria-hidden="true">+</span></summary>
+                    <p>Yalnız seçilen ürünün uygulanması hedeflenir. Ten rengi, yüz, saç, yaş görünümü, vücut oranı, poz, eller, arka plan ve temel ışığın korunması amaçlanır. Sonucu mutlaka kontrol et.</p>
+                  </details>
+                )}
+                <details className="compact-advanced">
+                  <summary><span>Ürün ve gelişmiş ayarlar <small>{PRODUCT_KIND_CONFIG[productKind].label}</small></span><span className="compact-disclosure-arrow" aria-hidden="true">+</span></summary>
                 <div className="vton-options">
                   <div className="vton-option-group">
                     <div className="vton-option-heading">
@@ -1013,121 +1114,10 @@ export function TryOnStudio() {
                     </>
                   )}
                 </div>
+                </details>
 
-                {mode === "personal" && (
-                  <div className="digital-profile-card">
-                    <div className="digital-profile-copy">
-                      <span className="digital-profile-icon">
-                        <UserRound size={21} />
-                      </span>
-                      <div>
-                        <strong>Dijital profilim</strong>
-                        <p>
-                          Fotoğraf cihazında saklanır; sunucuya yalnız deneme sırasında geçici olarak gönderilir.
-                        </p>
-                      </div>
-                    </div>
-
-                    {profileLoading ? (
-                      <span className="profile-loading"><LoaderCircle className="spin" size={16} /> Profil kontrol ediliyor</span>
-                    ) : savedProfile ? (
-                      <div className="saved-profile-row">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={savedProfile.previewUrl} alt="Kaydedilmiş dijital profil" />
-                        <div>
-                          <strong>Profil hazır</strong>
-                          <small>{formatDate(savedProfile.savedAt)}</small>
-                        </div>
-                        <button type="button" onClick={useDigitalProfile} disabled={loading}>
-                          <Check size={15} /> Kullan
-                        </button>
-                        <button
-                          type="button"
-                          className="profile-delete"
-                          onClick={() => void deleteDigitalProfile()}
-                          disabled={loading}
-                          aria-label="Dijital profili sil"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="profile-empty-copy">Henüz bu cihazda kayıtlı profil yok.</span>
-                    )}
-                  </div>
-                )}
-
-                {mode === "personal" && (
-                  <div className="identity-preservation-card" role="status" aria-label="Kimlik ve ten koruma kuralları">
-                    <div className="identity-preservation-heading">
-                      <span><ShieldCheck size={20} /></span>
-                      <div>
-                        <strong>Kimlik ve ten koruma odaklı</strong>
-                        <p>Yalnız seçilen ürünün uygulanması hedeflenir.</p>
-                      </div>
-                      <em>Sabit kural</em>
-                    </div>
-                    <ul>
-                      <li><Check size={14} /> Ten rengi ve cilt alt tonu korunur</li>
-                      <li><Check size={14} /> Yüz, saç ve yaş görünümü korunur</li>
-                      <li><Check size={14} /> Vücut oranı, poz ve eller korunur</li>
-                      <li><Check size={14} /> Arka plan ve temel ışık korunur</li>
-                    </ul>
-                  </div>
-                )}
-
-                <div className={`uploads-grid ${mode === "studio" ? "uploads-grid-studio" : ""}`}>
-                  <UploadCard
-                    id="product-photo"
-                    step="1"
-                    label={config.productLabel}
-                    hint={category === "clothing" ? CLOTHING_TYPE_CONFIG[clothingType].productHint : config.productHint}
-                    image={product}
-                    onSelect={(file) => setSelectedImage(file, product, setProduct)}
-                    onRemove={() => removeSelectedImage(product, setProduct)}
-                    disabled={loading}
-                  />
-
-                  {mode === "personal" ? (
-                    <div>
-                      <UploadCard
-                        id="target-photo"
-                        step="2"
-                        label={config.targetLabel}
-                        hint={category === "clothing" ? CLOTHING_TYPE_CONFIG[clothingType].targetHint : config.targetHint}
-                        image={target}
-                        onSelect={(file) => setSelectedImage(file, target, setTarget)}
-                        onRemove={() => removeSelectedImage(target, setTarget)}
-                        disabled={loading}
-                      />
-                      {target && (
-                        <button
-                          type="button"
-                          className="save-profile-button"
-                          onClick={() => void saveDigitalProfile()}
-                          disabled={loading}
-                        >
-                          <Save size={15} /> Bu fotoğrafı dijital profilim olarak kaydet
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="studio-brief-card">
-                      <span className="upload-heading-number">2</span>
-                      <BriefcaseBusiness size={28} />
-                      <strong>İşletme görseli hazırlanacak</strong>
-                      <p>
-                        Sistem ürünü yetişkin bir model üzerinde, 4:5 katalog ve Instagram gönderi oranında oluşturur.
-                      </p>
-                      <ul>
-                        <li><Check size={14} /> Ürün rengi ve ayrıntıları korunur</li>
-                        <li><Check size={14} /> Temiz premium stüdyo görünümü</li>
-                        <li><Check size={14} /> Model fotoğrafı yüklemek gerekmez</li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
-
+                <details className="compact-note">
+                  <summary><span>{mode === "studio" ? "Görsel yönlendirmesi" : "Yerleşim notu"} <small>{note ? "Not eklendi" : "İsteğe bağlı"}</small></span><span className="compact-disclosure-arrow" aria-hidden="true">+</span></summary>
                 <div className="note-field">
                   <label htmlFor="placement-note">
                     {mode === "studio" ? "Görsel yönlendirmesi" : "Kullanım biçimi"}
@@ -1171,6 +1161,7 @@ export function TryOnStudio() {
                     </p>
                   )}
                 </div>
+                </details>
 
                 <label className="consent-row">
                   <input
@@ -1288,25 +1279,9 @@ export function TryOnStudio() {
                     </p>
                   </div>
                 ) : (
-                  <div className="result-empty">
-                    <div className="result-placeholder-art" aria-hidden="true">
-                      <span className="placeholder-photo placeholder-photo-one"><Camera size={27} /></span>
-                      <span className="placeholder-spark"><Sparkles size={24} /></span>
-                      <span className="placeholder-photo placeholder-photo-two"><WandSparkles size={29} /></span>
-                    </div>
-                    <span className="section-kicker">Sonucun burada görünecek</span>
-                    <h3>{mode === "studio" ? "Üründen satışa hazır görsel" : "Tek profil, sınırsız ürün fikri"}</h3>
-                    <p>
-                      {mode === "studio"
-                        ? "Ürün fotoğrafını yükle; yetişkin model üzerinde 4:5 katalog görseli oluştur."
-                        : "Dijital profilini bir kez kaydet; giyim ve aksesuarları tekrar fotoğraf yüklemeden dene."}
-                    </p>
-                    <ul>
-                      <li><Check size={15} /> Ten rengi, kimlik ve vücut korunur</li>
-                      <li><Check size={15} /> Ürün ayrıntıları korunur</li>
-                      <li><Check size={15} /> Sonuç yalnızca bu tarayıcıya görünür</li>
-                      <li><Check size={15} /> Favori ve geçmiş yönetimi</li>
-                    </ul>
+                  <div className="result-empty compact-result-empty">
+                    <span className="compact-result-icon"><Sparkles size={25}/></span>
+                    <div><h3>Sonucun burada görünecek</h3><p>{mode === "studio" ? "Ürün fotoğrafından katalog görseli oluştur." : "Fotoğraflarını yükle ve önizlemeyi başlat."}</p></div>
                   </div>
                 )}
               </div>
