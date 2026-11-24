@@ -5310,3 +5310,87 @@ html{color-scheme:light}body{background:#faf9f6;color:#292724}body::selection{ba
 @media(max-width:700px){.home-hero-grid{padding-block:24px 28px;gap:20px}.home-hero-copy h1{font-size:clamp(32px,10.5vw,64px)}.fashion-hero-visual{width:100%;border-radius:12px}.fashion-hero-photo{aspect-ratio:1.12}.fashion-hero-caption{padding:12px 14px}.fashion-category-section{padding-block:32px}.fashion-category-heading{margin-bottom:18px}.fashion-category-heading p{font-size:13px}.fashion-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 10px}.fashion-category-photo{border-radius:12px}.fashion-category-label{margin-top:8px}.fashion-category-label h3{font-size:21px}.fashion-category-card p{font-size:11px}.upload-zone{min-height:180px}}
 @media(max-width:360px){.home-hero-copy h1{font-size:clamp(29px,10.5vw,38px)}.fashion-category-label h3{font-size:18px}.fashion-category-label svg{width:14px}}
 @media(prefers-reduced-motion:reduce){.fashion-category-photo img{transition:none}}
+
+/* V3.2 Pearl Compact Edition */
+.pearl-compact .header-inner{min-height:60px;gap:16px}
+.pearl-compact .home-nav{gap:22px}
+.pearl-compact .compact-history-link{display:inline-flex;align-items:center;gap:7px;border:1px solid #ded5c6;border-radius:999px;padding:8px 13px;color:#625d55;font-size:12px;white-space:nowrap}
+.pearl-compact .compact-history-link svg{color:#87652f}
+.pearl-compact .home-hero{background:#faf9f6}
+.pearl-compact .home-hero-grid{grid-template-columns:minmax(0,.87fr) minmax(0,1.13fr);gap:clamp(18px,3vw,42px);padding-block:22px;min-height:0}
+.pearl-compact .home-hero-copy h1{font-size:clamp(38px,4.8vw,66px);line-height:1.02;margin:12px 0;letter-spacing:-.05em}
+.pearl-compact .home-hero-copy h1 span{margin-top:5px}
+.pearl-compact .home-hero-copy>p{font-size:14px;line-height:1.55;max-width:420px}
+.pearl-compact .home-eyebrow{font-size:9px;padding:5px 8px}
+.pearl-compact .home-hero-actions{margin-top:18px;gap:8px;display:flex;flex-wrap:wrap}
+.pearl-compact .home-hero-actions .button{min-height:40px;padding:8px 16px;font-size:12px}
+.compact-hero-flow{margin:0;min-width:0;width:100%;border:1px solid #e5dbcb;border-radius:15px;background:#fffdfb;padding:9px}
+.compact-flow-image{display:block;width:100%;height:auto;max-width:100%;border-radius:10px}
+.compact-flow-labels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:7px}
+.compact-flow-labels span{font-size:11px;text-align:center;color:#292724;line-height:1.4}
+.compact-flow-labels b{font-weight:650;color:#87652f;margin-right:3px}
+.compact-hero-flow figcaption{font-size:10px;text-align:center;margin-top:5px;color:#625d55}
+.pearl-compact .fashion-category-section{padding-block:18px 20px}
+.pearl-compact .fashion-category-heading{display:flex;align-items:baseline;justify-content:space-between;text-align:left;gap:12px;margin:0 0 12px;max-width:none}
+.pearl-compact .fashion-category-heading h2{font-size:26px;margin:0}
+.pearl-compact .fashion-category-heading>span{font-size:12px;color:#625d55}
+.pearl-compact .fashion-category-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.pearl-compact .fashion-category-card{padding:0}
+.pearl-compact .fashion-category-photo{aspect-ratio:1.65;border-radius:9px}
+.pearl-compact .fashion-category-label{margin-top:6px}
+.pearl-compact .fashion-category-label h3{font-size:18px}
+.pearl-compact .studio-section,.pearl-compact .history-section{padding-block:22px}
+.pearl-compact .studio-section-heading{margin-bottom:13px;text-align:left}
+.pearl-compact .studio-section-heading h2{font-size:clamp(26px,3vw,36px);margin:4px 0 0;line-height:1.1}
+.pearl-compact .experience-switch{margin-bottom:10px;gap:8px}
+.pearl-compact .experience-switch button{padding:10px 14px;min-height:52px;gap:9px}
+.pearl-compact .experience-switch small{font-size:11px}
+.pearl-compact .credit-access-bar{margin:0 0 12px;padding:9px 12px}
+.pearl-compact .studio-tabs button{min-height:43px}
+.pearl-compact .studio-form,.pearl-compact .result-panel{padding:18px}
+.pearl-compact .studio-form-title{margin-bottom:12px}
+.pearl-compact .vton-options{padding:11px;margin-bottom:12px;gap:10px}
+.pearl-compact .digital-profile-card{padding:10px;margin-bottom:12px;gap:9px}
+.pearl-compact .identity-preservation-card{margin:0 0 12px;padding:10px;gap:7px}
+.pearl-compact .identity-preservation-card ul{font-size:10px;gap:4px 8px}
+.pearl-compact .identity-preservation-heading p{font-size:11px}
+.pearl-compact .uploads-grid{gap:10px}
+.pearl-compact .upload-heading{min-height:0;margin-bottom:7px}
+.pearl-compact .upload-zone,.pearl-compact .studio-brief-card{min-height:165px}
+.pearl-compact .upload-zone.has-image{min-height:210px}
+.pearl-compact .result-panel:has(.result-empty){min-height:260px}
+.pearl-compact .result-empty ul{font-size:12px}
+.pearl-compact .note-field{margin-top:12px}
+.pearl-compact .note-suggestions button{padding:6px 8px}
+.pearl-compact .consent-row{margin-top:8px;font-size:12px}
+.pearl-compact .studio-submit{min-height:45px}
+.pearl-compact .history-section{background:#f6f3ee}
+.compact-history{border:1px solid #e2d9cb;border-radius:12px;background:#fffdfb;padding:0 14px}
+.compact-history>summary,.compact-faq>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:51px;color:#292724;font-weight:650;font-size:14px}
+.compact-history>summary::-webkit-details-marker,.compact-faq>summary::-webkit-details-marker{display:none}
+.compact-history>summary>span{display:flex;align-items:center;gap:9px}
+.compact-history>summary>span svg{color:#87652f}
+.compact-history>summary>small{color:#625d55;font-weight:400;font-size:11px}
+.compact-history>summary::after{content:"+";color:#87652f;font-size:20px;line-height:1}
+.compact-history[open]>summary::after{content:"−"}
+.compact-history[open]{padding-bottom:14px}
+.pearl-compact .history-heading{margin:8px 0 12px;align-items:center;gap:10px}
+.pearl-compact .history-heading h2{font-size:22px}
+.pearl-compact .history-empty{min-height:82px;padding:12px}
+.compact-help{background:#faf9f6;padding:12px 0 20px}
+.compact-help-inner{display:grid;gap:10px}
+.compact-trust{display:flex;align-items:center;flex-wrap:wrap;gap:12px 22px;font-size:12px;color:#625d55}
+.compact-trust span,.compact-trust a{display:inline-flex;align-items:center;gap:6px}
+.compact-trust svg{color:#87652f}
+.compact-faq{border:1px solid #e2d9cb;border-radius:10px;padding:0 14px;background:#fffdfb}
+.compact-faq[open]>summary svg{transform:rotate(180deg)}
+.compact-faq .home-faq-list summary{min-height:46px;font-size:13px}
+.compact-faq .home-faq-list p{font-size:13px;margin:0 0 14px;padding:0}
+.pearl-compact .site-footer{padding:14px 0;background:#f6f3ee}
+.compact-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:11px;color:#625d55}
+.compact-footer .brand-mark{width:33px;height:33px;font-size:15px}
+.compact-footer .brand-copy strong{font-size:10px}
+.compact-footer .brand-copy small{font-size:8px}
+@media(max-width:900px){.pearl-compact .home-hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}.pearl-compact .home-hero-copy h1{font-size:clamp(34px,5.2vw,50px)}.pearl-compact .fashion-category-grid{gap:8px}.pearl-compact .fashion-category-label h3{font-size:16px}}
+@media(max-width:700px){.pearl-compact .header-inner{min-height:54px}.pearl-compact .compact-history-link{padding:7px 10px}.pearl-compact .compact-history-link span{display:none}.pearl-compact .home-hero-grid{grid-template-columns:minmax(0,1fr);padding-block:16px 18px;gap:14px}.pearl-compact .home-hero-copy h1{font-size:clamp(34px,9vw,54px);margin:10px 0}.pearl-compact .home-hero-copy>p{font-size:13px}.pearl-compact .home-hero-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px;gap:7px}.pearl-compact .home-hero-actions .button{min-height:44px;padding:7px 5px;font-size:11px}.pearl-compact .home-hero-actions svg{flex-shrink:0;width:15px}.compact-hero-flow{padding:6px;border-radius:11px}.compact-flow-labels span{font-size:10px}.compact-flow-labels b{display:none}.compact-hero-flow figcaption{font-size:9px}.pearl-compact .fashion-category-section{padding-block:16px}.pearl-compact .fashion-category-heading h2{font-size:23px}.pearl-compact .fashion-category-heading>span{font-size:10px}.pearl-compact .fashion-category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 8px}.pearl-compact .fashion-category-photo{aspect-ratio:1.45;border-radius:8px}.pearl-compact .fashion-category-label h3{font-size:15px}.pearl-compact .fashion-category-label svg{width:12px}.pearl-compact .studio-section,.pearl-compact .history-section{padding-block:16px}.pearl-compact .experience-switch{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.pearl-compact .experience-switch button{display:flex;gap:6px;padding:9px 7px;min-height:52px}.pearl-compact .experience-switch button svg{flex-shrink:0;width:16px}.pearl-compact .experience-switch strong{font-size:12px;line-height:1.25}.pearl-compact .experience-switch small{display:none}.pearl-compact .studio-form,.pearl-compact .result-panel{padding:12px}.pearl-compact .studio-tabs button{min-height:42px}.pearl-compact .uploads-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.pearl-compact .uploads-grid-studio{grid-template-columns:minmax(0,1fr)}.pearl-compact .uploads-grid>*,.pearl-compact .upload-block{min-width:0}.pearl-compact .upload-zone{min-height:130px}.pearl-compact .upload-empty{padding:10px 6px}.pearl-compact .upload-empty strong{font-size:11px}.pearl-compact .upload-empty span,.pearl-compact .upload-empty em{font-size:10px;overflow-wrap:anywhere}.pearl-compact .upload-zone.has-image{min-height:170px}.pearl-compact .upload-heading p{font-size:10px}.pearl-compact .identity-preservation-card ul{grid-template-columns:repeat(2,minmax(0,1fr));font-size:10px}.pearl-compact .history-heading h2{font-size:20px}.compact-footer{justify-content:center;text-align:center}.pearl-compact .home-footer{padding-bottom:calc(72px + env(safe-area-inset-bottom))}}
+@media(max-width:360px){.pearl-compact .home-hero-copy h1{font-size:31px}.pearl-compact .fashion-category-heading{flex-wrap:wrap;gap:3px}.pearl-compact .uploads-grid{grid-template-columns:minmax(0,1fr)}.pearl-compact .identity-preservation-card ul{grid-template-columns:1fr}}

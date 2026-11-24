@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="690" height="310" viewBox="0 0 690 310" role="img" aria-label="Temsili dijital ürün deneme akışı"><defs>
+<linearGradient id="paper" x2="1" y2="1"><stop stop-color="#faf7f0"/><stop offset="1" stop-color="#e9e0d2"/></linearGradient>
+<linearGradient id="jacket" x2="1" y2="1"><stop stop-color="#e9d9bf"/><stop offset=".5" stop-color="#c5ad8a"/><stop offset="1" stop-color="#a68c68"/></linearGradient>
+<linearGradient id="skin" x2=".8" y2="1"><stop stop-color="#eac4a9"/><stop offset="1" stop-color="#c88f76"/></linearGradient>
+<linearGradient id="hair" x2="1" y2="1"><stop stop-color="#4e3b30"/><stop offset="1" stop-color="#241d1a"/></linearGradient>
+<linearGradient id="shirt" x2="1" y2="1"><stop stop-color="#fffdf8"/><stop offset="1" stop-color="#e4ded2"/></linearGradient>
+<filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#493b2c" flood-opacity=".12"/></filter>
+<g id="figure">
+<ellipse cx="100" cy="274" rx="65" ry="9" fill="#b9a58c" opacity=".16"/>
+<path d="M70 203L60 283H96L100 241L106 283H141L130 203Z" fill="#51483f"/>
+<path d="M78 89Q48 94 43 123L30 204Q30 215 41 217Q51 217 54 205L70 148V213Q100 223 130 213V148L146 205Q149 218 160 216Q169 213 167 204L157 123Q151 94 122 89Z" fill="url(#shirt)" stroke="#c9c0b3" stroke-width=".8"/>
+<path d="M35 202Q32 214 36 228Q40 234 45 228L51 211Z M149 211L155 228Q160 233 164 227L165 204Z" fill="url(#skin)"/>
+<path d="M86 71L85 93Q99 105 115 93L114 71Z" fill="url(#skin)"/>
+<path d="M68 47Q66 12 99 10Q134 9 134 47L129 88L121 95L119 63L80 64L77 96L66 87Z" fill="url(#hair)"/>
+<path d="M77 42Q78 20 101 20Q123 21 125 42L123 60Q120 82 101 86Q83 83 78 62Z" fill="url(#skin)"/>
+<path d="M73 47Q73 14 100 14Q124 12 132 40Q109 39 91 25Q83 40 73 47Z" fill="url(#hair)"/>
+<path d="M84 49Q89 46 94 49M107 49Q112 46 117 49" stroke="#5d4438" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M89 53h2m19 0h2" stroke="#302723" stroke-width="2" stroke-linecap="round"/>
+<path d="M101 53l-2 10 4 1" stroke="#a97665" stroke-width=".9" fill="none"/>
+<path d="M94 71Q101 74 108 70" stroke="#9d665f" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+<circle cx="77" cy="62" r="2.5" fill="#bd9758"/><circle cx="124" cy="62" r="2.5" fill="#bd9758"/>
+<path d="M86 92Q99 108 114 92" stroke="#b9afa2" fill="none" stroke-width="1.2"/>
+</g>
+<g id="coat">
+<path d="M76 91L55 99Q44 105 40 122L25 205L51 211L66 149L63 213Q82 219 98 214L100 156L102 214Q118 219 137 213L134 149L149 211L175 205L160 122Q156 105 145 99L124 91L114 101L100 151L86 101Z" fill="url(#jacket)" stroke="#aa9272" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M76 91L61 115L82 127L72 138L98 157L86 101Z M124 91L139 115L118 127L128 138L102 157L114 101Z" fill="#e4d0b2" stroke="#aa9272" stroke-width="1.1" stroke-linejoin="round"/>
+<path d="M69 170h18v10H69ZM113 170h18v10h-18Z" fill="#c5ad8b" stroke="#a58c6c" stroke-width=".8"/>
+<path d="M100 157V213M44 131L31 197M156 131L169 197" stroke="#a58c6c" stroke-width="1" fill="none"/>
+<circle cx="104" cy="169" r="2.8" fill="#8d7356"/><circle cx="104" cy="191" r="2.8" fill="#8d7356"/>
+</g></defs><rect width="690" height="310" rx="20" fill="#fbf8f2"/><g><rect x="8" y="8" width="204" height="294" rx="14" fill="url(#paper)"/><rect x="243" y="8" width="204" height="294" rx="14" fill="url(#paper)"/><rect x="478" y="8" width="204" height="294" rx="14" fill="url(#paper)"/><rect x="478.5" y="8.5" width="203" height="293" rx="14" fill="none" stroke="#bca47c" stroke-width="1.5"/></g><g transform="translate(10 16)"><path d="M100 62V52Q117 41 100 33Q89 32 88 43" stroke="#79654e" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M100 62L53 93H147Z" stroke="#79654e" stroke-width="2" stroke-linejoin="round" fill="none"/><g transform="translate(-10 -14) scale(1.1)" filter="url(#shadow)"><use href="#coat"/></g></g><g transform="translate(245 10)"><use href="#figure"/></g><g transform="translate(480 10)"><use href="#figure"/><use href="#coat"/></g><g fill="#fffdf9" stroke="#c5b492"><circle cx="227.5" cy="155" r="12"/><circle cx="462.5" cy="155" r="12"/></g><g fill="none" stroke="#8c6a39" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M222 155h11m-4-4 4 4-4 4M457 155h11m-4-4 4 4-4 4"/></g><circle cx="661" cy="30" r="13" fill="#fffdf9" stroke="#bca47c"/><path d="m655 30 4 4 7-8" fill="none" stroke="#5c795f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>

@@ -1,67 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowDown,
-  ArrowRight,
-  BriefcaseBusiness,
-  Camera,
-  Check,
-  ChevronDown,
-  Images,
-  LockKeyhole,
-  ScanLine,
-  ShieldCheck,
-  Shirt,
-  Sparkles,
-  UserRound,
-  WandSparkles,
-} from "lucide-react";
-
+import { ArrowRight, BriefcaseBusiness, Camera, ChevronDown, History, LockKeyhole, ShieldCheck, Sparkles } from "lucide-react";
 import { TryOnStudio } from "@/components/try-on-studio";
-
-const trustItems = [
-  {
-    icon: UserRound,
-    title: "Dijital profil",
-    text: "Profil fotoğrafın kendi cihazında saklanır.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Kimlik koruma",
-    text: "Ten, yüz, saç ve vücut görünümü korunur.",
-  },
-  {
-    icon: Images,
-    title: "İndir ve paylaş",
-    text: "Hazır önizlemeyi kaydet veya paylaş.",
-  },
-  {
-    icon: BriefcaseBusiness,
-    title: "İşletme stüdyosu",
-    text: "Üründen katalog ve sosyal medya görseli üret.",
-  },
-];
-
-const steps = [
-  {
-    number: "01",
-    icon: Camera,
-    title: "Ürünü yükle",
-    text: "Vitrinde gördüğün ya da mağazandaki ürünün net fotoğrafını ekle.",
-  },
-  {
-    number: "02",
-    icon: UserRound,
-    title: "Fotoğrafını seç",
-    text: "Boydan ve net bir fotoğraf yükle veya kayıtlı dijital profilini kullan.",
-  },
-  {
-    number: "03",
-    icon: WandSparkles,
-    title: "Kendinde gör",
-    text: "Önizlemeyi incele, favorile, indir ya da arkadaşlarınla paylaş.",
-  },
-];
 
 const categories = [
   {
@@ -102,15 +42,6 @@ const categories = [
   }
 ];
 
-const protectionRules = [
-  "Ten rengi ve cilt alt tonu korunur.",
-  "Yüz, saç ve yaş görünümü korunur.",
-  "Vücut oranı, poz, el ve kollar korunur.",
-  "Arka plan ve temel ışık yapısı korunur.",
-  "Yalnızca seçilen ürün uygulanır.",
-  "Kritik değişiklik fark edilirse sonuç silinebilir.",
-];
-
 const faqs = [
   {
     question: "Sanal ürün deneme nasıl çalışır?",
@@ -144,455 +75,77 @@ const faqs = [
   },
 ];
 
+
 export default function HomePage() {
   const structuredData = [
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      name: "Sokak Vitrini Dene",
-      applicationCategory: "ShoppingApplication",
-      operatingSystem: "Web",
-      description:
-        "Giyim, iç giyim, takı, ayakkabı, çanta ve aksesuarları kendi fotoğrafında dijital olarak deneme platformu.",
-      offers: { "@type": "Offer", price: "0", priceCurrency: "TRY" },
-      featureList: [
-        "Dijital profil",
-        "Kimlik ve ten rengi koruma odaklı sanal deneme",
-        "Giyim ve aksesuar kategorileri",
-        "Sonuç indirme ve paylaşma",
-        "İşletme ürün görsel stüdyosu",
-      ],
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: faqs.map((item) => ({
-        "@type": "Question",
-        name: item.question,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: item.answer,
-        },
-      })),
-    },
+    {"@context":"https://schema.org","@type":"WebApplication",name:"Sokak Vitrini Dene",applicationCategory:"ShoppingApplication",operatingSystem:"Web",description:"Giyim ve aksesuarları kendi fotoğrafında dijital olarak dene; ürün fotoğrafından katalog görseli oluştur."},
+    {"@context":"https://schema.org","@type":"FAQPage",mainEntity:faqs.map(item=>({"@type":"Question",name:item.question,acceptedAnswer:{"@type":"Answer",text:item.answer}}))}
   ];
-
   return (
-    <main>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-
+    <main className="pearl-compact">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(structuredData)}} />
       <header className="site-header home-header">
         <div className="container header-inner">
-          <Link className="brand" href="#top" aria-label="Sokak Vitrini ana sayfa">
-            <span className="brand-mark" aria-hidden="true">
-              SV
-            </span>
-            <span className="brand-copy">
-              <strong>SOKAK VİTRİNİ</strong>
-              <small>DENE</small>
-            </span>
-          </Link>
-
+          <Link className="brand" href="#top" aria-label="Sokak Vitrini Dene ana sayfa"><span className="brand-mark" aria-hidden="true">SV</span><span className="brand-copy"><strong>SOKAK VİTRİNİ</strong><small>DENE</small></span></Link>
           <nav className="desktop-nav home-nav" aria-label="Ana menü">
-            <Link href="#kategoriler">Kategoriler</Link>
-            <Link href="#deneyim">Deneyim</Link>
-            <Link href="#nasil-calisir">Nasıl çalışır?</Link>
-            <Link href="#guven">Güven</Link>
-            <Link href="#isletmeler">İşletmeler</Link>
-            <Link href="#sss">SSS</Link>
+            <Link href="#kategoriler">Kategoriler</Link><Link href="#dene" data-dene-mode="personal">Kendimde dene</Link><Link href="#dene" data-dene-mode="studio">İşletme stüdyosu</Link><Link href="#gecmis">Denemelerim</Link>
           </nav>
-
-          <Link className="button button-small button-gold" href="#dene" data-dene-mode="personal">
-            Kendimde dene
-          </Link>
+          <Link className="compact-history-link" href="#gecmis" aria-label="Denemelerim"><History size={19}/><span>Denemelerim</span></Link>
         </div>
       </header>
 
       <section className="home-hero" id="top">
-        <div className="home-hero-orb home-hero-orb-one" aria-hidden="true" />
-        <div className="home-hero-orb home-hero-orb-two" aria-hidden="true" />
         <div className="container home-hero-grid">
           <div className="home-hero-copy">
-            <div className="eyebrow home-eyebrow">
-              <Sparkles size={15} strokeWidth={1.8} />
-              Dijital ürün deneme deneyimi
-            </div>
-            <h1>
-              Sokakta gör.
-              <span>Kendinde dene.</span>
-            </h1>
-            <p>
-              Vitrinde, mağazada veya sosyal medyada beğendiğin ürünü kendi
-              fotoğrafında önizle. Ten rengin ve kişisel görünümün korunurken yalnızca
-              seçtiğin ürün uygulansın.
-            </p>
-
+            <span className="eyebrow home-eyebrow"><Sparkles size={14}/> Dijital ürün deneme</span>
+            <h1>Sokakta gör.<span>Kendinde dene.</span></h1>
+            <p>Beğendiğin ürünü yükle, fotoğrafını seç ve yapay zekâ ile kendi görünümünde önizle.</p>
             <div className="home-hero-actions">
-              <Link className="button button-gold home-primary-cta" href="#dene" data-dene-mode="personal">
-                <Camera size={19} />
-                Kendimde dene
-              </Link>
-              <Link className="button button-outline" href="#dene" data-dene-mode="studio">
-                <BriefcaseBusiness size={18} />
-                İşletmem için
-              </Link>
-            </div>
-
-            <div className="home-hero-proof" aria-label="Güven özellikleri">
-              <span>
-                <ShieldCheck size={16} /> Kimlik koruma kuralları
-              </span>
-              <span>
-                <LockKeyhole size={16} /> Cihazda dijital profil
-              </span>
-              <span>
-                <Check size={16} /> Mobil uyumlu
-              </span>
+              <Link className="button button-gold home-primary-cta" href="#dene" data-dene-mode="personal"><Camera size={17}/> Kendimde dene</Link>
+              <Link className="button button-outline" href="#dene" data-dene-mode="studio"><BriefcaseBusiness size={17}/> İşletmem için</Link>
             </div>
           </div>
-
-          <figure className="fashion-hero-visual">
-            <div className="fashion-hero-photo">
-              <Image src="https://images.pexels.com/photos/23531833/pexels-photo-23531833.jpeg?auto=compress&cs=tinysrgb&w=1400" alt="Açık bej ceketli zarif moda portresi" fill priority sizes="(max-width: 700px) 100vw, (max-width: 900px) 80vw, 55vw" />
-            </div>
-            <figcaption className="fashion-hero-caption">
-              <span>PEARL FASHION EDITION</span>
-              <strong>Tarzın, senin imzan.</strong>
-              <Link href="#dene" data-dene-mode="personal" aria-label="Dijital denemeye başla"><ArrowRight size={20} /></Link>
-            </figcaption>
+          <figure className="compact-hero-flow" id="nasil-calisir">
+            <Image src="/pearl-tryon-flow.svg" alt="Açık bej ceket, beyaz üst giyen kişi ve aynı kişinin ceketi giymiş temsili görünümü" width={690} height={310} priority unoptimized className="compact-flow-image"/>
+            <div className="compact-flow-labels" aria-hidden="true"><span><b>01</b> Ürünü yükle</span><span><b>02</b> Fotoğrafını seç</span><span><b>03</b> Kendinde gör</span></div>
+            <figcaption>Temsili deneme akışı · Aynı kişi, yeni görünüm</figcaption>
           </figure>
-        </div>
-      </section>
-
-      <section className="home-trust-strip" aria-label="Platform özellikleri">
-        <div className="container home-trust-grid">
-          {trustItems.map(({ icon: Icon, title, text }) => (
-            <article key={title}>
-              <span>
-                <Icon size={20} strokeWidth={1.7} />
-              </span>
-              <div>
-                <strong>{title}</strong>
-                <p>{text}</p>
-              </div>
-            </article>
-          ))}
         </div>
       </section>
 
       <section className="home-category-section fashion-category-section" id="kategoriler" aria-labelledby="kategori-baslik">
         <div className="container">
-          <div className="fashion-category-heading">
-            <span className="section-kicker">Altı kategori, tek deneyim</span>
-            <h2 id="kategori-baslik">Tarzını kendinde keşfet.</h2>
-            <p>Bir kategori seç, ürün fotoğrafını yükle ve kendi görünümünde dene.</p>
-          </div>
+          <div className="fashion-category-heading"><h2 id="kategori-baslik">Tarzını keşfet</h2><span>Bir kategori seç, denemeye başla.</span></div>
           <div className="home-category-grid fashion-category-grid">
-            {categories.map(({ title, kind, image, text }) => (
+            {categories.map(({title,kind,image})=>(
               <Link className="fashion-category-card" href="#dene" data-dene-kind={kind} key={kind}>
-                <div className="fashion-category-photo">
-                  <Image src={image} alt={title + " moda ürünü"} fill sizes="(max-width: 700px) 46vw, (max-width: 1100px) 31vw, 16vw" />
-                </div>
-                <div className="fashion-category-label">
-                  <h3>{title}</h3>
-                  <ArrowRight size={17} aria-hidden="true" />
-                </div>
-                <p>{text}</p>
+                <div className="fashion-category-photo"><Image src={image} alt={title+" moda ürünü"} fill sizes="(max-width: 700px) 31vw, 16vw"/></div>
+                <div className="fashion-category-label"><h3>{title}</h3><ArrowRight size={15} aria-hidden="true"/></div>
               </Link>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="home-experience-section" id="deneyim">
-        <div className="container home-experience-grid">
-          <div className="home-experience-copy">
-            <span className="section-kicker">Ürünle arandaki mesafeyi kaldır</span>
-            <h2>Beğendiğin ürünü satın almadan önce kendi görünümünde incele.</h2>
-            <p>
-              Ürün fotoğrafını, dijital profilini ve kategori bilgisini tek akışta
-              birleştir. Sonuçta yalnızca ürünü değil, oluşturduğu genel görünümü de gör.
-            </p>
-            <ul>
-              <li>
-                <Check size={17} /> Giyim ve aksesuar için kategoriye özel ayarlar
-              </li>
-              <li>
-                <Check size={17} /> Aynı dijital profili tekrar kullanma
-              </li>
-              <li>
-                <Check size={17} /> Önizlemeyi favorileme, indirme ve paylaşma
-              </li>
-            </ul>
-            <Link className="text-link home-arrow-link" href="#dene" data-dene-mode="personal">
-              Deneme alanını aç <ArrowRight size={17} />
-            </Link>
-          </div>
-
-          <div className="home-preview-flow" aria-label="Temsili ürün deneme adımları">
-            <article className="home-preview-tile home-preview-product">
-              <span className="home-preview-index">1</span>
-              <div className="home-preview-image-wrap pearl-illustration">
-                <Shirt aria-hidden="true" />
-              </div>
-              <div>
-                <small>Ürün</small>
-                <strong>Vitrinde gördüğün</strong>
-              </div>
-            </article>
-
-            <span className="home-preview-connector" aria-hidden="true">
-              <ArrowRight size={18} />
-            </span>
-
-            <article className="home-preview-tile home-preview-profile">
-              <span className="home-preview-index">2</span>
-              <div className="home-preview-image-wrap pearl-illustration">
-                <UserRound aria-hidden="true" />
-              </div>
-              <div>
-                <small>Profil</small>
-                <strong>Kendi fotoğrafın</strong>
-              </div>
-            </article>
-
-            <span className="home-preview-connector" aria-hidden="true">
-              <ArrowRight size={18} />
-            </span>
-
-            <article className="home-preview-tile home-preview-result">
-              <span className="home-preview-index">3</span>
-              <div className="home-preview-image-wrap pearl-illustration">
-                <WandSparkles aria-hidden="true" />
-                <span className="home-preview-ready">
-                  <Check size={13} /> Temsili akış
-                </span>
-              </div>
-              <div>
-                <small>Önizleme</small>
-                <strong>Kendinde gördüğün</strong>
-              </div>
-            </article>
           </div>
         </div>
       </section>
 
       <TryOnStudio />
 
-      <section className="home-how-section" id="nasil-calisir">
-        <div className="container">
-          <div className="section-heading centered home-centered-heading">
-            <span className="section-kicker">Üç basit adım</span>
-            <h2>Fotoğraftan kişisel önizlemeye.</h2>
-            <p>
-              Uygulama indirmeden, doğrudan telefon veya bilgisayarındaki tarayıcıdan
-              başlayabilirsin.
-            </p>
+      <section className="compact-help" id="sss">
+        <div className="container compact-help-inner">
+          <div className="compact-trust" id="guven">
+            <span><ShieldCheck size={17}/> Kimlik ve ten koruma odaklı</span>
+            <span><LockKeyhole size={17}/> Cihazında dijital profil</span>
+            <Link href="/gizlilik">Gizlilik politikası <ArrowRight size={13}/></Link>
           </div>
-
-          <div className="home-steps-grid">
-            {steps.map(({ number, icon: Icon, title, text }, index) => (
-              <article className="home-step-card" key={number}>
-                <span className="home-step-number">{number}</span>
-                <span className="home-step-icon">
-                  <Icon size={27} strokeWidth={1.5} />
-                </span>
-                <h3>{title}</h3>
-                <p>{text}</p>
-                {index < steps.length - 1 && (
-                  <span className="home-step-arrow" aria-hidden="true">
-                    <ArrowRight size={19} />
-                  </span>
-                )}
-              </article>
-            ))}
-          </div>
-
-          <div className="home-how-cta">
-            <Link className="button button-gold" href="#dene" data-dene-mode="personal">
-              <Camera size={18} /> İlk önizlemeyi oluştur
-            </Link>
-            <span>Fotoğraflarını yüklemeden önce kullanım ve gizlilik koşullarını inceleyebilirsin.</span>
-          </div>
+          <details className="compact-faq">
+            <summary>Sık sorulan sorular <ChevronDown size={18}/></summary>
+            <div className="home-faq-list">{faqs.map(item=>(<details key={item.question}><summary><span>{item.question}</span><ChevronDown size={15}/></summary><p>{item.answer}</p></details>))}</div>
+          </details>
         </div>
       </section>
-
-
-
-      <section className="home-protection-section" id="guven">
-        <div className="container home-protection-grid">
-          <div className="home-protection-visual" aria-hidden="true">
-            <div className="home-security-ring home-security-ring-one" />
-            <div className="home-security-ring home-security-ring-two" />
-            <div className="home-security-core">
-              <ShieldCheck size={54} strokeWidth={1.25} />
-              <span>SV</span>
-              <strong>KİMLİK KORUMA</strong>
-            </div>
-            <div className="home-security-chip home-security-chip-one">
-              <Check size={14} /> Ten rengi
-            </div>
-            <div className="home-security-chip home-security-chip-two">
-              <Check size={14} /> Yüz & saç
-            </div>
-            <div className="home-security-chip home-security-chip-three">
-              <Check size={14} /> Vücut & poz
-            </div>
-          </div>
-
-          <div className="home-protection-copy">
-            <span className="section-kicker">Kişi aynı kalır, yalnız ürün değişir</span>
-            <h2>Ten rengin ve kişisel görünümün sistemin temel kuralıdır.</h2>
-            <p>
-              Deneme motoru kullanıcıyı yeniden tasarlamak için değil, seçilen ürünü
-              mevcut fotoğrafa uygulamak için yönlendirilir. Sonuç üzerinde kontrol her
-              zaman kullanıcıdadır.
-            </p>
-            <div className="home-protection-list">
-              {protectionRules.map((rule) => (
-                <span key={rule}>
-                  <Check size={15} /> {rule}
-                </span>
-              ))}
-            </div>
-            <div className="home-protection-note">
-              <LockKeyhole size={19} />
-              <p>
-                Dijital profil fotoğrafı, kullanıcı açıkça kaydettiğinde kendi cihazının
-                yerel veritabanında tutulur.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="home-business-section" id="isletmeler">
-        <div className="container home-business-card">
-          <div className="home-business-copy">
-            <span className="section-kicker">Butikler ve mağazalar için</span>
-            <h2>Ürünü yalnız sergileme. Müşterinin kendinde görmesini sağla.</h2>
-            <p>
-              İşletme stüdyosunda ürün fotoğrafından katalog ve sosyal medya görseli
-              oluştur. Aynı platform üzerinden müşterilerine kişisel deneme deneyimi sun.
-            </p>
-            <div className="home-business-features">
-              <span>
-                <Check size={15} /> Ürün odaklı katalog görseli
-              </span>
-              <span>
-                <Check size={15} /> 4:5 sosyal medya oranı
-              </span>
-              <span>
-                <Check size={15} /> Giyim ve aksesuar kategorileri
-              </span>
-            </div>
-            <Link className="button button-light" href="#dene" data-dene-mode="studio">
-              <BriefcaseBusiness size={18} /> İşletme stüdyosunu aç
-            </Link>
-          </div>
-
-          <div className="home-business-visual" aria-label="İşletme ürün görsel stüdyosu">
-            <div className="home-business-window">
-              <div className="home-business-window-top">
-                <span />
-                <span />
-                <span />
-                <strong>İşletme stüdyosu</strong>
-              </div>
-              <div className="home-business-window-body">
-                <div className="home-business-upload">
-                  <Images size={31} />
-                  <strong>Ürün fotoğrafı</strong>
-                  <small>Tek başına veya askıda</small>
-                </div>
-                <span className="home-business-process">
-                  <ScanLine size={20} />
-                </span>
-                <div className="home-business-result pearl-illustration">
-                  <Images aria-hidden="true" />
-                  <span>
-                    <Check size={12} /> Temsili akış
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="home-faq-section" id="sss">
-        <div className="container home-faq-grid">
-          <div className="home-faq-intro">
-            <span className="section-kicker">Sık sorulan sorular</span>
-            <h2>Denemeye başlamadan önce bilmen gerekenler.</h2>
-            <p>
-              Fotoğraf kullanımı, desteklenen ürünler ve kişisel görünüm koruması
-              hakkındaki temel yanıtlar.
-            </p>
-            <Link className="text-link home-arrow-link" href="/gizlilik">
-              Gizlilik politikasını incele <ArrowRight size={17} />
-            </Link>
-          </div>
-
-          <div className="home-faq-list">
-            {faqs.map((item) => (
-              <details key={item.question}>
-                <summary>
-                  <span>{item.question}</span>
-                  <ChevronDown size={19} />
-                </summary>
-                <p>{item.answer}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="home-final-cta">
-        <div className="container home-final-cta-inner">
-          <div>
-            <span className="section-kicker">Hazırsan başla</span>
-            <h2>Vitrinde gördüğünü, kendinde gör.</h2>
-            <p>Ürün fotoğrafını ve kendi fotoğrafını seçerek ilk önizlemeni oluştur.</p>
-          </div>
-          <Link className="button button-gold" href="#dene" data-dene-mode="personal">
-            <Camera size={19} /> Kendimde dene
-          </Link>
-        </div>
-      </section>
-
       <footer className="site-footer home-footer">
-        <div className="container footer-inner">
-          <Link className="brand" href="#top">
-            <span className="brand-mark">SV</span>
-            <span className="brand-copy">
-              <strong>SOKAK VİTRİNİ</strong>
-              <small>DENE</small>
-            </span>
-          </Link>
-          <p>Sokakta gör. Kendinde dene.</p>
-          <div className="footer-links">
-            <Link href="#nasil-calisir">Nasıl çalışır?</Link>
-            <Link href="/gizlilik">Gizlilik</Link>
-            <Link href="/kullanim-kosullari">Kullanım Koşulları</Link>
-          </div>
-        </div>
-        <div className="container footer-bottom">
-          <span>© {new Date().getFullYear()} Sokak Vitrini</span>
-          <span>Dijital ürün önizleme platformu</span>
-        </div>
+        <div className="container compact-footer"><Link className="brand" href="#top"><span className="brand-mark">SV</span><span className="brand-copy"><strong>SOKAK VİTRİNİ</strong><small>DENE</small></span></Link><span>© {new Date().getFullYear()} Sokak Vitrini</span><div className="footer-links"><Link href="#nasil-calisir">Nasıl çalışır?</Link><Link href="/gizlilik">Gizlilik</Link><Link href="/kullanim-kosullari">Kullanım Koşulları</Link></div></div>
       </footer>
-
-      <Link className="home-mobile-cta" href="#dene" data-dene-mode="personal">
-        <Camera size={18} /> Kendimde dene
-      </Link>
-
-      <Link className="home-scroll-cue" href="#deneyim" aria-label="Deneyim bölümüne git">
-        <ArrowDown size={17} />
-      </Link>
+      <Link className="home-mobile-cta" href="#dene" data-dene-mode="personal"><Camera size={18}/> Kendimde dene</Link>
     </main>
   );
 }

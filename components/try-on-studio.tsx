@@ -645,6 +645,11 @@ export function TryOnStudio() {
 
   useEffect(() => {
     const openStudio = (event: MouseEvent) => {
+      const historyLink = (event.target as Element | null)?.closest<HTMLAnchorElement>('a[href="#gecmis"]');
+      if (historyLink) {
+        const gallery = document.querySelector<HTMLDetailsElement>(".compact-history");
+        if (gallery) gallery.open = true;
+      }
       const link = (event.target as Element | null)?.closest<HTMLAnchorElement>("a[data-dene-mode],a[data-dene-kind]");
       if (!link || loading) return;
       const kind = link.dataset.deneKind as ProductKind | undefined;
@@ -874,11 +879,7 @@ export function TryOnStudio() {
         <div className="container">
           <div className="section-heading studio-section-heading">
             <span className="section-kicker">Kişisel deneme ve işletme stüdyosu</span>
-            <h2>Vitrinde gördüğün ürünü kendi görünümünde dene.</h2>
-            <p>
-              Kişisel modda ürünü dijital profilinde önizle; işletme modunda yalnız ürün
-              fotoğrafından katalog ve sosyal medya görseli oluştur.
-            </p>
+            <h2>Deneme stüdyosu</h2>
           </div>
 
           <div className="experience-switch" aria-label="Deneyim modu">
@@ -1061,8 +1062,8 @@ export function TryOnStudio() {
                     <div className="identity-preservation-heading">
                       <span><ShieldCheck size={20} /></span>
                       <div>
-                        <strong>Kimlik ve ten koruma aktif</strong>
-                        <p>Sistem kişiyi yeniden tasarlamaz; yalnızca seçilen ürünü uygular.</p>
+                        <strong>Kimlik ve ten koruma odaklı</strong>
+                        <p>Yalnız seçilen ürünün uygulanması hedeflenir.</p>
                       </div>
                       <em>Sabit kural</em>
                     </div>
@@ -1316,6 +1317,7 @@ export function TryOnStudio() {
 
       <section className="history-section" id="gecmis">
         <div className="container">
+          <details className="compact-history"><summary><span><History size={19}/> Denemelerim</span><small>{history.length} görsel · Favoriler</small></summary>
           <div className="history-heading">
             <div>
               <span className="section-kicker">Sana özel</span>
@@ -1396,6 +1398,7 @@ export function TryOnStudio() {
               </div>
             </div>
           )}
+          </details>
         </div>
       </section>
 
