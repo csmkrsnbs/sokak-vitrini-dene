@@ -3,45 +3,6 @@ import Link from "next/link";
 import { ArrowRight, BriefcaseBusiness, Camera, ChevronDown, History, LockKeyhole, ShieldCheck, Sparkles } from "lucide-react";
 import { TryOnStudio } from "@/components/try-on-studio";
 
-const categories = [
-  {
-    "title": "Giyim",
-    "kind": "shirt",
-    "image": "https://images.pexels.com/photos/7671167/pexels-photo-7671167.jpeg?auto=compress&cs=tinysrgb&w=650",
-    "text": "Klasik ve günlük giyim"
-  },
-  {
-    "title": "İç giyim",
-    "kind": "bra",
-    "image": "https://images.pexels.com/photos/15751888/pexels-photo-15751888.jpeg?auto=compress&cs=tinysrgb&w=650",
-    "text": "Yetişkin iç giyim ve mayo"
-  },
-  {
-    "title": "Takı",
-    "kind": "necklace",
-    "image": "https://images.pexels.com/photos/35933227/pexels-photo-35933227.jpeg?auto=compress&cs=tinysrgb&w=650",
-    "text": "Kolye, küpe ve bileklik"
-  },
-  {
-    "title": "Ayakkabı",
-    "kind": "shoes",
-    "image": "https://images.pexels.com/photos/27256448/pexels-photo-27256448.jpeg?auto=compress&cs=tinysrgb&w=650",
-    "text": "Günlük ve klasik ayakkabı"
-  },
-  {
-    "title": "Çanta",
-    "kind": "bag",
-    "image": "https://images.pexels.com/photos/26954381/pexels-photo-26954381.jpeg?auto=compress&cs=tinysrgb&w=650",
-    "text": "Çanta ve el çantası"
-  },
-  {
-    "title": "Aksesuar",
-    "kind": "glasses",
-    "image": "https://images.pexels.com/photos/3892369/pexels-photo-3892369.jpeg?auto=compress&cs=tinysrgb&w=650",
-    "text": "Gözlük, şapka ve aksesuar"
-  }
-];
-
 const faqs = [
   {
     question: "Sanal ürün deneme nasıl çalışır?",
@@ -110,20 +71,6 @@ export default function HomePage() {
             <div className="compact-flow-labels" aria-hidden="true"><span><b>01</b> Ürünü yükle</span><span><b>02</b> Fotoğrafını seç</span><span><b>03</b> Kendinde gör</span></div>
             <figcaption>Yapay zekâ ile hazırlanmış temsili deneme akışı</figcaption>
           </figure>
-        </div>
-      </section>
-
-      <section className="home-category-section fashion-category-section" id="kategoriler" aria-labelledby="kategori-baslik">
-        <div className="container">
-          <div className="fashion-category-heading"><h2 id="kategori-baslik">Tarzını keşfet</h2><span>Bir kategori seç, denemeye başla.</span></div>
-          <div className="home-category-grid fashion-category-grid">
-            {categories.map(({title,kind,image})=>(
-              <Link className="fashion-category-card" href="#dene" data-dene-kind={kind} key={kind}>
-                <div className="fashion-category-photo"><Image src={image} alt={title+" moda ürünü"} fill sizes="(max-width: 700px) 46vw, 16vw"/></div>
-                <div className="fashion-category-label"><h3>{title}</h3><ArrowRight size={15} aria-hidden="true"/></div>
-              </Link>
-            ))}
-          </div>
         </div>
       </section>
 

@@ -5481,3 +5481,37 @@ html,body{min-width:0;width:100%;max-width:100%;margin:0}
  .pearl-compact .footer-links{flex-wrap:wrap;gap:10px}
 }
 @media(max-width:360px){.pearl-compact .container{width:calc(100% - 20px);max-width:calc(100% - 20px)}.pearl-compact .home-hero-copy h1{font-size:clamp(29px,9.2vw,34px)}.pearl-compact .home-hero-actions .button{font-size:11px}.pearl-compact .fashion-category-label h3{font-size:16px}.pearl-compact .compact-flow-labels span{font-size:10px}}
+
+/* V3.4 Pearl Clean: single category area and compact idle result. */
+.pearl-compact .home-hero-grid{grid-template-columns:minmax(0,.84fr) minmax(0,1.16fr);gap:clamp(20px,3vw,44px);padding-block:24px}
+.pearl-compact .home-hero-copy>p{font-size:16px;line-height:1.6;color:#514c44}
+.pearl-compact .home-hero-actions .button{font-size:14px;min-height:44px}
+.pearl-compact .compact-hero-flow{padding:7px}
+.pearl-compact .compact-flow-labels span{font-size:12px}
+.pearl-compact .compact-hero-flow figcaption{font-size:11px}
+.pearl-compact .studio-section{padding-block:22px}
+.pearl-compact .studio-tabs-six{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));scroll-margin-top:80px;min-width:0}
+.pearl-compact .studio-tabs-six button{font-size:14px;min-height:48px;min-width:0;white-space:normal}
+.pearl-compact .studio-body-idle{grid-template-columns:minmax(0,1fr)}
+.pearl-compact .studio-body-idle .studio-form{border-right:0;max-width:none;width:100%}
+.pearl-compact .studio-body-idle .result-panel{margin:0 16px 16px;padding:14px;width:auto;min-width:0;min-height:0}
+.pearl-compact .studio-body-idle .compact-result-empty{max-width:none}
+.pearl-compact .studio-body-idle .compact-result-empty h3{font-size:20px}
+.pearl-compact .studio-form-title p,.pearl-compact .upload-heading p,.pearl-compact .digital-profile-copy p{font-size:13px;line-height:1.5;color:#514c44}
+.pearl-compact .studio-form-title h3{font-size:23px}
+.pearl-compact .compact-identity summary,.pearl-compact .compact-advanced summary,.pearl-compact .compact-note summary{font-size:14px}
+.pearl-compact .compact-result-empty p{font-size:13px;color:#514c44}
+.pearl-compact .consent-row{font-size:13px;line-height:1.6}
+@media(max-width:900px){.pearl-compact .home-hero-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}}
+@media(max-width:700px){
+ .pearl-compact .home-hero-grid{grid-template-columns:minmax(0,1fr);padding-block:16px;gap:14px}
+ .pearl-compact .home-hero-copy>p{font-size:15px}
+ .pearl-compact .home-hero-actions .button{font-size:12px}
+ .pearl-compact .compact-flow-labels span{font-size:11px}
+ .pearl-compact .compact-hero-flow figcaption{font-size:10px}
+ .pearl-compact .studio-section{padding-block:16px}
+ .pearl-compact .studio-tabs-six{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pearl-compact .studio-tabs-six button{font-size:13px;min-height:46px}
+ .pearl-compact .studio-body-idle .result-panel{margin:0 12px 12px;padding:12px}
+ .pearl-compact .studio-form-title h3{font-size:21px}
+}

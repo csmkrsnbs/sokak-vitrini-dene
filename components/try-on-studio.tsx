@@ -68,6 +68,8 @@ const categoryIcons = {
   accessory: Glasses,
 } satisfies Record<PreviewCategory, typeof Shirt>;
 
+const innerwearKinds = new Set<ProductKind>(["bikini", "swimsuit", "bra", "underwear", "corset", "bodysuit", "fantasy"]);
+
 const MAX_RAW_FILE_BYTES = 20_000_000;
 const MAX_UPLOAD_BYTES = 1_800_000;
 const MAX_DIRECT_UPLOAD_DIMENSION = 4096;
@@ -914,20 +916,26 @@ export function TryOnStudio() {
           />
 
           <div className="studio-shell">
-            <div className="studio-tabs studio-tabs-five" role="tablist" aria-label="Ürün türü">
-              {(Object.keys(CATEGORY_CONFIG) as PreviewCategory[]).map((item) => {
-                const Icon = categoryIcons[item];
+            <div className="studio-tabs studio-tabs-five studio-tabs-six" id="kategoriler" role="tablist" aria-label="Ürün türü">
+              {(["clothing", "innerwear", "jewelry", "shoes", "bag", "accessory"] as const).map((item) => {
+                const isInnerwear = item === "innerwear";
+                const tabCategory = isInnerwear ? "clothing" : item;
+                const Icon = categoryIcons[tabCategory];
+                const active = category === tabCategory && (tabCategory !== "clothing" || isInnerwear === innerwearKinds.has(productKind));
                 return (
                   <button
                     type="button"
                     role="tab"
-                    aria-selected={category === item}
-                    className={category === item ? "active" : ""}
+                    aria-selected={active}
+                    className={active ? "active" : ""}
                     key={item}
                     disabled={loading}
-                    onClick={() => changeCategory(item)}
+                    onClick={() => {
+                      changeCategory(tabCategory);
+                      if (isInnerwear) changeProductKind("bra");
+                    }}
                   >
-                    <Icon size={19} /> {CATEGORY_CONFIG[item].shortLabel}
+                    <Icon size={19} /> {isInnerwear ? "İç giyim" : CATEGORY_CONFIG[tabCategory].shortLabel}
                   </button>
                 );
               })}
