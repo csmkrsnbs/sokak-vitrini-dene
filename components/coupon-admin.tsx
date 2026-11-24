@@ -373,22 +373,22 @@ export function CouponAdmin() {
                     <tbody>
                       {coupons.map((coupon) => (
                         <tr key={coupon.id}>
-                          <td>
+                          <td data-label="Durum">
                             <span className={`admin-status admin-status-${coupon.status}`}>
                               {statusLabels[coupon.status]}
                             </span>
                           </td>
-                          <td>
+                          <td data-label="Kampanya">
                             <strong>{coupon.label}</strong>
                             <small>{coupon.activatedAt ? `Etkinleştirildi: ${formatDate(coupon.activatedAt)}` : "Henüz kullanılmadı"}</small>
                           </td>
-                          <td>
+                          <td data-label="Hak">
                             <strong>{coupon.remainingCredits} / {coupon.totalCredits}</strong>
                             <small>Kalan / toplam</small>
                           </td>
-                          <td><span>{formatDate(coupon.createdAt)}</span></td>
-                          <td><span>{formatDate(coupon.expiresAt)}</span></td>
-                          <td>
+                          <td data-label="Oluşturma"><span>{formatDate(coupon.createdAt)}</span></td>
+                          <td data-label="Son kullanım"><span>{formatDate(coupon.expiresAt)}</span></td>
+                          <td data-label="İşlem">
                             {coupon.status === "active" ? (
                               <div className="admin-row-actions">
                                 <button
