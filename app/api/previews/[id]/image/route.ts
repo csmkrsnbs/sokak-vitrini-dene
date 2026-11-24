@@ -50,7 +50,7 @@ export async function GET(
         "Content-Type": row.mime || "image/webp",
         "Content-Length": String(image.byteLength),
         "Cache-Control": "private, no-store, max-age=0",
-        "Content-Disposition": `inline; filename="sokak-vitrini-${id}.webp"`,
+        "Content-Disposition": `inline; filename="sokak-vitrini-${id}.${row.mime === "image/png" ? "png" : row.mime === "image/jpeg" ? "jpg" : "webp"}"`,
         "X-Content-Type-Options": "nosniff",
       },
     });

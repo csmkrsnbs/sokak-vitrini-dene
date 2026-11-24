@@ -127,9 +127,21 @@ export async function POST(request: NextRequest) {
   let providerJobId: string | null = null;
   let providerJobStored = false;
   let providerCategory: PreviewCategory | null = null;
+  const existingResponse = async (id: string) => {
+    const [row] = await getDb().select(previewListSelection).from(previewRequests).where(and(eq(previewRequests.id, id), eq(previewRequests.sessionId, session.id))).limit(1);
+    if (!row) return null;
+    const access = await getAccessState({ request, sessionId: session.id, clientKey });
+    return attachSessionCookie(NextResponse.json({ preview: serializePreview(row), access }, { status: row.status === "processing" ? 202 : 200, headers: noStoreHeaders() }), session);
+  };
 
   try {
     const formData = await request.formData();
+    const suppliedId = formData.get("requestId");
+    if (typeof suppliedId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(suppliedId)) {
+      requestId = suppliedId;
+      const prior = await existingResponse(requestId);
+      if (prior) return prior;
+    }
     const modeValue = formData.get("mode");
     const categoryValue = formData.get("category");
     const productKindValue = formData.get("productKind");
@@ -203,7 +215,7 @@ export async function POST(request: NextRequest) {
       couponId,
     });
 
-    requestId = crypto.randomUUID();
+    requestId ??= crypto.randomUUID();
     reservation = await reservePreviewAccess({
       id: requestId,
       sessionId: session.id,
@@ -283,6 +295,7 @@ export async function POST(request: NextRequest) {
         and(
           eq(previewRequests.id, requestId),
           eq(previewRequests.sessionId, session.id),
+          eq(previewRequests.status, "processing"),
         ),
       )
       .returning(previewListSelection);
@@ -303,6 +316,9 @@ export async function POST(request: NextRequest) {
     );
     return attachSessionCookie(response, session);
   } catch (error) {
+    if (!reservation && requestId) {
+      try { const prior = await existingResponse(requestId); if (prior) return prior; } catch { /* preserve original failure */ }
+    }
     if (!providerJobStored && providerJobId && providerCategory) {
       await cancelProductPreviewJob(providerJobId, providerCategory);
     }

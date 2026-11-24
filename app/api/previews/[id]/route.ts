@@ -169,6 +169,7 @@ export async function GET(
     };
 
     if (!row.providerJobId) {
+      if (Date.now() - row.createdAt.getTime() < 90_000) return respond(row, null);
       return failProcessing(
         "ERROR",
         "AI_JOB_MISSING",
@@ -177,7 +178,8 @@ export async function GET(
     }
 
     const submittedAt = row.providerSubmittedAt ?? row.createdAt;
-    if (Date.now() - submittedAt.getTime() > getPreviewJobMaxAgeMs()) {
+    const job = await getProductPreviewJob(row.providerJobId, row.category, row.mode);
+    if (job.state !== "completed" && job.state !== "failed" && Date.now() - submittedAt.getTime() > getPreviewJobMaxAgeMs()) {
       await cancelProductPreviewJob(row.providerJobId, row.category);
       return failProcessing(
         "TIMED_OUT",
@@ -186,7 +188,6 @@ export async function GET(
       );
     }
 
-    const job = await getProductPreviewJob(row.providerJobId, row.category, row.mode);
     if (job.state === "completed") {
       const [completed] = await db
         .update(previewRequests)

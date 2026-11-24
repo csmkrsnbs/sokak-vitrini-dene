@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Giyim ve aksesuarları dijital profilinde dene; ürün fotoğrafından model görseli üret.",
     start_url: "/",
     display: "standalone",
-    background_color: "#090909",
-    theme_color: "#090909",
+    background_color: "#FAF9F6",
+    theme_color: "#FAF9F6",
     lang: "tr",
     icons: [
       {

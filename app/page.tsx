@@ -201,7 +201,7 @@ export default function HomePage() {
             <Link href="#sss">SSS</Link>
           </nav>
 
-          <Link className="button button-small button-gold" href="#dene">
+          <Link className="button button-small button-gold" href="#dene" data-dene-mode="personal">
             Kendimde dene
           </Link>
         </div>
@@ -227,11 +227,11 @@ export default function HomePage() {
             </p>
 
             <div className="home-hero-actions">
-              <Link className="button button-gold home-primary-cta" href="#dene">
+              <Link className="button button-gold home-primary-cta" href="#dene" data-dene-mode="personal">
                 <Camera size={19} />
                 Kendimde dene
               </Link>
-              <Link className="button button-outline" href="#isletmeler">
+              <Link className="button button-outline" href="#dene" data-dene-mode="studio">
                 <BriefcaseBusiness size={18} />
                 İşletmem için
               </Link>
@@ -332,21 +332,16 @@ export default function HomePage() {
                 <Check size={17} /> Önizlemeyi favorileme, indirme ve paylaşma
               </li>
             </ul>
-            <Link className="text-link home-arrow-link" href="#dene">
+            <Link className="text-link home-arrow-link" href="#dene" data-dene-mode="personal">
               Deneme alanını aç <ArrowRight size={17} />
             </Link>
           </div>
 
-          <div className="home-preview-flow" aria-label="Ürün deneme adımları">
+          <div className="home-preview-flow" aria-label="Temsili ürün deneme adımları">
             <article className="home-preview-tile home-preview-product">
               <span className="home-preview-index">1</span>
-              <div className="home-preview-image-wrap">
-                <Image
-                  src="/concept-poster.png"
-                  alt="Vitrindeki ürün fotoğrafı"
-                  fill
-                  sizes="(max-width: 760px) 44vw, 210px"
-                />
+              <div className="home-preview-image-wrap pearl-illustration">
+                <Shirt aria-hidden="true" />
               </div>
               <div>
                 <small>Ürün</small>
@@ -360,13 +355,8 @@ export default function HomePage() {
 
             <article className="home-preview-tile home-preview-profile">
               <span className="home-preview-index">2</span>
-              <div className="home-preview-image-wrap">
-                <Image
-                  src="/concept-poster.png"
-                  alt="Kullanıcının dijital profili"
-                  fill
-                  sizes="(max-width: 760px) 44vw, 210px"
-                />
+              <div className="home-preview-image-wrap pearl-illustration">
+                <UserRound aria-hidden="true" />
               </div>
               <div>
                 <small>Profil</small>
@@ -380,15 +370,10 @@ export default function HomePage() {
 
             <article className="home-preview-tile home-preview-result">
               <span className="home-preview-index">3</span>
-              <div className="home-preview-image-wrap">
-                <Image
-                  src="/concept-poster.png"
-                  alt="Dijital ürün önizleme sonucu"
-                  fill
-                  sizes="(max-width: 760px) 90vw, 250px"
-                />
+              <div className="home-preview-image-wrap pearl-illustration">
+                <WandSparkles aria-hidden="true" />
                 <span className="home-preview-ready">
-                  <Check size={13} /> Hazır
+                  <Check size={13} /> Temsili akış
                 </span>
               </div>
               <div>
@@ -399,6 +384,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <TryOnStudio />
 
       <section className="home-category-section" aria-labelledby="kategori-baslik">
         <div className="container">
@@ -415,7 +402,7 @@ export default function HomePage() {
 
           <div className="home-category-grid">
             {categories.map(({ icon: Icon, title, text, tag }) => (
-              <Link className="home-category-card" href="#dene" key={title}>
+              <Link className="home-category-card" href="#dene" data-dene-kind={({ "Giyim": "shirt", "İç giyim": "bra", "Takı": "necklace", "Ayakkabı": "shoes", "Çanta & aksesuar": "bag" } as Record<string, string>)[title]} key={title}>
                 <span className="home-category-icon">
                   <Icon size={27} strokeWidth={1.5} />
                 </span>
@@ -461,7 +448,7 @@ export default function HomePage() {
           </div>
 
           <div className="home-how-cta">
-            <Link className="button button-gold" href="#dene">
+            <Link className="button button-gold" href="#dene" data-dene-mode="personal">
               <Camera size={18} /> İlk önizlemeyi oluştur
             </Link>
             <span>Fotoğraflarını yüklemeden önce kullanım ve gizlilik koşullarını inceleyebilirsin.</span>
@@ -469,7 +456,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <TryOnStudio />
+
 
       <section className="home-protection-section" id="guven">
         <div className="container home-protection-grid">
@@ -538,7 +525,7 @@ export default function HomePage() {
                 <Check size={15} /> Giyim ve aksesuar kategorileri
               </span>
             </div>
-            <Link className="button button-light" href="#dene">
+            <Link className="button button-light" href="#dene" data-dene-mode="studio">
               <BriefcaseBusiness size={18} /> İşletme stüdyosunu aç
             </Link>
           </div>
@@ -560,15 +547,10 @@ export default function HomePage() {
                 <span className="home-business-process">
                   <ScanLine size={20} />
                 </span>
-                <div className="home-business-result">
-                  <Image
-                    src="/concept-poster.png"
-                    alt="Üründen oluşturulan katalog görseli örneği"
-                    fill
-                    sizes="260px"
-                  />
+                <div className="home-business-result pearl-illustration">
+                  <Images aria-hidden="true" />
                   <span>
-                    <Check size={12} /> Görsel hazır
+                    <Check size={12} /> Temsili akış
                   </span>
                 </div>
               </div>
@@ -612,7 +594,7 @@ export default function HomePage() {
             <h2>Vitrinde gördüğünü, kendinde gör.</h2>
             <p>Ürün fotoğrafını ve kendi fotoğrafını seçerek ilk önizlemeni oluştur.</p>
           </div>
-          <Link className="button button-gold" href="#dene">
+          <Link className="button button-gold" href="#dene" data-dene-mode="personal">
             <Camera size={19} /> Kendimde dene
           </Link>
         </div>
@@ -640,7 +622,7 @@ export default function HomePage() {
         </div>
       </footer>
 
-      <Link className="home-mobile-cta" href="#dene">
+      <Link className="home-mobile-cta" href="#dene" data-dene-mode="personal">
         <Camera size={18} /> Kendimde dene
       </Link>
 

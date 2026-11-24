@@ -408,6 +408,8 @@ export function TryOnStudio() {
   const [notice, setNotice] = useState<Notice>(null);
   const [access, setAccess] = useState<AccessState | null>(null);
   const [couponOpen, setCouponOpen] = useState(false);
+  const submissionLock = useRef(false);
+  const retryRequest = useRef<{ id: string; key: string; product: File; target: File | null } | null>(null);
   const productRef = useRef<SelectedImage | null>(null);
   const targetRef = useRef<SelectedImage | null>(null);
   const savedProfileRef = useRef<SavedProfile | null>(null);
@@ -547,6 +549,10 @@ export function TryOnStudio() {
         const response = await fetch(`/api/previews/${activePreviewId}`, {
           cache: "no-store",
         });
+        if (response.status === 404 || response.status === 401) {
+          if (!stopped) { setActivePreviewId(null); setLoading(false); setNotice({ kind: "error", text: "İşlem kaydına erişilemedi. Geçmişini kontrol et." }); }
+          return;
+        }
         if (!response.ok) throw await readApiError(response);
         const payload = (await response.json()) as PreviewStatusResponse;
         if (stopped) return;
@@ -637,6 +643,21 @@ export function TryOnStudio() {
     setter(null);
   };
 
+  useEffect(() => {
+    const openStudio = (event: MouseEvent) => {
+      const link = (event.target as Element | null)?.closest<HTMLAnchorElement>("a[data-dene-mode],a[data-dene-kind]");
+      if (!link || loading) return;
+      const kind = link.dataset.deneKind as ProductKind | undefined;
+      if (kind && Object.hasOwn(PRODUCT_KIND_CONFIG, kind)) {
+        setMode("personal"); setCategory(PRODUCT_KIND_CONFIG[kind].category); setProductKind(kind); setClothingType(PRODUCT_KIND_CONFIG[kind].clothingType); setNote(""); setResult(null);
+      } else if (link.dataset.deneMode === "studio" || link.dataset.deneMode === "personal") {
+        setMode(link.dataset.deneMode); setResult(null);
+      }
+    };
+    document.addEventListener("click", openStudio);
+    return () => document.removeEventListener("click", openStudio);
+  }, [loading]);
+
   const changeCategory = (next: PreviewCategory) => {
     setCategory(next);
     const first = PRODUCT_KINDS_BY_CATEGORY[next][0];
@@ -713,6 +734,7 @@ export function TryOnStudio() {
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submissionLock.current || loading) return;
     if (!product || (mode === "personal" && !target)) {
       setNotice({ kind: "error", text: "Gerekli fotoğrafları ekleyin." });
       return;
@@ -726,6 +748,7 @@ export function TryOnStudio() {
       return;
     }
 
+    submissionLock.current = true;
     setLoading(true);
     setLoadingStage("submitting");
     setLoadingIndex(0);
@@ -733,7 +756,13 @@ export function TryOnStudio() {
     setNotice(null);
 
     try {
+      const key = JSON.stringify([mode, category, productKind, clothingType, garmentPhotoType, note]);
+      const targetFile = mode === "personal" ? target?.file ?? null : null;
+      if (!retryRequest.current || retryRequest.current.key !== key || retryRequest.current.product !== product.file || retryRequest.current.target !== targetFile) {
+        retryRequest.current = { id: crypto.randomUUID(), key, product: product.file, target: targetFile };
+      }
       const formData = new FormData();
+      formData.set("requestId", retryRequest.current.id);
       formData.set("mode", mode);
       formData.set("category", category);
       formData.set("productKind", productKind);
@@ -754,6 +783,7 @@ export function TryOnStudio() {
         preview: PreviewListItem;
         access: AccessState;
       };
+      retryRequest.current = null;
       setAccess(payload.access);
 
       if (payload.preview.status === "completed") {
@@ -768,12 +798,15 @@ export function TryOnStudio() {
     } catch (error) {
       setLoading(false);
       if (error instanceof ApiRequestError && error.code === "CREDITS_REQUIRED") {
+        retryRequest.current = null;
         setCouponOpen(true);
       }
       setNotice({
         kind: "error",
         text: error instanceof Error ? error.message : "İşlem başlatılamadı.",
       });
+    } finally {
+      submissionLock.current = false;
     }
   };
 
