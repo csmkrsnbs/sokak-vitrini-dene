@@ -67,7 +67,7 @@ export default function HomePage() {
             </div>
           </div>
           <figure className="compact-hero-flow" id="nasil-calisir">
-            <Image src="/pearl-tryon-photo.webp" alt="Açık bej ceket, beyaz üst giyen kişi ve aynı kişinin ceketi giymiş temsili görünümü" width={480} height={270} priority unoptimized className="compact-flow-image"/>
+            <Image src="/pearl-tryon-photo.webp" alt="Açık bej ceket, beyaz üst giyen kişi ve aynı kişinin ceketi giymiş temsili görünümü" width={1672} height={941} sizes="(max-width: 700px) 100vw, 60vw" priority className="compact-flow-image"/>
             <div className="compact-flow-labels" aria-hidden="true"><span><b>01</b> Ürünü yükle</span><span><b>02</b> Fotoğrafını seç</span><span><b>03</b> Kendinde gör</span></div>
             <figcaption>Yapay zekâ ile hazırlanmış temsili deneme akışı</figcaption>
           </figure>
